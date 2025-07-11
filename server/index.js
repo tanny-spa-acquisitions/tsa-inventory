@@ -12,10 +12,14 @@ import {
   updateCell,
   getNotes,
   setNotes,
+  SHEET_NAME,
+  SHEET_ID,
+  auth,
 } from "./functions/google.js";
 import compressRouter from "./routes/compress.js";
 import userRoutes from "./routes/users.js";
 import { db } from "./connection/connect.js";
+import { FRONTEND_URL, WEBSITE_URL } from "./config.js";
 dotenv.config();
 
 // const isProduction = process.env.NODE_ENV === "production";
@@ -103,7 +107,7 @@ app.post("/google/update", async (req, res) => {
 });
 
 app.post("/google/set-notes", async (req, res) => {
-  const { row, value } = req.body
+  const { row, value } = req.body;
   try {
     await setNotes(row, value);
     res.json({ status: "success" });
@@ -113,12 +117,62 @@ app.post("/google/set-notes", async (req, res) => {
 });
 
 app.post("/google/get-notes", async (req, res) => {
-  const { row } = req.body
+  const { row } = req.body;
   try {
     const notes = await getNotes(row);
     res.json({ status: "success", notes });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/wix-inventory", async (req, res) => {
+  const origin = req.headers.origin || "";
+  if (origin !== WEBSITE_URL) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  try {
+    const authClient = await auth.getClient();
+    const [valuesRes, notesRes] = await Promise.all([
+      sheets.spreadsheets.values.get({
+        spreadsheetId: SHEET_ID,
+        range: `${SHEET_NAME}!A1:P`, 
+        auth: authClient,
+      }),
+      sheets.spreadsheets.get({
+        spreadsheetId: SHEET_ID,
+        ranges: [`${SHEET_NAME}!P`],
+        fields: "sheets.data.rowData.values.note",
+        auth: authClient,
+      }),
+    ]);
+
+    const rows = valuesRes.data.values || [];
+    const notesData = notesRes.data.sheets[0].data[0].rowData || [];
+
+    const headers = rows[0];
+    const data = rows.slice(1).map((row, i) => {
+      const product = {};
+      headers.forEach((header, j) => {
+        product[header] = row[j] || "";
+      });
+
+      // Grab image URLs from NOTE in column 15 (index 14)
+      const note = notesData[i + 1]?.values?.[14]?.note || "";
+      const images = note
+        .trim()
+        .split(/\s+/)
+        .filter((url) => url.startsWith("http"));
+      product.Images = images;
+
+      return product;
+    });
+
+    res.json(data);
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).json({ error: "Failed to fetch inventory" });
   }
 });
 

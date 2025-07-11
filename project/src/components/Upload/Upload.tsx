@@ -39,7 +39,7 @@ const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
         justifyContent: "center",
         transition: "background-color 0.3s",
         border: currentUser.theme === "light" ? dragging ? "3px dashed blue" : "none" : "1px solid #333",
-        borderRadius: "25px"
+        borderRadius: "28px"
       }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}

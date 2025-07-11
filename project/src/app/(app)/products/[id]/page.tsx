@@ -13,14 +13,12 @@ import { appTheme } from "@/util/appTheme";
 import { getNotes, setNotes, updateCell } from "@/util/functions/Inventory";
 
 const ProductPage = () => {
-  const { inventory } = useVideo();
+  const { inventory, editingLock, setEditingLock } = useVideo();
   const { currentUser } = useContext(AuthContext);
   const params = useParams();
   const id = params?.id as string;
 
   const TubIDColumn = 7;
-
-  const [loading, setLoading] = useState<boolean>(false);
 
   const [uploadPopup, setUploadPopup] = useState(false);
   const uploadPopupRef = useRef<HTMLDivElement>(null);
@@ -65,7 +63,7 @@ const ProductPage = () => {
         const currentNote = await getNote();
         const urls = response.data.urls;
         const newValue = urls.join(" ");
-        await editNote(currentNote + " " + newValue);
+        await editNote(currentNote.trim().length === 0 ? newValue : currentNote + " " + newValue);
       }
       return response.status === 200;
     } catch (error) {
@@ -75,7 +73,7 @@ const ProductPage = () => {
   };
 
   const handleFiles = (files: File[]) => {
-    setLoading(true);
+    setEditingLock(true);
     const uploadedNames: string[] = [];
     const imageFiles = files.filter((file) => file.type.startsWith("image/"));
 
@@ -105,10 +103,11 @@ const ProductPage = () => {
           await handleSend(images);
         })
         .then(async () => {
-          setLoading(false);
+          setEditingLock(false);
         });
     } else {
       alert("Only image files are allowed!");
+      setEditingLock(false)
     }
   };
 

@@ -54,7 +54,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 const AppRoot = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
   const queryClientRef = useRef(queryClient);
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, isLoadingCurrentUserData } = useContext(AuthContext);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -66,20 +66,13 @@ const AppRoot = ({ children }: { children: ReactNode }) => {
     queryClientRef.current = queryClient;
   }, [queryClient]);
 
-  // useEffect(() => {
-  //   if (typeof window !== "undefined" && currentUser) {
-  //     localStorage.setItem("user", JSON.stringify(currentUser));
-  //   }
-  //   console.log(currentUser)
-  // }, [currentUser]);
-
   useEffect(() => {
-    // If not logged in, and not on "/", redirect to "/"
-    if (!currentUser && pathname !== "/") {
+    if (!isLoadingCurrentUserData && !currentUser && pathname !== "/") {
       router.push("/");
     }
-  }, [currentUser, pathname]);
+  }, [currentUser, isLoadingCurrentUserData, pathname]);
 
+  if (isLoadingCurrentUserData) return null;
   if (!currentUser && pathname !== "/") return null;
 
   return currentUser ? (
@@ -100,8 +93,12 @@ const UnprotectedLayout = () => {
 };
 
 const ProtectedLayout = ({ children }: { children: ReactNode }) => {
+  const { editingLock } = useVideo();
   return (
     <>
+      {editingLock && (
+        <div className="z-[999] absolute left-0 top-0 w-[100vw] h-[100vh]" />
+      )}
       <Modals landing={false} />
       <Navbar />
       <LeftBar />

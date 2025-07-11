@@ -10,14 +10,15 @@ import {
 import { useModal1Store } from "../../store/useModalStore";
 import appDetails from "../../util/appDetails.json";
 import Settings from "../Settings/Settings";
-import {
-  removeWhiteSpace,
-} from "../../util/functions/Data";
+import { removeWhiteSpace } from "../../util/functions/Data";
 import Link from "next/link";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
+import { useVideo } from "@/contexts/videoContext";
+import "./Navbar.css";
 
 const Navbar = () => {
   const { currentUser } = useContext(AuthContext);
+  const { editingLock } = useVideo();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
   const leftBarOpen = useLeftBarOpenStore((state: any) => state.leftBarOpen);
@@ -124,6 +125,21 @@ const Navbar = () => {
         </div>
 
         <div className="h-[100%] mr-[10px] pr-[2px] hidden min-[500px]:flex flex-row items-center gap-[18px]">
+          {editingLock && (
+            <div
+              style={{
+                border:
+                  currentUser.theme === "light"
+                    ? "3px solid rgba(0, 0, 0, 0.1)"
+                    : "3px solid #333",
+                borderTop:
+                  currentUser.theme === "light"
+                    ? "3px solid #98d5fd"
+                    : "3px solid #dddddd",
+              }}
+              className="absolute top-4 right-[218px] w-[30px] h-[30px] mt-[3px] simple-spinner"
+            ></div>
+          )}
           <div
             onClick={handleProfileClick}
             className="dim cursor-pointer flex flex-row w-fit max-w-[250px] pr-[10px] h-[42px] hover:brightness-75 rounded-[4px]"
