@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { appTheme, ThemeType } from "@/util/appTheme";
 import appDetails from "../util/appDetails.json";
-import LandingPage from "@/screens/Landing/LandingPage/LandingPage";
 import AppLayout from "../layouts/appLayout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,9 +16,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("accessToken");
-  const showLanding = !token;
   return (
     <html
       lang="en"
@@ -31,7 +26,6 @@ export default async function RootLayout({
     >
       <body>
         <AppLayout>{children}</AppLayout>
-        {showLanding && <LandingPage />}
         <ToastContainer />
       </body>
     </html>

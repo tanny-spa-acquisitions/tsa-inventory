@@ -1,12 +1,7 @@
-import { ThemeType } from "../../../util/appTheme";
-import { appTheme } from "../../../util/appTheme";
+"use client"
 import appDetails from "../../../util/appDetails.json";
-import PageLayout from "@/layouts/pageLayout";
-import Image from "next/image";
 
-const LandingPage = async () => {
-  const currentTheme = appDetails.default_theme as ThemeType;
-
+const LandingPage = () => {
   return (
     <div
       style={

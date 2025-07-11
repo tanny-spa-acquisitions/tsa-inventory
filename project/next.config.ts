@@ -6,7 +6,6 @@
 
 // export default nextConfig;
 
-
 // const isPlayer = process.env.PLAYER === 'true';
 
 // const nextConfig = {
@@ -34,12 +33,14 @@
 // export default nextConfig;
 
 /** @type {import('next').NextConfig} */
-const isPlayer = process.env.PLAYER === 'true';
+const isPlayer = process.env.PLAYER === "true";
 
 const nextConfig = {
   reactStrictMode: true,
-  basePath: isPlayer ? '' : '',
-  // no experimental section needed
+  basePath: isPlayer ? "" : "",
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;

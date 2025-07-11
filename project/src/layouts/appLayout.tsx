@@ -32,6 +32,7 @@ import {
 import { QueryProvider } from "@/contexts/queryContext";
 import CustomToast from "@/components/CustomToast";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
+import LandingPage from "@/screens/Landing/LandingPage/LandingPage";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -64,12 +65,11 @@ const AppRoot = ({ children }: { children: ReactNode }) => {
   }, [queryClient]);
 
   useEffect(() => {
-    localStorage.setItem("user", JSON.stringify(currentUser));
+    if (typeof window !== "undefined" && currentUser) {
+      localStorage.setItem("user", JSON.stringify(currentUser));
+    }
   }, [currentUser]);
 
-    // return <UnprotectedLayout />
-
-  
   return currentUser ? (
     <ProtectedLayout>{children}</ProtectedLayout>
   ) : (
@@ -82,7 +82,7 @@ const UnprotectedLayout = () => {
     <>
       <Modals landing={true} />
       <LandingNav />
-      {/* <LandingLeftBar /> */}
+      <LandingPage />
     </>
   );
 };

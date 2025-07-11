@@ -71,7 +71,6 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     refetchOnMount: true,
   });
   const currentUser = currentUserData ?? null;
-  console.log(currentUser)
 
   const handleLogout = async () => {
     if (typeof window !== "undefined") {
