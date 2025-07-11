@@ -19,7 +19,6 @@ export const getCurrentUser = (req, res) => {
         password,
         password_reset,
         password_reset_timestamp,
-        stripe_customer_id,
         ...user
       } = data[0];
       return res.json(user);
