@@ -126,14 +126,15 @@ app.post("/google/get-notes", async (req, res) => {
   }
 });
 
-const imagesColumn = "P"
+const imagesColumn = "P";
 
 app.get("/wix-inventory", async (req, res) => {
   console.log("wix inventory");
-
   try {
     const authClient = await auth.getClient();
     console.log("got client");
+    const sheets = google.sheets({ version: "v4", auth: client });
+    console.log("got sheet");
     const [valuesRes, notesRes] = await Promise.all([
       sheets.spreadsheets.values.get({
         spreadsheetId: SHEET_ID,
