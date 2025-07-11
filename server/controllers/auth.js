@@ -37,11 +37,11 @@ const createUniqueUserId = async () => {
 // Google sign in
 export const googleAuth = async (req, res) => {
   const { email, name, profile_img_src } = req.body;
-  const validEmails = await getSheetSharedEmails()
+  const validEmails = await getSheetSharedEmails();
   if (!validEmails.includes(email)) {
     return res.status(403).json({
       message: "Unauthorized gmail",
-    })
+    });
   }
 
   const q = "SELECT * FROM users WHERE email = ?";
@@ -69,8 +69,8 @@ export const googleAuth = async (req, res) => {
       // return res.status(200).json({ accessToken: token });
       res.cookie("accessToken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: true,
+        sameSite: "None",
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
@@ -102,8 +102,8 @@ export const googleAuth = async (req, res) => {
           });
           res.cookie("accessToken", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: true,
+            sameSite: "None",
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
           });
@@ -120,11 +120,11 @@ export const googleAuth = async (req, res) => {
 };
 
 export const register = async (req, res) => {
-  const validEmails = await getSheetSharedEmails()
+  const validEmails = await getSheetSharedEmails();
   if (!validEmails.includes(req.body.email)) {
     return res.status(403).json({
       message: "Unauthorized email",
-    })
+    });
   }
 
   const q = "SELECT * FROM users WHERE email = ?";
@@ -163,8 +163,8 @@ export const register = async (req, res) => {
           });
           res.cookie("accessToken", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: true,
+            sameSite: "None",
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
           });
@@ -227,8 +227,8 @@ export const login = (req, res) => {
       httpOnly: true,
       // TURN THIS LINE ON IN PRODUCTION -> secure false allows connection to local host
       // secure: process.env.NODE_ENV === "production",
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "None",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -241,8 +241,8 @@ export const logout = (req, res) => {
   if (!token) return res.status(401).json("Not authenticated!");
   res.clearCookie("accessToken", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "None",
   });
   return res.status(200).json({ message: "Logout successful" });
 };

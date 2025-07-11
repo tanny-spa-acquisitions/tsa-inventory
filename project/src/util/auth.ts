@@ -63,6 +63,7 @@ export const googleSignIn = async () => {
       auth,
       provider.setCustomParameters({ prompt: "select_account" })
     );
+
     const user = googleAccount.user;
 
     const inputs = {
@@ -75,7 +76,6 @@ export const googleSignIn = async () => {
       withCredentials: true,
     });
     return res.status === 200;
-
   } catch (error) {
     toast.error("Unauthorized TSA User");
     console.error("Login Error:", error);

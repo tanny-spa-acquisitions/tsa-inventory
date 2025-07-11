@@ -57,9 +57,6 @@ const AppRoot = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-    queryClient.invalidateQueries({
-      queryKey: ["currentUserSubscription"],
-    });
   }, []);
 
   useEffect(() => {
@@ -70,6 +67,9 @@ const AppRoot = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("user", JSON.stringify(currentUser));
   }, [currentUser]);
 
+    // return <UnprotectedLayout />
+
+  
   return currentUser ? (
     <ProtectedLayout>{children}</ProtectedLayout>
   ) : (
