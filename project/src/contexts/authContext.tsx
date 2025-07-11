@@ -24,11 +24,13 @@ export interface User {
 interface AuthContextType {
   currentUser: User | null;
   handleLogout: () => void;
+  isLoadingCurrentUserData: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   handleLogout: () => {},
+  isLoadingCurrentUserData: false,
 });
 
 interface AuthContextProviderProps {
@@ -46,21 +48,21 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     (state: any) => state.setLeftBarOpen
   );
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      if (
-        storedUser &&
-        storedUser !== "undefined" &&
-        storedUser !== "null" &&
-        JSON.parse(storedUser).id
-      ) {
-        queryClient.setQueryData(["currentUser"], JSON.parse(storedUser));
-      }
-    }
-  }, [queryClient]);
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const storedUser = localStorage.getItem("user");
+  //     if (
+  //       storedUser &&
+  //       storedUser !== "undefined" &&
+  //       storedUser !== "null" &&
+  //       JSON.parse(storedUser).id
+  //     ) {
+  //       queryClient.setQueryData(["currentUser"], JSON.parse(storedUser));
+  //     }
+  //   }
+  // }, [queryClient]);
 
-  const { data: currentUserData } = useQuery<User | null>({
+  const { data: currentUserData, isLoading: isLoadingCurrentUserData } = useQuery<User | null>({
     queryKey: ["currentUser"],
     queryFn: async () => {
       const res = await makeRequest.get("/api/users/current");
@@ -98,6 +100,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
       value={{
         currentUser,
         handleLogout,
+        isLoadingCurrentUserData,
       }}
     >
       {children}

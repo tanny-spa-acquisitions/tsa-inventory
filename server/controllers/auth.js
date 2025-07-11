@@ -238,7 +238,6 @@ export const login = (req, res) => {
 
 export const logout = (req, res) => {
   const token = req.cookies.accessToken;
-  console.log(token)
   if (!token) return res.status(401).json("Not authenticated!");
   res.clearCookie("accessToken", {
     httpOnly: true,

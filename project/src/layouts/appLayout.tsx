@@ -22,7 +22,7 @@ import { BACKEND_URL } from "@/util/config";
 import { handleUpdateUser } from "@/util/functions/User";
 import Modals from "@/modals/Modals";
 import appDetails from "@/util/appDetails.json";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import LandingNav from "@/screens/Landing/LandingNav/LandingNav";
 import LandingLeftBar from "@/screens/Landing/LandingLeftBar/LandingLeftBar";
 import {
@@ -55,6 +55,8 @@ const AppRoot = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
   const queryClientRef = useRef(queryClient);
   const { currentUser } = useContext(AuthContext);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["currentUser"] });
@@ -64,11 +66,21 @@ const AppRoot = ({ children }: { children: ReactNode }) => {
     queryClientRef.current = queryClient;
   }, [queryClient]);
 
+  // useEffect(() => {
+  //   if (typeof window !== "undefined" && currentUser) {
+  //     localStorage.setItem("user", JSON.stringify(currentUser));
+  //   }
+  //   console.log(currentUser)
+  // }, [currentUser]);
+
   useEffect(() => {
-    if (typeof window !== "undefined" && currentUser) {
-      localStorage.setItem("user", JSON.stringify(currentUser));
+    // If not logged in, and not on "/", redirect to "/"
+    if (!currentUser && pathname !== "/") {
+      router.push("/");
     }
-  }, [currentUser]);
+  }, [currentUser, pathname]);
+
+  if (!currentUser && pathname !== "/") return null;
 
   return currentUser ? (
     <ProtectedLayout>{children}</ProtectedLayout>
