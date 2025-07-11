@@ -144,7 +144,7 @@ app.get("/wix-inventory", async (req, res) => {
       }),
       sheets.spreadsheets.get({
         spreadsheetId: SHEET_ID,
-        ranges: [`${SHEET_NAME}!P1:P${rowCount}`],
+        ranges: [`${SHEET_NAME}!${imagesColumn}1:${imagesColumn}${rowCount}`],
         fields: "sheets.data.rowData.values.note",
         auth: authClient,
       }),
