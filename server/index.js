@@ -6,10 +6,10 @@ import https from "https";
 import fs from "fs";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.js";
-import { initializeWebSocket, getIO } from "./connection/websocket.js";
-import { getSheetData, updateRow } from './functions/google.js';
+import { getSheetData, updateRow } from "./functions/google.js";
 import compressRouter from "./routes/compress.js";
 import userRoutes from "./routes/users.js";
+import { db } from "./connection/connect.js";
 dotenv.config();
 
 // const isProduction = process.env.NODE_ENV === "production";
@@ -27,7 +27,7 @@ const server = isProduction
       },
       app
     );
-const io = initializeWebSocket(server);
+
 const __dirname = new URL(".", import.meta.url).pathname;
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
@@ -56,38 +56,37 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
 // Database
-// db.getConnection((err, connection) => {
-//   if (err) {
-//     console.error("Database connection failed: ", err);
-//     return;
-//   }
-//   console.log("Connected to MySQL Database");
-//   connection.release();
-// });
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error("Database connection failed: ", err);
+    return;
+  }
+  console.log("Connected to MySQL Database");
+  connection.release();
+});
 
 // INVENTORY
-app.get('/google/inventory', async (req, res) => {
+app.get("/google/inventory", async (req, res) => {
   try {
     const data = await getSheetData();
     res.json(data);
   } catch (err) {
-    console.error(err)
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/google/update', async (req, res) => {
+app.post("/google/update", async (req, res) => {
   const { rowIndex, rowData } = req.body;
   try {
     await updateRow(rowIndex, rowData);
-    res.json({ status: 'success' });
+    res.json({ status: "success" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 app.use("/api", compressRouter);
-
 
 server.listen(PORT, () => {
   console.log("API is running on port " + PORT);

@@ -1,11 +1,5 @@
 import crypto from "crypto"
 
-export const formatStripeDate = (date: any) => {
-  return date
-    ? new Date(date * 1000).toISOString().slice(0, 19).replace("T", " ")
-    : null;
-};
-
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
@@ -18,10 +12,6 @@ export const formatDate = (dateString: string) => {
     hour12: true,
   };
   return date.toLocaleString("en-US", options);
-};
-
-export const formatStripeAmount = (amount: string) => {
-  return (parseInt(amount) / 100).toFixed(2);
 };
 
 export const capitalizeFirstLetter = (word: string) => {
