@@ -127,18 +127,15 @@ app.post("/google/get-notes", async (req, res) => {
 });
 
 app.get("/wix-inventory", async (req, res) => {
-  console.log("wix inventory")
-  const origin = req.headers.origin || "";
-  if (origin !== WEBSITE_URL) {
-    return res.status(403).json({ error: "Forbidden" });
-  }
+  console.log("wix inventory");
 
   try {
     const authClient = await auth.getClient();
+    console.log("got client");
     const [valuesRes, notesRes] = await Promise.all([
       sheets.spreadsheets.values.get({
         spreadsheetId: SHEET_ID,
-        range: `${SHEET_NAME}!A1:P`, 
+        range: `${SHEET_NAME}!A1:P`,
         auth: authClient,
       }),
       sheets.spreadsheets.get({
@@ -150,7 +147,9 @@ app.get("/wix-inventory", async (req, res) => {
     ]);
 
     const rows = valuesRes.data.values || [];
+    console.log(rows.length);
     const notesData = notesRes.data.sheets[0].data[0].rowData || [];
+    console.log(notesData);
 
     const headers = rows[0];
     const data = rows.slice(1).map((row, i) => {
@@ -166,9 +165,10 @@ app.get("/wix-inventory", async (req, res) => {
         .split(/\s+/)
         .filter((url) => url.startsWith("http"));
       product.Images = images;
-
+      console.log("PRODUCT", product);
       return product;
     });
+    console.log(data);
 
     res.json(data);
   } catch (err) {
