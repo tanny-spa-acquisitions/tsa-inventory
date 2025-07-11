@@ -7,23 +7,17 @@ import {
   useLeftBarOpenStore,
   useLeftBarRefStore,
 } from "../../store/useLeftBarOpenStore";
-import { BsSuitDiamondFill } from "react-icons/bs";
 import { useModal1Store } from "../../store/useModalStore";
 import appDetails from "../../util/appDetails.json";
 import Settings from "../Settings/Settings";
 import {
-  capitalizeFirstLetter,
   removeWhiteSpace,
 } from "../../util/functions/Data";
 import Link from "next/link";
-import { useVideo } from "@/contexts/videoContext";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
-import { usePathname } from "next/navigation";
 
 const Navbar = () => {
-  const pathname = usePathname();
-  const { currentUser, currentUserSubscription } = useContext(AuthContext);
-  const { playerState, setPlayerState } = useVideo();
+  const { currentUser } = useContext(AuthContext);
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
   const leftBarOpen = useLeftBarOpenStore((state: any) => state.leftBarOpen);
@@ -53,20 +47,6 @@ const Navbar = () => {
         pageLayoutRef.current.style.transition = "none";
       }
     }, 300);
-  };
-
-  const handleTokensClick = () => {
-    setModal1({
-      ...modal1,
-      open: !modal1.open,
-      showClose: true,
-      offClickClose: true,
-      width: "w-[90vw] md:w-[80vw]",
-      maxWidth: "md:max-w-[1000px]",
-      aspectRatio: "aspect-[2/2.1] md:aspect-[3/2]",
-      borderRadius: "rounded-[15px] md:rounded-[20px]",
-      content: <Settings initialPage={"Subscription"} />,
-    });
   };
 
   const handleProfileClick = () => {
@@ -118,13 +98,6 @@ const Navbar = () => {
           />
           <Link
             href="/"
-            onClick={() => {
-              if (pathname === "/") {
-                if (playerState === "screen") {
-                  setPlayerState("sm");
-                }
-              }
-            }}
             className="flex flex-row gap-[5px] items-center cursor-pointer dim hover:brightness-75 pr-[6px]"
           >
             <img
@@ -148,96 +121,9 @@ const Navbar = () => {
               {appDetails.project_name}
             </p>
           </Link>
-
-          {/* <div className="ml-[28px] hidden md:flex flex-row h-[22px] gap-[28px]">
-            <Link
-              onClick={() => {
-                if (playerState === "screen") {
-                  setPlayerState("sm");
-                }
-              }}
-              href="/study"
-              className="dim text-[17px] font-[100] hover:brightness-75"
-              style={{
-                color: appTheme[currentUser.theme].text_3,
-              }}
-            >
-              Study
-            </Link>
-            <Link
-              onClick={() => {
-                if (playerState === "screen") {
-                  setPlayerState("sm");
-                }
-              }}
-              href="/library"
-              className="dim text-[17px] font-[100] hover:brightness-75"
-              style={{
-                color: appTheme[currentUser.theme].text_3,
-              }}
-            >
-              Library
-            </Link>
-            <Link
-              onClick={() => {
-                if (playerState === "screen") {
-                  setPlayerState("sm");
-                }
-              }}
-              href="/explore"
-              className="dim text-[17px] font-[100] hover:brightness-75"
-              style={{
-                color: appTheme[currentUser.theme].text_3,
-              }}
-            >
-              Explore
-            </Link>
-          </div> */}
         </div>
 
         <div className="h-[100%] mr-[10px] pr-[2px] hidden min-[500px]:flex flex-row items-center gap-[18px]">
-          {currentUserSubscription && (
-            <div
-              className="w-[150px]  h-[42px] flex flex-row justify-center items-center gap-[8px] dim cursor-pointer hover:brightness-75 rounded-[4px]"
-              style={{
-                backgroundColor: appTheme[currentUser.theme].background_2,
-              }}
-              title="subscription"
-            >
-              <p
-                className="font-[500] text-[15px] rounded-[7px]"
-                style={{
-                  color: appTheme[currentUser.theme].text_1,
-                }}
-              >
-                {capitalizeFirstLetter(currentUserSubscription.status)} |{" "}
-                {currentUserSubscription.subscription_item}
-              </p>
-            </div>
-          )}
-
-          {/* <div
-            onClick={handleTokensClick}
-            className="w-[75px] h-[42px] flex flex-row justify-center items-center gap-[8px] dim cursor-pointer hover:brightness-75 rounded-[4px]"
-            style={{
-              backgroundColor: appTheme[currentUser.theme].background_2,
-            }}
-            title="tokens"
-          >
-            <BsSuitDiamondFill
-              size={16}
-              color={appTheme[currentUser.theme].text_1}
-            />
-            <p
-              className="select-none font-[500] text-[15px] rounded-[7px]"
-              style={{
-                color: appTheme[currentUser.theme].text_1,
-              }}
-            >
-              {currentUser.credits}
-            </p>
-          </div> */}
-
           <div
             onClick={handleProfileClick}
             className="dim cursor-pointer flex flex-row w-fit max-w-[250px] pr-[10px] h-[42px] hover:brightness-75 rounded-[4px]"
