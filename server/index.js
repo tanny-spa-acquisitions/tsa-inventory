@@ -127,6 +127,7 @@ app.post("/google/get-notes", async (req, res) => {
 });
 
 app.get("/wix-inventory", async (req, res) => {
+  console.log("wix inventory")
   const origin = req.headers.origin || "";
   if (origin !== WEBSITE_URL) {
     return res.status(403).json({ error: "Forbidden" });
