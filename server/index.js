@@ -133,7 +133,7 @@ app.get("/wix-inventory", async (req, res) => {
   try {
     const authClient = await auth.getClient();
     console.log("got client");
-    const sheets = google.sheets({ version: "v4", auth: client });
+    const sheets = google.sheets({ version: "v4", auth: authClient });
     console.log("got sheet");
     const [valuesRes, notesRes] = await Promise.all([
       sheets.spreadsheets.values.get({
