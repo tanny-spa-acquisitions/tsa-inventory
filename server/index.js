@@ -19,7 +19,7 @@ import {
 import compressRouter from "./routes/compress.js";
 import userRoutes from "./routes/users.js";
 import { db } from "./connection/connect.js";
-import { FRONTEND_URL, WEBSITE_URL } from "./config.js";
+import { google } from "googleapis";
 dotenv.config();
 
 // const isProduction = process.env.NODE_ENV === "production";
