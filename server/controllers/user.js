@@ -14,7 +14,7 @@ export const getCurrentUser = (req, res) => {
 
     db.query(q, [userInfo.id], (err, data) => {
       if (err) return res.status(500).json(err);
-      if (data.length === 0) return res.status(404).json("User not found");
+      if (data.length === 0) return res.json(null);
       const {
         password,
         password_reset,

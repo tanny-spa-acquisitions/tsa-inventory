@@ -1,9 +1,6 @@
 import { AuthContext } from "@/contexts/authContext";
-import { useVideo } from "@/contexts/videoContext";
 import { appTheme } from "@/util/appTheme";
-import { FRONTEND_URL } from "@/util/config";
-import { capitalizeFirstLetter, iso8601ToSeconds } from "@/util/functions/Data";
-import { formatTimeStamp } from "@/util/functions/YouTubeData";
+import { capitalizeFirstLetter } from "@/util/functions/Data";
 import Link from "next/link";
 import { useContext } from "react";
 
@@ -46,41 +43,7 @@ const CustomInventoryFrame = ({
               {TubPrice && TubPrice.trim().length !== 0 ? TubPrice : "No Price"}
             </p>
           </div>
-
-          {/* <div className="absolute bottom-[10px] left-[12px]  py-[4px] px-[8px] bg-black/60 rounded-[6px] flex flex-row gap-[6px] items-center justify-center">
-            <p className="text-[11px] leading-[11px] font-[600] mt-[1px] text-white">
-              {formatTimeStamp(
-                iso8601ToSeconds(
-                  recentVideosData[index].video_data.contentDetails.duration
-                )
-              )}
-            </p>
-          </div> */}
         </div>
-        {/* {isRecent && (
-          <div
-            className="w-[100%] h-[2.5px] bottom-[-2.5px]"
-            style={{
-              backgroundColor: appTheme[currentUser.theme].background_3,
-            }}
-          >
-            {recentVideosData && (
-              <div
-                style={{
-                  width: `${
-                    (recentVideosData[index].last_timestamp /
-                      iso8601ToSeconds(
-                        recentVideosData[index].video_data.contentDetails
-                          .duration
-                      )) *
-                    100
-                  }%`,
-                }}
-                className="bg-red-400 h-[2.5px] bottom-0"
-              />
-            )}
-          </div>
-        )} */}
         <div className="w-[100%] relative flex flex-col pt-[5px] mb-[47px] px-[13px] gap-[6px]">
           <p
             className="font-[500] truncate w-[100%] overflow-hidden text-[14px] leading-[14px] tracking-[0.2px] mt-[5px]"
