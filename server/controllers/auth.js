@@ -69,8 +69,8 @@ export const googleAuth = async (req, res) => {
       // return res.status(200).json({ accessToken: token });
       res.cookie("accessToken", token, {
         httpOnly: true,
-        secure: true,
-        sameSite: "None",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
         path: "/",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
@@ -102,8 +102,8 @@ export const googleAuth = async (req, res) => {
           });
           res.cookie("accessToken", token, {
             httpOnly: true,
-            secure: true,
-            sameSite: "None",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
           });
@@ -163,8 +163,8 @@ export const register = async (req, res) => {
           });
           res.cookie("accessToken", token, {
             httpOnly: true,
-            secure: true,
-            sameSite: "None",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
           });
@@ -225,10 +225,8 @@ export const login = (req, res) => {
 
     res.cookie("accessToken", token, {
       httpOnly: true,
-      // TURN THIS LINE ON IN PRODUCTION -> secure false allows connection to local host
-      // secure: process.env.NODE_ENV === "production",
-      secure: true,
-      sameSite: "None",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -241,8 +239,8 @@ export const logout = (req, res) => {
   if (!token) return res.status(401).json("Not authenticated!");
   res.clearCookie("accessToken", {
     httpOnly: true,
-    secure: true,
-    sameSite: "None",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
   });
   return res.status(200).json({ message: "Logout successful" });
 };

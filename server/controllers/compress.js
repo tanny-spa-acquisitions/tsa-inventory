@@ -21,7 +21,7 @@ export const compressImages = async (req, res) => {
 
       await sharp(originalPath)
         .resize({ width: 1200, withoutEnlargement: true }) // optional: adjust as needed
-        .webp({ quality: 80 }) // adjust quality here
+        .webp({ quality: 90 }) // adjust quality here
         .toFile(compressedPath);
 
       compressedFilePaths.push(compressedPath);
