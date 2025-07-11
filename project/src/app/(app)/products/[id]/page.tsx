@@ -10,12 +10,15 @@ import { IoCloseOutline } from "react-icons/io5";
 import axios from "axios";
 import { BACKEND_URL } from "@/util/config";
 import { appTheme } from "@/util/appTheme";
+import { getNotes, setNotes, updateCell } from "@/util/functions/Inventory";
 
 const ProductPage = () => {
   const { inventory } = useVideo();
   const { currentUser } = useContext(AuthContext);
   const params = useParams();
   const id = params?.id as string;
+
+  const TubIDColumn = 7;
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -49,12 +52,21 @@ const ProductPage = () => {
       formData.append("files", fileImage.file, fileImage.name);
     });
     try {
-      const response = await axios.post(BACKEND_URL + "/api/compress", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log("done")
+      const response = await axios.post(
+        BACKEND_URL + "/api/compress",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (response.status === 200) {
+        const currentNote = await getNote();
+        const urls = response.data.urls;
+        const newValue = urls.join(" ");
+        await editNote(currentNote + " " + newValue);
+      }
       return response.status === 200;
     } catch (error) {
       console.error("Upload error:", error);
@@ -83,7 +95,6 @@ const ProductPage = () => {
 
           sanitizedFileName = `${timeStamp}--${sanitizedFileName}.${newExtension}`;
           uploadedNames.push(sanitizedFileName);
-          console.log(sanitizedFileName)
           resolve({ name: sanitizedFileName, file });
         });
       });
@@ -101,13 +112,36 @@ const ProductPage = () => {
     }
   };
 
+  const getNote = async () => {
+    const productIndex = inventory.findIndex(
+      (item: any) => item[TubIDColumn] === id
+    );
+    if (productIndex === -1) return;
+    const notes = await getNotes(productIndex)
+    const note = notes.notes
+    return note
+  };
+
+  const editNote = async (newValue: any) => {
+    const productIndex = inventory.findIndex(
+      (item: any) => item[TubIDColumn] === id
+    );
+    if (productIndex === -1) return;
+    setNotes(productIndex, newValue);
+  };
+
   if (!inventory || inventory.length === 0 || !currentUser) return null;
-  const productIndex = inventory.findIndex((item: any) => item[7] === id);
+  const productIndex = inventory.findIndex(
+    (item: any) => item[TubIDColumn] === id
+  );
   if (productIndex === -1) return <div className="p-4">Product not found</div>;
   const product = inventory[productIndex];
 
   return (
-    <div className="p-6 max-w-3xl mx-auto" style={{color: appTheme[currentUser.theme].text_1}}>
+    <div
+      className="p-6 max-w-3xl mx-auto"
+      style={{ color: appTheme[currentUser.theme].text_1 }}
+    >
       <h1 className="text-3xl font-bold mb-2">{product[1]}</h1>
       <p className="text-md font-[400] mb-2">{product[14]}</p>
       <p className="text-md font-[300] mb-2">{product[6]}</p>
@@ -158,7 +192,7 @@ const ProductPage = () => {
                   }}
                   className="absolute top-2 right-3"
                   style={{ cursor: "pointer" }}
-                  color={"black"}
+                  color={appTheme[currentUser.theme].text_3}
                   size={40}
                 />
               </div>

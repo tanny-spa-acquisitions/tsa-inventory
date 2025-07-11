@@ -29,7 +29,6 @@ export const compressImages = async (req, res) => {
 
     const uploadPromises = compressedFilePaths.map(async (filePath) => {
       const originalName = path.parse(filePath).name;
-      console.log(originalName);
 
       const result = await cloudinary.uploader.upload(filePath, {
         folder: "tsa",

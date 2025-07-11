@@ -6,7 +6,13 @@ import https from "https";
 import fs from "fs";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.js";
-import { getSheetData, updateRow } from "./functions/google.js";
+import {
+  getSheetData,
+  updateRow,
+  updateCell,
+  getNotes,
+  setNotes,
+} from "./functions/google.js";
 import compressRouter from "./routes/compress.js";
 import userRoutes from "./routes/users.js";
 import { db } from "./connection/connect.js";
@@ -76,11 +82,41 @@ app.get("/google/inventory", async (req, res) => {
   }
 });
 
-app.post("/google/update", async (req, res) => {
+app.post("/google/update-row", async (req, res) => {
   const { rowIndex, rowData } = req.body;
   try {
     await updateRow(rowIndex, rowData);
     res.json({ status: "success" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/google/update", async (req, res) => {
+  const { row, column, value } = req.body;
+  try {
+    await updateCell(row, column, value);
+    res.json({ status: "success" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/google/set-notes", async (req, res) => {
+  const { row, value } = req.body
+  try {
+    await setNotes(row, value);
+    res.json({ status: "success" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/google/get-notes", async (req, res) => {
+  const { row } = req.body
+  try {
+    const notes = await getNotes(row);
+    res.json({ status: "success", notes });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

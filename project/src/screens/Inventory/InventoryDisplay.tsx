@@ -2,7 +2,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   fetchInventory,
-  updateInventoryRow,
+  updateRow,
+  updateCell,
 } from "../../util/functions/Inventory";
 import { IoSync } from "react-icons/io5";
 import { appTheme } from "../../util/appTheme";
@@ -29,7 +30,7 @@ const InventoryDisplay = () => {
 
   const handleSave = async () => {
     if (editIndex === null) return;
-    await updateInventoryRow(editIndex, editedRow);
+    await updateRow(editIndex, editedRow);
     const newData = [...inventory];
     newData[editIndex] = editedRow;
     setInventory(newData);

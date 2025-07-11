@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import { AuthContext } from "@/contexts/authContext";
+import { appTheme } from "@/util/appTheme";
+import React, { useContext, useState } from "react";
 
 interface UploadProps {
   handleFiles: (files: File[]) => void;
 }
 
 const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
-
+  const { currentUser } = useContext(AuthContext);
   const [dragging, setDragging] = useState(false);
   const handleDragOver = (e: any) => {
     e.preventDefault();
@@ -24,23 +26,29 @@ const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
     handleFiles(files);
   };
 
+  if (!currentUser) return;
+
   return (
     <div
       style={{
         width: "100%",
         height: "100%",
-        backgroundColor: dragging ? "rgba(0, 0, 0, 0.2)" : "transparent",
+        backgroundColor: appTheme[currentUser.theme].background_stark,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         transition: "background-color 0.3s",
-        border: dragging ? "3px dashed blue" : "none",
+        border: currentUser.theme === "light" ? dragging ? "3px dashed blue" : "none" : "1px solid #333",
+        borderRadius: "25px"
       }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <p className="absolute font-[300]" style={{ fontSize: "1.2rem", color: dragging ? "blue" : "black" }}>
+      <p
+        className="absolute font-[300]"
+        style={{ fontSize: "1.2rem", color: currentUser.theme === "light" ? dragging ? "blue" : "black" : "#fff" }}
+      >
         Drag and drop images here
       </p>
 
@@ -63,7 +71,7 @@ const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
             marginTop: "20px",
             cursor: "pointer",
             textDecoration: "underline",
-            color: "blue",
+            color: currentUser.theme === "dark" ? "#eee" : "blue",
           }}
         >
           Open Finder
