@@ -127,6 +127,7 @@ app.post("/google/get-notes", async (req, res) => {
 });
 
 const imagesColumn = "P";
+const rowCount = 1000
 
 app.get("/wix-inventory", async (req, res) => {
   console.log("wix inventory");
@@ -143,7 +144,7 @@ app.get("/wix-inventory", async (req, res) => {
       }),
       sheets.spreadsheets.get({
         spreadsheetId: SHEET_ID,
-        ranges: [`${SHEET_NAME}!${imagesColumn}`],
+        ranges: [`${SHEET_NAME}!P1:P${rowCount}`],
         fields: "sheets.data.rowData.values.note",
         auth: authClient,
       }),
@@ -152,7 +153,7 @@ app.get("/wix-inventory", async (req, res) => {
     const rows = valuesRes.data.values || [];
     console.log(rows.length);
     const notesData = notesRes.data.sheets[0].data[0].rowData || [];
-    console.log(notesData);
+    console.log("NOTES", notesData.length)
 
     const headers = rows[0];
     const data = rows.slice(1).map((row, i) => {
@@ -167,6 +168,7 @@ app.get("/wix-inventory", async (req, res) => {
         .split(/\s+/)
         .filter((url) => url.startsWith("http"));
       product.Images = images;
+      console.log("IMAGES", images);
       console.log("PRODUCT", product);
       return product;
     });
