@@ -595,17 +595,18 @@ const Login = () => {
   };
 
   let animationInstance: any;
-  function playAnimation(id: string) {
-    const container = document.getElementById(id);
-    if (container) {
-      animationInstance = lottie.loadAnimation({
-        container: container,
-        animationData: animationData,
-        renderer: "svg",
-        loop: true,
-        autoplay: true,
-      });
-    }
+  let containerRef = useRef<HTMLDivElement>(null)
+  
+  function playAnimation1() {
+    // if (containerRef.current) {
+    //   animationInstance = lottie.loadAnimation({
+    //     container: containerRef.current,
+    //     animationData: animationData,
+    //     renderer: "svg",
+    //     loop: true,
+    //     autoplay: true,
+    //   });
+    // }
   }
 
   const [continueDisabled, setContinueDisabled] = useState<boolean>(false);
@@ -636,7 +637,7 @@ const Login = () => {
           }
           // Register
           setSignInButtonText("Registering...");
-          playAnimation("lottie-container1");
+          playAnimation1();
           try {
             setContinueDisabled(true);
             const success = await register(inputs);
@@ -660,7 +661,7 @@ const Login = () => {
         // Login
         if (inputs.email !== "" && inputs.password !== "") {
           setSignInButtonText("Signing In...");
-          playAnimation("lottie-container1");
+          playAnimation1();
           try {
             setContinueDisabled(true);
             const success = await login(inputs);
@@ -754,13 +755,6 @@ const Login = () => {
         >
           Welcome to {appDetails.project_name}
         </div>
-
-        {/* <div
-          className="mb-[15px] font-[600] text-[15px] brightness-90"
-          style={{ color: appTheme[defaultTheme].text_2 }}
-        >
-          Sign in with
-        </div> */}
 
         <div className="flex w-full flex-row gap-[11px] px-[80px] md:px-[40px]">
           <div
@@ -1056,7 +1050,7 @@ const Login = () => {
             onClick={handleContinueClick}
           >
             <div
-              id="lottie-container1"
+              ref={containerRef}
               className="absolute mr-[120px] w-[100px] h-[100px] opacity-[80%]"
             />
             <p
