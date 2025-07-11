@@ -126,6 +126,8 @@ app.post("/google/get-notes", async (req, res) => {
   }
 });
 
+const imagesColumn = "P"
+
 app.get("/wix-inventory", async (req, res) => {
   console.log("wix inventory");
 
@@ -135,12 +137,12 @@ app.get("/wix-inventory", async (req, res) => {
     const [valuesRes, notesRes] = await Promise.all([
       sheets.spreadsheets.values.get({
         spreadsheetId: SHEET_ID,
-        range: `${SHEET_NAME}!A1:P`,
+        range: `${SHEET_NAME}!A1:${imagesColumn}`,
         auth: authClient,
       }),
       sheets.spreadsheets.get({
         spreadsheetId: SHEET_ID,
-        ranges: [`${SHEET_NAME}!P`],
+        ranges: [`${SHEET_NAME}!${imagesColumn}`],
         fields: "sheets.data.rowData.values.note",
         auth: authClient,
       }),
@@ -158,8 +160,7 @@ app.get("/wix-inventory", async (req, res) => {
         product[header] = row[j] || "";
       });
 
-      // Grab image URLs from NOTE in column 15 (index 14)
-      const note = notesData[i + 1]?.values?.[14]?.note || "";
+      const note = notesData[i + 1]?.values?.[0]?.note || "";
       const images = note
         .trim()
         .split(/\s+/)
