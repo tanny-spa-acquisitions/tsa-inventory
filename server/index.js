@@ -6,6 +6,7 @@ import https from "https";
 import fs from "fs";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.js";
+import productRoutes from "./routes/products.js";
 import {
   getSheetData,
   updateRow,
@@ -16,7 +17,7 @@ import {
   SHEET_ID,
   auth,
 } from "./functions/google.js";
-import compressRouter from "./routes/compress.js";
+import imageRouter from "./routes/images.js";
 import userRoutes from "./routes/users.js";
 import { db } from "./connection/connect.js";
 import { google } from "googleapis";
@@ -64,6 +65,8 @@ app.use(
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/images", imageRouter);
 
 // Database
 db.getConnection((err, connection) => {
@@ -180,8 +183,6 @@ app.get("/wix-inventory", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch inventory" });
   }
 });
-
-app.use("/api", compressRouter);
 
 server.listen(PORT, () => {
   console.log("API is running on port " + PORT);

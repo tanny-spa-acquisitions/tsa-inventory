@@ -1,6 +1,6 @@
 import express from "express";
 import upload from "../services/middleware.js";
-import { compressImages } from "../controllers/compress.js";
+import { compressImages } from "../controllers/images.js";
 
 const router = express.Router();
 

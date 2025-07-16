@@ -24,15 +24,14 @@ import Modals from "@/modals/Modals";
 import appDetails from "@/util/appDetails.json";
 import { usePathname, useRouter } from "next/navigation";
 import LandingNav from "@/screens/Landing/LandingNav/LandingNav";
-import LandingLeftBar from "@/screens/Landing/LandingLeftBar/LandingLeftBar";
 import {
   useLeftBarOpenStore,
-  useLeftBarRefStore,
 } from "@/store/useLeftBarOpenStore";
 import { QueryProvider } from "@/contexts/queryContext";
 import CustomToast from "@/components/CustomToast";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
 import LandingPage from "@/screens/Landing/LandingPage/LandingPage";
+import UploadModal from "@/components/Upload/Upload";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -103,6 +102,7 @@ const ProtectedLayout = ({ children }: { children: ReactNode }) => {
       <Navbar />
       <LeftBar />
       <PageLayout>{children}</PageLayout>
+      <UploadModal />
     </>
   );
 };

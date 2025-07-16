@@ -1,4 +1,5 @@
 import { AuthContext } from "@/contexts/authContext";
+import { Product } from "@/contexts/queryContext";
 import { appTheme } from "@/util/appTheme";
 import { capitalizeFirstLetter } from "@/util/functions/Data";
 import Link from "next/link";
@@ -8,18 +9,19 @@ const CustomInventoryFrame = ({
   item,
   index,
 }: {
-  item: any[];
+  item: Product;
   index: number;
 }) => {
   const { currentUser } = useContext(AuthContext);
 
-  const TubTitle = item[1];
-  const TubMake = item[4];
-  const TubModel = item[5];
-  const TubPrice = item[6];
-  const TubID = item[7];
+  const TubTitle = item.name;
+  const TubMake = item.make;
+  const TubModel = item.model;
+  const TubPrice = "$" + item.price;
+  const TubID = item.serial_number;
 
   if (!currentUser) return;
+
   return (
     <Link
       href={
@@ -35,7 +37,9 @@ const CustomInventoryFrame = ({
           <img
             className="w-[100%] h-[100%] object-cover"
             src={
-              "https://images.unsplash.com/photo-1751786210867-a886b5996bf2?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyNXx8fGVufDB8fHx8fA%3D%3D"
+              item.images.length > 0
+                ? item.images[0]
+                : "https://images.unsplash.com/photo-1751786210867-a886b5996bf2?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyNXx8fGVufDB8fHx8fA%3D%3D"
             }
           />
           <div className="absolute bottom-[9px] right-[10px] bg-white py-[6px] px-[10px] rounded-[6px] flex flex-row gap-[6px] items-center justify-center">
@@ -74,7 +78,9 @@ const CustomInventoryFrame = ({
           >
             {TubMake && TubMake.trim().length !== 0
               ? TubModel && TubModel.trim().length !== 0
-                ? `${capitalizeFirstLetter(TubMake)} | ${capitalizeFirstLetter(TubModel)}`
+                ? `${capitalizeFirstLetter(TubMake)} | ${capitalizeFirstLetter(
+                    TubModel
+                  )}`
                 : capitalizeFirstLetter(TubMake)
               : ""}
           </p>

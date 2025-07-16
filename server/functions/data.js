@@ -1,4 +1,5 @@
 import crypto from "crypto"
+import { DateTime } from "luxon";
 
 export const generateId = (length) => {
   return crypto.randomBytes(length).toString("hex");
@@ -15,6 +16,13 @@ export function formatTimeStamp(input) {
   const paddedSeconds = String(seconds).padStart(2, '0');
 
   return `${hours}:${paddedMinutes}:${paddedSeconds}`
+}
+
+export function formatDateToMySQL(dateInput) {
+  const date = DateTime.fromJSDate(new Date(dateInput), {
+    zone: "America/New_York",
+  });
+  return date.toFormat("yyyy-LL-dd HH:mm:ss");  
 }
 
 export const extractJsonArray = (input) => {

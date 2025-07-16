@@ -1,29 +1,118 @@
 "use client";
-import React, { createContext, ReactNode, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import {
   useQuery,
   useMutation,
-  QueryClient,
   QueryObserverResult,
   useQueryClient,
 } from "@tanstack/react-query";
 import { makeRequest } from "@/util/axios";
 import { AuthContext } from "./authContext";
-import { showToast } from "@/components/CustomToast";
+import { formatToEST } from "@/util/functions/Data";
 
-export type VideoCollection = {
-  collection_id: string;
-  collection_name: string;
+export type Product = {
+  serial_number: string;
+  name: string;
+  description: string;
+  make: string;
+  model: string;
+  price: number;
+  date_sold: Date;
+  repair_status: "In Progress" | "Complete";
+  sale_status:
+    | "Not Yet Posted"
+    | "Awaiting Sale"
+    | "Sold Awaiting Delivery"
+    | "Delivered";
+  length: number;
+  width: number;
+  note: string;
+  images: string[];
 };
 
-export type QueryContextType = {};
+export type QueryContextType = {
+  productsData: Product[];
+  isLoadingProductsData: boolean;
+  refetchProductsData: () => Promise<QueryObserverResult<Product[], Error>>;
+  updateProduct: (newProduct: Product) => void;
+};
 
 const QueryContext = createContext<QueryContextType | undefined>(undefined);
 
 export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  return <QueryContext.Provider value={{}}>{children}</QueryContext.Provider>;
+  const queryClient = useQueryClient();
+  const { currentUser } = useContext(AuthContext);
+  const isLoggedIn = useMemo(
+    () => !!currentUser?.user_id,
+    [currentUser?.user_id]
+  );
+
+  const {
+    data: productsData,
+    isLoading: isLoadingProductsData,
+    refetch: refetchProductsData,
+  } = useQuery<Product[]>({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const res = await makeRequest.get("/api/products/get", {});
+      console.log(res.data.products);
+      return res.data.products || [];
+    },
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    refetchOnMount: true,
+    enabled: isLoggedIn,
+  });
+
+  const updateProductsMutation = useMutation({
+    mutationFn: async (product: Product) => {
+      await makeRequest.post("/api/products/update", {
+        product,
+      });
+    },
+    onMutate: async (updatedProduct: Product) => {
+      const queryKey = ["products"];
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<any[]>(queryKey);
+      if (!previousData) return { previousData, queryKey };
+      const newData = previousData.map((product) =>
+        product.serial_number === updatedProduct.serial_number
+          ? updatedProduct
+          : product
+      );
+      queryClient.setQueryData(queryKey, newData);
+      return { previousData, queryKey };
+    },
+    onError: (_err, _newData, context) => {
+      if (context?.queryKey && context?.previousData) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
+      }
+    },
+    onSettled: (_data, _err, _variables, context) => {
+      if (context?.queryKey) {
+        queryClient.invalidateQueries({ queryKey: context.queryKey });
+      }
+    },
+  });
+
+  const updateProduct = async (product: Product) => {
+    await updateProductsMutation.mutateAsync(product);
+  };
+
+  return (
+    <QueryContext.Provider
+      value={{
+        productsData: productsData ?? [],
+        isLoadingProductsData,
+        refetchProductsData,
+        updateProduct,
+      }}
+    >
+      {children}
+    </QueryContext.Provider>
+  );
 };
 
 export const useContextQueries = () => {

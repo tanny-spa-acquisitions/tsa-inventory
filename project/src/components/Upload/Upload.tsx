@@ -1,10 +1,55 @@
 import { AuthContext } from "@/contexts/authContext";
+import { useVideo } from "@/contexts/videoContext";
 import { appTheme } from "@/util/appTheme";
 import React, { useContext, useState } from "react";
+import { IoCloseOutline } from "react-icons/io5";
 
 interface UploadProps {
   handleFiles: (files: File[]) => void;
 }
+
+const UploadModal = () => {
+  const { currentUser } = useContext(AuthContext);
+  const { uploadPopup, setUploadPopup, handleFiles, uploadPopupRef } =
+    useVideo();
+  if (!currentUser) return;
+
+  return (
+    <>
+      {uploadPopup && (
+        <div className="z-[999] fixed top-0 left-0">
+          <div
+            className="absolute top-0 w-[100vw] h-[100vh]"
+            style={{ backgroundColor: "black", opacity: 0.4 }}
+          ></div>
+          <div className="absolute top-0 w-[100vw] h-[100vh] flex items-center justify-center">
+            <div
+              ref={uploadPopupRef}
+              className="w-[70%] aspect-[1.5/1] relative"
+              style={{
+                userSelect: "none",
+                backgroundColor: "white",
+                borderRadius: "30px",
+                border: "1.5px solid black",
+              }}
+            >
+              <Upload handleFiles={handleFiles} />
+              <IoCloseOutline
+                onClick={() => {
+                  setUploadPopup(false);
+                }}
+                className="absolute top-2 right-3"
+                style={{ cursor: "pointer" }}
+                color={appTheme[currentUser.theme].text_3}
+                size={40}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
   const { currentUser } = useContext(AuthContext);
@@ -38,8 +83,13 @@ const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
         alignItems: "center",
         justifyContent: "center",
         transition: "background-color 0.3s",
-        border: currentUser.theme === "light" ? dragging ? "3px dashed blue" : "none" : "1px solid #333",
-        borderRadius: "28px"
+        border:
+          currentUser.theme === "light"
+            ? dragging
+              ? "3px dashed blue"
+              : "none"
+            : "1px solid #333",
+        borderRadius: "28px",
       }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -47,7 +97,15 @@ const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
     >
       <p
         className="absolute font-[300]"
-        style={{ fontSize: "1.2rem", color: currentUser.theme === "light" ? dragging ? "blue" : "black" : "#fff" }}
+        style={{
+          fontSize: "1.2rem",
+          color:
+            currentUser.theme === "light"
+              ? dragging
+                ? "blue"
+                : "black"
+              : "#fff",
+        }}
       >
         Drag and drop images here
       </p>
@@ -81,4 +139,4 @@ const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
   );
 };
 
-export default Upload;
+export default UploadModal;
