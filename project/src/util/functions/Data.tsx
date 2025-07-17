@@ -1,4 +1,4 @@
-import crypto from "crypto"
+import crypto from "crypto";
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -14,6 +14,41 @@ export const formatDate = (dateString: string) => {
   return date.toLocaleString("en-US", options);
 };
 
+export const formatSQLDate = (
+  value: string | Date,
+  showFullYear = false
+): string => {
+  const date = typeof value === "string" ? new Date(value) : value;
+
+  if (isNaN(date.getTime())) return "";
+
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const year = showFullYear ? date.getFullYear() : date.getFullYear() % 100;
+
+  return `${month}/${day}/${year}`;
+};
+
+export const parseDateString = (input: string): string | null => {
+  const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/;
+  const match = input.match(regex);
+  if (!match) return null;
+
+  const [, mm, dd, yy] = match;
+  const month = parseInt(mm, 10);
+  const day = parseInt(dd, 10);
+  let year = parseInt(yy, 10);
+
+  if (year < 100) {
+    year += year < 50 ? 2000 : 1900; // 25 => 2025, 90 => 1990
+  }
+
+  const date = new Date(year, month - 1, day);
+  if (isNaN(date.getTime())) return null;
+
+  return date.toISOString();
+};
+
 export const capitalizeFirstLetter = (word: string) => {
   return word.charAt(0).toUpperCase() + word.slice(1);
 };
@@ -24,8 +59,8 @@ export const validateEmail = (email: string) => {
 };
 
 export const removeWhiteSpace = (input: string) => {
-  return input.replace(/\s+/g, '')
-}
+  return input.replace(/\s+/g, "");
+};
 
 export const generateUniqueId = () => {
   return crypto.randomBytes(15).toString("hex");
@@ -35,12 +70,12 @@ export function secondsToISO8601(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
-  
-  let isoString = 'PT';
+
+  let isoString = "PT";
   if (hours) isoString += `${hours}H`;
   if (minutes) isoString += `${minutes}M`;
   if (secs) isoString += `${secs}S`;
-  
+
   return isoString;
 }
 
@@ -50,9 +85,9 @@ export function iso8601ToSeconds(isoString: string): number {
   if (!match) return 0;
   const [, hours, minutes, seconds] = match;
   return (
-    (parseInt(hours || "0") * 3600) +
-    (parseInt(minutes || "0") * 60) +
-    (parseFloat(seconds || "0"))   
+    parseInt(hours || "0") * 3600 +
+    parseInt(minutes || "0") * 60 +
+    parseFloat(seconds || "0")
   );
 }
 

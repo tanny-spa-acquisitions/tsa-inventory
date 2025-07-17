@@ -18,6 +18,15 @@ export function formatTimeStamp(input) {
   return `${hours}:${paddedMinutes}:${paddedSeconds}`
 }
 
+export const formatSQLDate = (value) => {
+  const date = typeof value === "string" ? new Date(value) : value;
+  if (isNaN(date.getTime())) return "";
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const year = date.getFullYear() % 100;
+  return `${month}/${day}/${year}`;
+};
+
 export function formatDateToMySQL(dateInput) {
   const date = DateTime.fromJSDate(new Date(dateInput), {
     zone: "America/New_York",

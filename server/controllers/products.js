@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
 import { db } from "../connection/connect.js";
+import { google } from "googleapis";
+import fs from "fs";
 import dotenv from "dotenv";
-import { formatDateToMySQL } from "../functions/data.js";
+import { formatDateToMySQL, formatSQLDate } from "../functions/data.js";
 dotenv.config();
 
 export const getProducts = (req, res) => {
@@ -77,7 +79,7 @@ export const updateProduct = (req, res) => {
       sale_status,
       length,
       width,
-      JSON.stringify(images), 
+      JSON.stringify(images),
     ];
 
     db.query(q, values, (err, result) => {
@@ -117,6 +119,181 @@ export const deleteProduct = (req, res) => {
       }
 
       return res.status(200).json({ success: true });
+    });
+  });
+};
+
+export const syncToGoogleSheets = (req, res) => {
+  const token = req.cookies.accessToken;
+  if (!token) return res.status(401).json("No token.");
+
+  jwt.verify(token, process.env.JWT_SECRET, async (err) => {
+    if (err) return res.status(403).json("Invalid token");
+
+    db.query("SELECT * FROM tubs", async (err, data) => {
+      if (err) return res.status(500).json(err);
+
+      const spreadsheetId = "1eqbNGSklj9kRzh7jcRG9PtNKURURjy_V8sc3Kz5WJSo";
+      const sheetName = "Inventory";
+
+      try {
+        // Format the data
+        const rows = data.map((row, index) => {
+          return [
+            index + 1, // index instead of ID
+            row.serial_number,
+            row.name,
+            row.description || "",
+            row.note || "",
+            row.make || "",
+            row.model || "",
+            `$${row.price}`,
+            row.type || "",
+            formatSQLDate(row.date_entered),
+            formatSQLDate(row.date_sold),
+            row.repair_status,
+            row.sale_status,
+            row.length || "",
+            row.width || "",
+            Array.isArray(row.images)
+              ? row.images.join(" ")
+              : typeof row.images === "string"
+              ? JSON.parse(row.images || "[]").join(" ")
+              : "",
+          ];
+        });
+
+        const header = [
+          "ID",
+          "Serial Number",
+          "Name",
+          "Description",
+          "Note",
+          "Make",
+          "Model",
+          "Price",
+          "Type",
+          "Date Entered",
+          "Date Sold",
+          "Repair Status",
+          "Sale Status",
+          "Length",
+          "Width",
+          "Images",
+        ];
+
+        const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+        const parsed = JSON.parse(raw);
+        parsed.private_key = parsed.private_key.replace(/\\n/g, "\n");
+
+        const auth = new google.auth.GoogleAuth({
+          credentials: parsed,
+          scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+        });
+
+        const sheets = google.sheets({ version: "v4", auth });
+
+        await sheets.spreadsheets.values.clear({
+          spreadsheetId,
+          range: `${sheetName}!A1:Z`,
+        });
+
+        // Overwrite with new data
+        await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: `${sheetName}!A1:Z`,
+          valueInputOption: "RAW",
+          requestBody: {
+            values: [header, ...rows],
+          },
+        });
+
+        // Format header and data rows
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          requestBody: {
+            requests: [
+              {
+                repeatCell: {
+                  range: {
+                    sheetId: 0,
+                    startRowIndex: 0,
+                    endRowIndex: 1,
+                  },
+                  cell: {
+                    userEnteredFormat: {
+                      textFormat: { bold: true },
+                      horizontalAlignment: "CENTER",
+                      wrapStrategy: "CLIP",
+                      backgroundColor: {
+                        red: 0.9,
+                        green: 0.9,
+                        blue: 0.9,
+                      },
+                      padding: {
+                        top: 10,
+                        bottom: 10,
+                      },
+                    },
+                  },
+                  fields:
+                    "userEnteredFormat(textFormat,horizontalAlignment,wrapStrategy,backgroundColor,padding)",
+                },
+              },
+              {
+                repeatCell: {
+                  range: {
+                    sheetId: 0,
+                    startRowIndex: 1,
+                  },
+                  cell: {
+                    userEnteredFormat: {
+                      textFormat: { bold: false },
+                      horizontalAlignment: "LEFT",
+                      wrapStrategy: "CLIP",
+                    },
+                  },
+                  fields:
+                    "userEnteredFormat(textFormat,horizontalAlignment,wrapStrategy)",
+                },
+              },
+              {
+                updateDimensionProperties: {
+                  range: {
+                    sheetId: 0,
+                    dimension: "COLUMNS",
+                    startIndex: 0,
+                    endIndex: 1,
+                  },
+                  properties: {
+                    pixelSize: 50,
+                  },
+                  fields: "pixelSize",
+                },
+              },
+              {
+                updateDimensionProperties: {
+                  range: {
+                    sheetId: 0,
+                    dimension: "COLUMNS",
+                    startIndex: 1,
+                    endIndex: 5,
+                  },
+                  properties: {
+                    pixelSize: 130,
+                  },
+                  fields: "pixelSize",
+                },
+              },
+            ],
+          },
+        });
+
+        return res.json({ success: true });
+      } catch (e) {
+        console.error(e);
+        return res.status(500).json("Google Sheets sync failed.");
+      }
     });
   });
 };

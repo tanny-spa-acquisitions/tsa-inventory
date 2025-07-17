@@ -30,8 +30,21 @@ const ProductSchema = z.object({
     "Sold Awaiting Delivery",
     "Delivered",
   ]),
-  length: z.number().min(0, "Must be positive"),
-  width: z.number().min(0, "Must be positive"),
+  // length: z.number().min(0, "Must be positive"),
+  // width: z.number().min(0, "Must be positive"),
+  length: z
+    .number()
+    .min(0, "Must be positive")
+    .refine((val) => /^\d+(\.\d{1,2})?$/.test(val.toString()), {
+      message: "Max 2 decimal places",
+    }),
+
+  width: z
+    .number()
+    .min(0, "Must be positive")
+    .refine((val) => /^\d+(\.\d{1,2})?$/.test(val.toString()), {
+      message: "Max 2 decimal places",
+    }),
   note: z.string().optional(),
   images: z.array(z.string().url()).optional(),
 });
@@ -173,25 +186,25 @@ const ProductPage = ({
         )}
       </div>
 
-      <div
-        className="flex flex-row gap-[10px] text-[20px] font-[400] mb-[20px] opacity-[0.5]"
-        style={{ color: currentUser.theme === "dark" ? "#bbb" : "black" }}
-      >
-        {!newProduct && (
+      {!newProduct && (
+        <div
+          className="flex flex-row gap-[10px] text-[20px] font-[400] mb-[20px] opacity-[0.5]"
+          style={{ color: currentUser.theme === "dark" ? "#bbb" : "black" }}
+        >
           <Link
             href="/products"
             className="cursor-pointer dim hover:brightness-75"
           >
             Products
           </Link>
-        )}
-        <h1>/</h1>
-        {!newProduct && (
+
+          <h1>/</h1>
+
           <div className="cursor-pointer dim hover:brightness-75 text-[19px] mt-[1px]">
             {serialNumber}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {newProduct && (
         <h1 className="text-3xl font-[500] mb-[24px]">Add Product</h1>
@@ -248,6 +261,7 @@ const ProductPage = ({
             <label className="block font-[400]">Serial Number</label>
             <input
               {...register("serial_number")}
+              disabled={!newProduct}
               className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
               style={{
                 border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
@@ -336,6 +350,7 @@ const ProductPage = ({
             <label className="block font-[400]">Length (in)</label>
             <input
               type="number"
+              step="0.01"
               {...register("length", { valueAsNumber: true })}
               className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
               style={{
@@ -350,6 +365,7 @@ const ProductPage = ({
             <label className="block font-[400]">Width (in)</label>
             <input
               type="number"
+              step="0.01"
               {...register("width", { valueAsNumber: true })}
               className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
               style={{

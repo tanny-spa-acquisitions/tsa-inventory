@@ -16,7 +16,8 @@ import { IoCloseOutline } from "react-icons/io5";
 
 const ProductsPage = () => {
   const { currentUser } = useContext(AuthContext);
-  const { productsData, deleteProduct } = useContextQueries();
+  const { productsData, deleteProduct, isLoadingProductsData } =
+    useContextQueries();
   const { setProductImages } = useAppContext();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
@@ -39,7 +40,7 @@ const ProductsPage = () => {
   };
 
   const handleDeleteProduct = async (item: Product) => {
-    await deleteProduct(item.serial_number)
+    await deleteProduct(item.serial_number);
   };
 
   if (!currentUser) return <></>;
@@ -96,7 +97,7 @@ const ProductsPage = () => {
               </div>
             );
           })
-        ) : (
+        ) : isLoadingProductsData ? (
           <>
             {Array.from({ length: 6 }, (_, index) => {
               return (
@@ -106,6 +107,8 @@ const ProductsPage = () => {
               );
             })}
           </>
+        ) : (
+          <></>
         )}
       </div>
     </div>
