@@ -1,5 +1,5 @@
 "use client";
-
+import { IoCloseOutline } from "react-icons/io5";
 import {
   DndContext,
   closestCenter,
@@ -30,6 +30,9 @@ function SortableImage({
   url: string;
   setImageView: React.Dispatch<React.SetStateAction<string>>;
 }) {
+  const { currentUser } = useContext(AuthContext);
+  const { productImages, setProductImages } = useVideo();
+
   const {
     attributes,
     listeners,
@@ -42,50 +45,68 @@ function SortableImage({
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    borderRadius: "10px",
-    overflow: "hidden",
     cursor: "grab",
     opacity: isDragging ? 0.5 : 1,
   };
 
   const startPos = useRef<{ x: number; y: number } | null>(null);
-  const wiggleThreshold = 5; 
+  const wiggleThreshold = 5;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     startPos.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseUp = (e: React.MouseEvent) => {
-    if (!startPos.current) return;
+    const target = e.target as HTMLElement;
+    if (target.closest(".ignore-click")) return;
 
+    if (!startPos.current) return;
     const dx = e.clientX - startPos.current.x;
     const dy = e.clientY - startPos.current.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-
     if (distance < wiggleThreshold) {
       setImageView(url);
     }
-
     startPos.current = null;
   };
+
+  const handleDeleteImage = (url: string) => {
+    let productImagesCopy = [...productImages];
+    productImagesCopy = productImagesCopy.filter((link) => link !== url);
+    setProductImages(productImagesCopy);
+  };
+
+  if (!currentUser) return;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
+      {...attributes}
+      className="relative w-full aspect-square"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
-      {...attributes}
-      {...listeners}
-      className="w-full aspect-square"
     >
+      <div {...listeners} className="absolute inset-0 z-10 cursor-grab" />
       <Image
         src={url}
         alt="image"
         width={200}
         height={200}
-        className="object-cover w-full h-full"
+        className="object-cover w-full h-full rounded-[10px]"
       />
+      <div
+        style={{
+          border: `1px solid ${appTheme[currentUser.theme].text_4}`,
+          backgroundColor: appTheme[currentUser.theme].background_1,
+        }}
+        className="ignore-click w-[20px] h-[20px] flex items-center justify-center dim hover:brightness-75 cursor-pointer rounded-[10px] absolute top-[-8px] right-[-9px] z-20"
+        onClick={() => {
+          handleDeleteImage(url);
+        }}
+      >
+        <IoCloseOutline color={appTheme[currentUser.theme].text_2} />
+      </div>
     </div>
   );
 }
@@ -118,7 +139,7 @@ export default function DraggableImageGrid() {
     <>
       {imageView !== "" && (
         <div
-          className="fixed top-0 left-0 w-[100vw] h-[100vh] flex items-center justify-center"
+          className="fixed z-[900] top-0 left-0 w-[100vw] h-[100vh] flex items-center justify-center"
           style={{
             backgroundColor: appTheme[currentUser.theme].background_1,
           }}
@@ -139,16 +160,18 @@ export default function DraggableImageGrid() {
           items={items.map((item) => item.id)}
           strategy={rectSortingStrategy}
         >
-          <div className="grid grid-cols-6 gap-[10px] p-4">
-            {items.map((item) => (
-              <SortableImage
-                key={item.id}
-                id={item.id}
-                url={item.url}
-                setImageView={setImageView}
-              />
-            ))}
-          </div>
+          {productImages.length > 0 && (
+            <div className="grid grid-cols-6 gap-[10px] p-4">
+              {items.map((item) => (
+                <SortableImage
+                  key={item.id}
+                  id={item.id}
+                  url={item.url}
+                  setImageView={setImageView}
+                />
+              ))}
+            </div>
+          )}
         </SortableContext>
       </DndContext>
     </>

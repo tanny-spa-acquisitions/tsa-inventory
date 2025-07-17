@@ -43,9 +43,11 @@ type ProductFormData = z.infer<typeof ProductSchema>;
 
 const AddProduct = () => {
   const { currentUser } = useContext(AuthContext);
-  const { setUploadPopup, editingLock, productImages, setProductImages } = useVideo();
+  const { setUploadPopup, editingLock, productImages, setProductImages } =
+    useVideo();
   const { updateProduct } = useContextQueries();
-  if (!currentUser) return null;
+  const modal1 = useModal1Store((state: any) => state.modal1);
+  const setModal1 = useModal1Store((state: any) => state.setModal1);
 
   const {
     register,
@@ -53,6 +55,7 @@ const AddProduct = () => {
     setValue,
     watch,
     formState: { errors },
+    reset,
   } = useForm<ProductFormData>({
     resolver: zodResolver(ProductSchema),
     defaultValues: {
@@ -74,16 +77,27 @@ const AddProduct = () => {
 
   const dateSold = watch("date_sold");
 
+  const resetForm = async () => {
+    await setModal1({
+      ...modal1,
+      open: false,
+    });
+    reset();
+    setProductImages([]);
+  };
+
   const onSubmit = async (data: ProductFormData) => {
     const normalizedData: Product = {
       ...data,
       date_sold: data.date_sold ?? new Date(),
       note: data.note ?? "",
-      images: productImages
+      images: productImages,
     };
     await updateProduct(normalizedData);
-    setUploadPopup(false)
+    resetForm();
   };
+
+  if (!currentUser) return null;
 
   return (
     <div className="max-w-4xl mx-auto px-10 py-[60px] rounded-2xl overflow-scroll">
@@ -300,15 +314,30 @@ const AddProduct = () => {
             rows={2}
           />
         </div>
-        <button
-          type="submit"
-          className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold"
-          style={{
-            backgroundColor: appTheme[currentUser.theme].app_color_1,
-          }}
-        >
-          <div className="flex items-center justify-center">Submit</div>
-        </button>
+
+        <div className="flex flex-row gap-[16px]">
+          <button
+            type="submit"
+            className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold"
+            style={{
+              backgroundColor: appTheme[currentUser.theme].app_color_1,
+            }}
+          >
+            <div className="flex items-center justify-center">Submit</div>
+          </button>
+
+          <div
+            onClick={() => {
+              resetForm();
+            }}
+            className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold flex items-center justify-center"
+            style={{
+              backgroundColor: currentUser.theme === "dark" ? "#999" : "#bbb",
+            }}
+          >
+            Cancel
+          </div>
+        </div>
       </form>
     </div>
   );
@@ -322,7 +351,7 @@ const ProductsPage = () => {
   const setModal1 = useModal1Store((state: any) => state.setModal1);
 
   const handleAddProduct = () => {
-    // setProductImages([]);
+    setProductImages([]);
     setModal1({
       ...modal1,
       open: !modal1.open,
@@ -345,7 +374,7 @@ const ProductsPage = () => {
         style={{
           backgroundColor: appTheme[currentUser.theme].app_color_1,
         }}
-        className="cursor-pointer dim hover:brightness-75 items-center justify-center flex z-[900] rounded-full fixed bottom-[50px] right-[50px] w-[50px] h-[50px]"
+        className="cursor-pointer dim hover:brightness-75 items-center justify-center flex z-[900] rounded-full fixed bottom-[45px] right-[45px] w-[50px] h-[50px]"
       >
         <FaPlus className="w-[23px] h-[23px]" color="white" />
       </div>
