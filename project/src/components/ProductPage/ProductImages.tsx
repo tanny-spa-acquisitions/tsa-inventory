@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
-import { useVideo } from "@/contexts/videoContext";
+import { useAppContext } from "@/contexts/appContext";
 import { appTheme } from "@/util/appTheme";
 import { useContext, useRef, useState } from "react";
 import { AuthContext } from "@/contexts/authContext";
@@ -31,7 +31,7 @@ function SortableImage({
   setImageView: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const { currentUser } = useContext(AuthContext);
-  const { productImages, setProductImages } = useVideo();
+  const { productImages, setProductImages } = useAppContext();
 
   const {
     attributes,
@@ -113,7 +113,7 @@ function SortableImage({
 
 export default function DraggableImageGrid() {
   const { currentUser } = useContext(AuthContext);
-  const { productImages, setProductImages } = useVideo();
+  const { productImages, setProductImages } = useAppContext();
   const sensors = useSensors(useSensor(PointerSensor));
   const [imageView, setImageView] = useState<string>("");
 
@@ -139,7 +139,7 @@ export default function DraggableImageGrid() {
     <>
       {imageView !== "" && (
         <div
-          className="fixed z-[900] top-0 left-0 w-[100vw] h-[100vh] flex items-center justify-center"
+          className="fixed z-[990] top-0 left-0 w-[100vw] h-[100vh] flex items-center justify-center"
           style={{
             backgroundColor: appTheme[currentUser.theme].background_1,
           }}

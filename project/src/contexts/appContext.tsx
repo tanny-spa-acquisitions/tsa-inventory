@@ -29,9 +29,9 @@ export type FileImage = {
   file: File;
 };
 
-const VideoContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const VideoProvider: React.FC<{ children: React.ReactNode }> = ({
+export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [editingLock, setEditingLock] = useState<boolean>(false);
@@ -142,7 +142,7 @@ export const VideoProvider: React.FC<{ children: React.ReactNode }> = ({
   ]);
 
   return (
-    <VideoContext.Provider
+    <AppContext.Provider
       value={{
         editingLock,
         setEditingLock,
@@ -157,14 +157,14 @@ export const VideoProvider: React.FC<{ children: React.ReactNode }> = ({
       }}
     >
       {children}
-    </VideoContext.Provider>
+    </AppContext.Provider>
   );
 };
 
-export const useVideo = (): AppContextType => {
-  const context = useContext(VideoContext);
+export const useAppContext = (): AppContextType => {
+  const context = useContext(AppContext);
   if (!context) {
-    throw new Error("useVideo must be used within a VideoProvider");
+    throw new Error("useAppContext must be used within a AppContextProvider");
   }
   return context;
 };

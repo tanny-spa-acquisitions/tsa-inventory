@@ -13,12 +13,12 @@ import Settings from "../Settings/Settings";
 import { removeWhiteSpace } from "../../util/functions/Data";
 import Link from "next/link";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
-import { useVideo } from "@/contexts/videoContext";
+import { useAppContext } from "@/contexts/appContext";
 import "./Navbar.css";
 
 const Navbar = () => {
   const { currentUser } = useContext(AuthContext);
-  const { editingLock } = useVideo();
+  const { editingLock } = useAppContext();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
   const leftBarOpen = useLeftBarOpenStore((state: any) => state.leftBarOpen);

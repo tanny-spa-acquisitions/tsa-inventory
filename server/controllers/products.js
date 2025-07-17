@@ -90,3 +90,33 @@ export const updateProduct = (req, res) => {
     });
   });
 };
+
+export const deleteProduct = (req, res) => {
+  const token = req.cookies.accessToken;
+  if (!token) return res.status(401).json("Access token missing");
+
+  const { serial_number } = req.body;
+
+  if (!serial_number) {
+    return res.status(400).json("Missing serial number");
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, userInfo) => {
+    if (err) return res.status(403).json("Token is invalid!");
+
+    const q = `DELETE FROM tubs WHERE serial_number = ?`;
+
+    db.query(q, [serial_number], (err, result) => {
+      if (err) {
+        console.error("DB error:", err);
+        return res.status(500).json("Database error");
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json("Product not found");
+      }
+
+      return res.status(200).json({ success: true });
+    });
+  });
+};

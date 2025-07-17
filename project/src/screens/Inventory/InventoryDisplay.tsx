@@ -9,11 +9,11 @@ import { IoSync } from "react-icons/io5";
 import { appTheme } from "../../util/appTheme";
 import appDetails from "../../util/appDetails.json";
 import { AuthContext } from "@/contexts/authContext";
-import { useVideo } from "@/contexts/videoContext";
+import { useAppContext } from "@/contexts/appContext";
 
 const InventoryDisplay = () => {
   const { currentUser } = useContext(AuthContext);
-  const { inventory, setInventory } = useVideo()
+  const { inventory, setInventory } = useAppContext()
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<any[]>([]);
 

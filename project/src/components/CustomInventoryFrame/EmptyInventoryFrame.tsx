@@ -1,8 +1,6 @@
 import { AuthContext } from "@/contexts/authContext";
-import { useVideo } from "@/contexts/videoContext";
 import { appTheme } from "@/util/appTheme";
 import { FRONTEND_URL } from "@/util/config";
-import { iso8601ToSeconds } from "@/util/functions/Data";
 import Link from "next/link";
 import { useContext } from "react";
 import { FaPlus } from "react-icons/fa6";
@@ -34,7 +32,7 @@ const EmptyInventoryFrame = () => {
             }}
           >
             <FaPlus className="w-[29px] h-[29px]" />
-            <p className="">Add new video</p>
+            <p className="">Add new product</p>
           </div>
         </div>
         <div className="w-[100%] relative flex flex-col pt-[5px] mb-[3px] px-[13px] gap-[6px]">

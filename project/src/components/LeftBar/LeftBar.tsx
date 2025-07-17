@@ -10,7 +10,6 @@ import { appTheme } from "../../util/appTheme";
 import appDetails from "../../util/appDetails.json";
 import { AuthContext } from "@/contexts/authContext";
 import Link from "next/link";
-import { useVideo } from "@/contexts/videoContext";
 import { FRONTEND_URL } from "@/util/config";
 import { LuCircleFadingPlus } from "react-icons/lu";
 import { MdLibraryBooks } from "react-icons/md";

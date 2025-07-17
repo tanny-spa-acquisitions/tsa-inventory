@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-query";
 import { makeRequest } from "@/util/axios";
 import { AuthContext } from "./authContext";
-import { formatToEST } from "@/util/functions/Data";
 
 export type Product = {
   serial_number: string;
@@ -35,6 +34,7 @@ export type QueryContextType = {
   isLoadingProductsData: boolean;
   refetchProductsData: () => Promise<QueryObserverResult<Product[], Error>>;
   updateProduct: (newProduct: Product) => void;
+  deleteProduct: (serial_number: string) => void;
 };
 
 const QueryContext = createContext<QueryContextType | undefined>(undefined);
@@ -97,8 +97,44 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     },
   });
 
+  const deleteProductMutation = useMutation({
+    mutationFn: async (serial_number: string) => {
+      await makeRequest.delete("/api/products/delete", {
+        data: { serial_number },
+      });
+    },
+    onMutate: async (serial_number: string) => {
+      const queryKey = ["products"];
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousData = queryClient.getQueryData<any[]>(queryKey);
+      if (!previousData) return { previousData, queryKey };
+
+      const newData = previousData.filter(
+        (product) => product.serial_number !== serial_number
+      );
+
+      queryClient.setQueryData(queryKey, newData);
+      return { previousData, queryKey };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData && context?.queryKey) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
+      }
+    },
+    onSettled: (_data, _error, _variables, context) => {
+      if (context?.queryKey) {
+        queryClient.invalidateQueries({ queryKey: context.queryKey });
+      }
+    },
+  });
+
   const updateProduct = async (product: Product) => {
     await updateProductsMutation.mutateAsync(product);
+  };
+
+  const deleteProduct = async (serial_number: string) => {
+    await deleteProductMutation.mutateAsync(serial_number);
   };
 
   return (
@@ -108,6 +144,7 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
         isLoadingProductsData,
         refetchProductsData,
         updateProduct,
+        deleteProduct,
       }}
     >
       {children}

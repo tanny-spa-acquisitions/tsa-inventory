@@ -1,5 +1,5 @@
 import { AuthContext } from "@/contexts/authContext";
-import { useVideo } from "@/contexts/videoContext";
+import { useAppContext } from "@/contexts/appContext";
 import { appTheme } from "@/util/appTheme";
 import React, { useContext, useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
@@ -11,7 +11,7 @@ interface UploadProps {
 const UploadModal = () => {
   const { currentUser } = useContext(AuthContext);
   const { uploadPopup, setUploadPopup, handleFiles, uploadPopupRef } =
-    useVideo();
+    useAppContext();
   if (!currentUser) return;
 
   return (

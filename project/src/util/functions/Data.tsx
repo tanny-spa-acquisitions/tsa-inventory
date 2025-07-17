@@ -14,13 +14,6 @@ export const formatDate = (dateString: string) => {
   return date.toLocaleString("en-US", options);
 };
 
-export const formatToEST = (isoString: string) => {
-  return new Date(isoString).toLocaleString("en-US", {
-    timeZone: "America/New_York",
-    hour12: false,
-  });
-};
-
 export const capitalizeFirstLetter = (word: string) => {
   return word.charAt(0).toUpperCase() + word.slice(1);
 };

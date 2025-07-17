@@ -13,7 +13,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { AuthContext, AuthContextProvider } from "@/contexts/authContext";
-import { useVideo, VideoProvider } from "@/contexts/videoContext";
+import { useAppContext, AppContextProvider } from "@/contexts/appContext";
 import Navbar from "@/components/Navbar/Navbar";
 import LeftBar from "@/components/LeftBar/LeftBar";
 import { appTheme } from "@/util/appTheme";
@@ -40,10 +40,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
         <QueryProvider>
-          <VideoProvider>
+          <AppContextProvider>
             <CustomToast />
             <AppRoot>{children}</AppRoot>
-          </VideoProvider>
+          </AppContextProvider>
         </QueryProvider>
       </AuthContextProvider>
     </QueryClientProvider>
@@ -92,7 +92,7 @@ const UnprotectedLayout = () => {
 };
 
 const ProtectedLayout = ({ children }: { children: ReactNode }) => {
-  const { editingLock } = useVideo();
+  const { editingLock } = useAppContext();
   return (
     <>
       {editingLock && (
