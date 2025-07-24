@@ -22,6 +22,8 @@ type AppContextType = {
   uploadPopupRef: React.RefObject<HTMLDivElement | null>;
   productImages: string[];
   setProductImages: React.Dispatch<React.SetStateAction<string[]>>;
+  addProductPage: boolean;
+  setAddProductPage: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type FileImage = {
@@ -141,6 +143,8 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     "https://res.cloudinary.com/dsw56yw2e/image/upload/v1752695894/tsa/soluzd06ni8uvbqyxs4t.webp",
   ]);
 
+  const [addProductPage, setAddProductPage] = useState<boolean>(false);
+
   return (
     <AppContext.Provider
       value={{
@@ -154,6 +158,8 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         uploadPopupRef,
         productImages,
         setProductImages,
+        addProductPage,
+        setAddProductPage,
       }}
     >
       {children}

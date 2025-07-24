@@ -14,6 +14,8 @@ import { Product, useContextQueries } from "@/contexts/queryContext";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import ProductImages from "@/components/ProductPage/ProductImages";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FaChevronLeft } from "react-icons/fa6";
 
 const ProductSchema = z.object({
   name: z.string().min(1, "Required"),
@@ -59,11 +61,17 @@ const ProductPage = ({
   serialNumber?: string;
 }) => {
   const { currentUser } = useContext(AuthContext);
-  const { setUploadPopup, editingLock, productImages, setProductImages } =
-    useAppContext();
+  const {
+    setUploadPopup,
+    editingLock,
+    productImages,
+    setProductImages,
+    setAddProductPage,
+  } = useAppContext();
   const { updateProduct, productsData } = useContextQueries();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
+  const router = useRouter();
 
   const {
     register,
@@ -145,6 +153,7 @@ const ProductPage = ({
     };
     await updateProduct(normalizedData);
     resetForm();
+    router.push("/products");
   };
 
   if (!currentUser) return null;
@@ -162,53 +171,57 @@ const ProductPage = ({
     }
   }
 
+  const handleBackButton = () => {
+    if (newProduct) {
+      setAddProductPage(false);
+    } else {
+      router.push("/products");
+    }
+  };
+
   return (
     <div
       className={`max-w-4xl mx-auto px-10 ${
         newProduct ? "pt-[60px]" : "pt-[22px]"
       } pb-[60px] rounded-2xl overflow-scroll`}
     >
-      <div className="absolute flex items-center justify-center right-[63px] top-[7px] w-[40px] h-[40px]">
-        {editingLock && (
+      <div className="flex flex-row gap-[13px] mb-[10px]">
+        <div
+          onClick={handleBackButton}
+          style={{
+            backgroundColor: appTheme[currentUser.theme].background_2,
+          }}
+          className="w-[40px] h-[40px] rounded-[20px] flex items-center justify-center pr-[2px] pb-[1px] dim hover:brightness-75 cursor-pointer"
+        >
+          <FaChevronLeft size={21} color={appTheme[currentUser.theme].text_1} />
+        </div>
+
+        {newProduct && (
+          <div className="">
+            <h1 className="text-3xl font-[500] mb-[24px]">Add Product</h1>
+          </div>
+        )}
+
+        {!newProduct && (
           <div
-            style={{
-              border:
-                currentUser.theme === "light"
-                  ? "3px solid rgba(0, 0, 0, 0.1)"
-                  : "3px solid #333",
-              borderTop:
-                currentUser.theme === "light"
-                  ? "3px solid #98d5fd"
-                  : "3px solid #dddddd",
-            }}
-            className="w-[30px] h-[30px] simple-spinner"
-          ></div>
+            className="ml-[2px] flex flex-row gap-[10px] text-[25px] font-[400] mb-[20px] opacity-[0.5]"
+            style={{ color: currentUser.theme === "dark" ? "#bbb" : "black" }}
+          >
+            <Link
+              href="/products"
+              className="cursor-pointer dim hover:brightness-75"
+            >
+              Products
+            </Link>
+
+            <h1>/</h1>
+
+            <div className="cursor-pointer dim hover:brightness-75 text-[23px] mt-[1px]">
+              {serialNumber}
+            </div>
+          </div>
         )}
       </div>
-
-      {!newProduct && (
-        <div
-          className="flex flex-row gap-[10px] text-[20px] font-[400] mb-[20px] opacity-[0.5]"
-          style={{ color: currentUser.theme === "dark" ? "#bbb" : "black" }}
-        >
-          <Link
-            href="/products"
-            className="cursor-pointer dim hover:brightness-75"
-          >
-            Products
-          </Link>
-
-          <h1>/</h1>
-
-          <div className="cursor-pointer dim hover:brightness-75 text-[19px] mt-[1px]">
-            {serialNumber}
-          </div>
-        </div>
-      )}
-
-      {newProduct && (
-        <h1 className="text-3xl font-[500] mb-[24px]">Add Product</h1>
-      )}
 
       <button
         onClick={() => {
@@ -376,22 +389,45 @@ const ProductPage = ({
               {errors.width?.message}
             </p>
           </div>
-          <div className="">
-            <label className="block font-[400]">Date Sold</label>
-            <div
-              className="rounded-[8px] mt-[6px] w-fit"
-              style={{
-                border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
-              }}
-            >
-              <DatePicker
-                selected={dateSold}
-                onChange={(date: Date | null) =>
-                  setValue("date_sold", date ?? undefined)
-                }
-                className="input w-[100%] h-[100%] px-[8px] py-[7px]"
-                placeholderText="Select Date"
-              />
+          <div className="flex flex-row">
+            {!newProduct && (
+              <div className="mr-[25px] pointer-events-none">
+                <label className="block font-[400]">Date Entered</label>
+                <div
+                  className="rounded-[8px] mt-[6px] w-fit"
+                  style={{
+                    border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
+                  }}
+                >
+                  <DatePicker
+                    selected={dateSold}
+                    onChange={(date: Date | null) =>
+                      setValue("date_sold", date ?? undefined)
+                    }
+                    className="input w-[100%] h-[100%] px-[8px] py-[7px] opacity-[0.5]"
+                    placeholderText="Select Date"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="">
+              <label className="block font-[400]">Date Sold</label>
+              <div
+                className="rounded-[8px] mt-[6px] w-fit"
+                style={{
+                  border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
+                }}
+              >
+                <DatePicker
+                  selected={dateSold}
+                  onChange={(date: Date | null) =>
+                    setValue("date_sold", date ?? undefined)
+                  }
+                  className="input w-[100%] h-[100%] px-[8px] py-[7px]"
+                  placeholderText="Select Date"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -421,6 +457,7 @@ const ProductPage = ({
           {newProduct && (
             <div
               onClick={() => {
+                setAddProductPage(false);
                 resetForm();
               }}
               className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold flex items-center justify-center"

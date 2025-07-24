@@ -29,7 +29,7 @@ const isProduction = true;
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const server = isProduction
+const server = !isProduction
   ? http.createServer(app)
   : https.createServer(
       {

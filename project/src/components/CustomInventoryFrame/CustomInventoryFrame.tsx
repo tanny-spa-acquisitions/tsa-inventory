@@ -39,11 +39,19 @@ const CustomInventoryFrame = ({
             src={
               item.images.length > 0
                 ? item.images[0]
-                : "https://images.unsplash.com/photo-1751786210867-a886b5996bf2?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyNXx8fGVufDB8fHx8fA%3D%3D"
+                : "https://images.unsplash.com/photo-1632341503970-dbec32e7ec76?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             }
           />
-          <div className="absolute bottom-[9px] right-[10px] bg-white py-[6px] px-[10px] rounded-[6px] flex flex-row gap-[6px] items-center justify-center">
-            <p className="text-[11px] leading-[11px] font-[500] mt-[1px] text-black">
+          <div
+            style={{
+              backgroundColor: appTheme[currentUser.theme].background_2,
+            }}
+            className="absolute bottom-[9px] right-[10px] py-[6px] px-[10px] rounded-[6px] flex flex-row gap-[6px] items-center justify-center"
+          >
+            <p
+              style={{ color: appTheme[currentUser.theme].text_1 }}
+              className="text-[11px] leading-[11px] font-[400] mt-[1px]"
+            >
               {TubPrice && TubPrice.trim().length !== 0 ? TubPrice : "No Price"}
             </p>
           </div>
@@ -61,12 +69,16 @@ const CustomInventoryFrame = ({
       </div>
 
       <div className="group-hover:brightness-75 hover:brightness-100 dim absolute bottom-[7px] left-0 mx-[9px] py-[2px] pr-[6px] pl-[4px]  w-fit flex flex-row gap-[8px] items-center">
-        <div className="w-[25px] h-[25px] min-w-[25px] overflow-hidden rounded-full">
+        <div
+          className="w-[25px] h-[25px] min-w-[25px] overflow-hidden rounded-full"
+          style={{
+            backgroundColor: appTheme[currentUser.theme].background_2_2,
+            border: `0.5px solid ${appTheme[currentUser.theme].background_4}`,
+          }}
+        >
           <img
-            className="w-[100%] h-[100%] object-cover"
-            src={
-              "https://images.unsplash.com/photo-1751786210867-a886b5996bf2?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwyNXx8fGVufDB8fHx8fA%3D%3D"
-            }
+            className="w-[100%] h-[100%] p-[5px] object-contain"
+            src={"/assets/logo-black.png"}
           />
         </div>
         <div className="overflow-hidden flex flex-col w-[100%] gap-[3px]">

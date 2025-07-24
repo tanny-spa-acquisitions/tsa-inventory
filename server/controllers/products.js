@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { db } from "../connection/connect.js";
 import { google } from "googleapis";
-import fs from "fs";
+import axios from "axios";
 import dotenv from "dotenv";
 import { formatDateToMySQL, formatSQLDate } from "../functions/data.js";
 dotenv.config();
@@ -297,3 +297,87 @@ export const syncToGoogleSheets = (req, res) => {
     });
   });
 };
+
+export const syncToWix = async (req, res) => {
+  const token = req.cookies.accessToken;
+  if (!token) return res.status(401).json("Unauthorized");
+  jwt.verify(token, process.env.JWT_SECRET, async (err) => {
+    if (err) return res.status(403).json("Token is invalid!");
+    const q = "SELECT * FROM tubs";
+    db.query(q, async (err, data) => {
+      if (err) return res.status(500).json(err);
+      
+      const corrected_data = data.map((item) => ({
+        serialNumber: item.serial_number,
+        sold: !!item.date_sold,
+        name: item.name,
+        description_fld: item.description || "",
+        make: item.make || "",
+        model: item.model || "",
+        price: parseFloat(item.price) || 0,
+        length: parseFloat(item.length) || 0,
+        width: parseFloat(item.width) || 0,
+        images: item.images?.join(" ") || "",
+      }));
+      
+      try {
+        await axios.post(
+          "https://tannyspaacquisitions.com/_functions/addHotTub",
+          corrected_data,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.WIX_GENERATED_SECRET}`,
+              "Content-Type": "application/json",
+            },
+            timeout: 10000,
+            validateStatus: (status) => status < 500,
+          }
+        );
+        return res.status(200).json({ success: true });
+      } catch (err) {
+        console.error("Failed to sync with Wix:", err.response?.data || err.message);
+        return res.status(500).json("Wix sync failed.");
+      }
+    });
+  });
+};
+
+
+
+
+
+
+
+
+
+
+// export const syncToWix = async () => {
+//   const hotTubData = {
+//     serialNumber: "4321",
+//     sold: false,
+//     name: "Another Tub 2",
+//     description_fld: "Soothing luxury 2",
+//     make: "DreamTubs 2",
+//     model: "XT500",
+//     price: 12999,
+//     length: 80,
+//     width: 85,
+//     images: "https://example.com/tub.jpg",
+//   };
+
+//   try {
+//     const res = await axios.post(
+//       "https://tannyspaacquisitions.com/_functions/addHotTub",
+//       hotTubData,
+//       {
+//         headers: {
+//           Authorization:
+//             "Bearer 06f86df10d2b9dee119ec5f3d879c8431aac47dee6b8bc1bd8eed7900e7165e4",
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//   } catch (err) {
+//     console.error("Failed to insert:", err.response?.data || err.message);
+//   }
+// };
