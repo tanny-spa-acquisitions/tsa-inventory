@@ -20,7 +20,7 @@ const CustomInventoryFrame = ({
   const TubPrice = "$" + item.price;
   const TubID = item.serial_number;
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <Link

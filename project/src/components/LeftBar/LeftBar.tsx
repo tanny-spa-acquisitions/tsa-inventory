@@ -121,7 +121,7 @@ const LeftBar = () => {
     appDetails.left_bar_full || windowWidth < 1024 ? 0 : appDetails.nav_height;
 
   const handleSignOut = () => {
-    if (!currentUser) return;
+    if (!currentUser) return null;
     setModal2({
       ...modal2,
       open: !modal2.open,
@@ -146,7 +146,7 @@ const LeftBar = () => {
     });
   };
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <>

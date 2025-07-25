@@ -5,7 +5,7 @@ import { Skeleton } from "../ui/skeleton";
 
 const CustomInventoryFrameSkeleton = () => {
   const { currentUser } = useContext(AuthContext);
-  if (!currentUser) return;
+  if (!currentUser) return null;
   return (
     <Skeleton
       className="opacity-75 rounded-[7px] overflow-hidden relative w-[100%] h-[100%] flex flex-col"

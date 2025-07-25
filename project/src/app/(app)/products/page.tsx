@@ -34,7 +34,7 @@ const ProductsPage = () => {
     await deleteProduct(item.serial_number);
   };
 
-  if (!currentUser) return <></>;
+  if (!currentUser) return null;
 
   return (
     <>

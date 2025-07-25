@@ -21,7 +21,7 @@ const Settings = ({ initialPage }: SettingsProps) => {
     "Settings",
   ];
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <div className="w-full h-full flex flex-row">

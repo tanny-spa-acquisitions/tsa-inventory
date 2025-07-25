@@ -16,15 +16,28 @@ import ProductImages from "@/components/ProductPage/ProductImages";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaChevronLeft } from "react-icons/fa6";
+import { IoClose } from "react-icons/io5";
 
 const ProductSchema = z.object({
   name: z.string().min(1, "Required"),
   description: z.string().min(1, "Required"),
-  serial_number: z.string().min(1, "Required"),
+  serial_number: z
+    .string()
+    .min(14, "14 Characters Required")
+    .transform((val) => val.toUpperCase())
+    .refine((val) => /^[A-Z0-9]+$/.test(val), {
+      message: "Only uppercase letters and numbers allowed",
+    }),
   make: z.string().min(1, "Required"),
   model: z.string().min(1, "Required"),
-  price: z.number().min(0, "Must be a positive number"),
+  price: z
+    .number()
+    .min(0, "Must be a positive number")
+    .refine((val) => /^\d+(\.\d{1,2})?$/.test(String(val)), {
+      message: "Max 2 decimal places",
+    }),
   date_sold: z.date().optional(),
+  date_entered: z.date().optional(),
   repair_status: z.enum(["In Progress", "Complete"]),
   sale_status: z.enum([
     "Not Yet Posted",
@@ -32,19 +45,16 @@ const ProductSchema = z.object({
     "Sold Awaiting Delivery",
     "Delivered",
   ]),
-  // length: z.number().min(0, "Must be positive"),
-  // width: z.number().min(0, "Must be positive"),
   length: z
     .number()
-    .min(0, "Must be positive")
-    .refine((val) => /^\d+(\.\d{1,2})?$/.test(val.toString()), {
+    .min(0, "Must be a positive number")
+    .refine((val) => /^\d+(\.\d{1,2})?$/.test(String(val)), {
       message: "Max 2 decimal places",
     }),
-
   width: z
     .number()
-    .min(0, "Must be positive")
-    .refine((val) => /^\d+(\.\d{1,2})?$/.test(val.toString()), {
+    .min(0, "Must be a positive number")
+    .refine((val) => /^\d+(\.\d{1,2})?$/.test(String(val)), {
       message: "Max 2 decimal places",
     }),
   note: z.string().optional(),
@@ -78,7 +88,7 @@ const ProductPage = ({
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, isDirty },
     reset,
   } = useForm<ProductFormData>({
     resolver: zodResolver(ProductSchema),
@@ -90,6 +100,7 @@ const ProductPage = ({
       model: "",
       price: 0,
       date_sold: undefined,
+      date_entered: undefined,
       repair_status: "In Progress",
       sale_status: "Not Yet Posted",
       length: 0,
@@ -100,6 +111,7 @@ const ProductPage = ({
   });
 
   const dateSold = watch("date_sold");
+  const dateEntered = watch("date_entered");
 
   useEffect(() => {
     if (!newProduct && serialNumber && productsData?.length) {
@@ -112,28 +124,25 @@ const ProductPage = ({
         return;
       }
 
-      Object.entries(matchedProduct).forEach(([key, value]) => {
-        if (key === "date_sold" && value) {
-          const parsedDate =
-            typeof value === "string" || typeof value === "number"
-              ? new Date(value)
-              : value instanceof Date
-              ? value
-              : undefined;
+      const formDefaults: Partial<ProductFormData> = {
+        ...matchedProduct,
+        date_sold: matchedProduct.date_sold
+          ? new Date(matchedProduct.date_sold)
+          : undefined,
+        date_entered: matchedProduct.date_entered
+          ? new Date(matchedProduct.date_entered)
+          : undefined,
+        price: matchedProduct.price ? Number(matchedProduct.price) : 0,
+        length: matchedProduct.length ? Number(matchedProduct.length) : 0,
+        width: matchedProduct.width ? Number(matchedProduct.width) : 0,
+      };
 
-          if (parsedDate instanceof Date && !isNaN(parsedDate.getTime())) {
-            setValue(key as keyof ProductFormData, parsedDate);
-          }
-        } else if (key === "price" || key === "length" || key === "width") {
-          setValue(key as keyof ProductFormData, Number(value));
-        } else if (key === "images" && Array.isArray(value)) {
-          setProductImages(value);
-        } else {
-          setValue(key as keyof ProductFormData, value as any);
-        }
-      });
+      reset(formDefaults);
+      setProductImages(
+        Array.isArray(matchedProduct.images) ? matchedProduct.images : []
+      );
     }
-  }, [newProduct, serialNumber, productsData, setValue, setProductImages]);
+  }, [newProduct, serialNumber, productsData, reset, setProductImages]);
 
   const resetForm = async () => {
     await setModal1({
@@ -149,11 +158,11 @@ const ProductPage = ({
       ...data,
       date_sold: data.date_sold ?? new Date(),
       note: data.note ?? "",
-      images: productImages,
+      images: Array.isArray(productImages) ? productImages : [],
     };
     await updateProduct(normalizedData);
     resetForm();
-    router.push("/products");
+    handleBackButton();
   };
 
   if (!currentUser) return null;
@@ -275,6 +284,11 @@ const ProductPage = ({
             <input
               {...register("serial_number")}
               disabled={!newProduct}
+              onInput={(e) => {
+                e.currentTarget.value = e.currentTarget.value
+                  .toUpperCase()
+                  .replace(/[^A-Z0-9]/g, "");
+              }}
               className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
               style={{
                 border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
@@ -287,15 +301,29 @@ const ProductPage = ({
           <div className="col-span-2 sm:col-span-1 w-[100%]">
             <label className="block font-[400]">Price ($)</label>
             <input
-              type="number"
-              step="1"
-              min="0"
+              type="text"
+              inputMode="decimal"
+              pattern="^\d+(\.\d{0,2})?$"
               {...register("price", {
-                valueAsNumber: true,
+                required: "Price is required",
                 validate: (value) =>
-                  /^\d+(\.\d{1,2})?$/.test(value.toString()) ||
+                  /^\d+(\.\d{1,2})?$/.test(String(value)) ||
                   "Max 2 decimal places",
+                setValueAs: (v) => (v === "" ? undefined : parseFloat(v)),
               })}
+              onInput={(e) => {
+                let value = e.currentTarget.value;
+                value = value.replace(/[^0-9.]/g, "");
+                const parts = value.split(".");
+                if (parts.length > 2) {
+                  value = parts[0] + "." + parts[1];
+                }
+                if (parts[1]?.length > 2) {
+                  parts[1] = parts[1].slice(0, 2);
+                  value = parts[0] + "." + parts[1];
+                }
+                e.currentTarget.value = value;
+              }}
               className="input rounded-[7px] w-full mt-[6px] px-[6px] py-[4px]"
               style={{
                 border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
@@ -362,10 +390,30 @@ const ProductPage = ({
           <div className="col-span-2 sm:col-span-1 w-[100%] mt-[10px]">
             <label className="block font-[400]">Length (in)</label>
             <input
-              type="number"
-              step="0.01"
-              {...register("length", { valueAsNumber: true })}
-              className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
+              type="text"
+              inputMode="decimal"
+              pattern="^\d+(\.\d{0,2})?$"
+              {...register("length", {
+                required: "Length is required",
+                validate: (value) =>
+                  /^\d+(\.\d{1,2})?$/.test(String(value)) ||
+                  "Max 2 decimal places",
+                setValueAs: (v) => (v === "" ? undefined : parseFloat(v)),
+              })}
+              onInput={(e) => {
+                let value = e.currentTarget.value;
+                value = value.replace(/[^0-9.]/g, "");
+                const parts = value.split(".");
+                if (parts.length > 2) {
+                  value = parts[0] + "." + parts[1];
+                }
+                if (parts[1]?.length > 2) {
+                  parts[1] = parts[1].slice(0, 2);
+                  value = parts[0] + "." + parts[1];
+                }
+                e.currentTarget.value = value;
+              }}
+              className="input rounded-[7px] w-full mt-[6px] px-[6px] py-[4px]"
               style={{
                 border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
               }}
@@ -377,10 +425,30 @@ const ProductPage = ({
           <div className="col-span-2 sm:col-span-1 w-[100%] sm:mt-[10px]">
             <label className="block font-[400]">Width (in)</label>
             <input
-              type="number"
-              step="0.01"
-              {...register("width", { valueAsNumber: true })}
-              className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
+              type="text"
+              inputMode="decimal"
+              pattern="^\d+(\.\d{0,2})?$"
+              {...register("width", {
+                required: "Width is required",
+                validate: (value) =>
+                  /^\d+(\.\d{1,2})?$/.test(String(value)) ||
+                  "Max 2 decimal places",
+                setValueAs: (v) => (v === "" ? undefined : parseFloat(v)),
+              })}
+              onInput={(e) => {
+                let value = e.currentTarget.value;
+                value = value.replace(/[^0-9.]/g, "");
+                const parts = value.split(".");
+                if (parts.length > 2) {
+                  value = parts[0] + "." + parts[1];
+                }
+                if (parts[1]?.length > 2) {
+                  parts[1] = parts[1].slice(0, 2);
+                  value = parts[0] + "." + parts[1];
+                }
+                e.currentTarget.value = value;
+              }}
+              className="input rounded-[7px] w-full mt-[6px] px-[6px] py-[4px]"
               style={{
                 border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
               }}
@@ -389,7 +457,7 @@ const ProductPage = ({
               {errors.width?.message}
             </p>
           </div>
-          <div className="flex flex-row">
+          {/* <div className="flex flex-row">
             {!newProduct && (
               <div className="mr-[25px] pointer-events-none">
                 <label className="block font-[400]">Date Entered</label>
@@ -400,9 +468,9 @@ const ProductPage = ({
                   }}
                 >
                   <DatePicker
-                    selected={dateSold}
+                    selected={dateEntered}
                     onChange={(date: Date | null) =>
-                      setValue("date_sold", date ?? undefined)
+                      setValue("date_entered", date ?? undefined)
                     }
                     className="input w-[100%] h-[100%] px-[8px] py-[7px] opacity-[0.5]"
                     placeholderText="Select Date"
@@ -413,6 +481,46 @@ const ProductPage = ({
 
             <div className="">
               <label className="block font-[400]">Date Sold</label>
+              <div className="flex flex-row gap-[10px] mt-[6px]">
+                <div
+                  className="rounded-[8px] w-fit"
+                  style={{
+                    border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
+                  }}
+                >
+                  <DatePicker
+                    selected={dateSold}
+                    onChange={(date: Date | null) =>
+                      setValue("date_sold", date ?? undefined)
+                    }
+                    className="input w-[100%] h-[100%] px-[8px] py-[7px]"
+                    placeholderText="Select Date"
+                  />
+                </div>
+
+                {dateSold && (
+                  <div
+                    onClick={() => setValue("date_sold", undefined)}
+                    style={{
+                      backgroundColor: appTheme[currentUser.theme].background_3,
+                    }}
+                    className="flex items-center justify-center min-w-[100px] w-[34.5px] h-[34px] pb-[0.5px] pr-[0.5px] rounded-[6px] cursor-pointer dim hover:brightness-75"
+                  >
+                    <IoClose
+                      color={appTheme[currentUser.theme].background_1}
+                      size={29}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div> */}
+        </div>
+
+        <div className="flex flex-row">
+          {!newProduct && (
+            <div className="mr-[25px] pointer-events-none">
+              <label className="block font-[400]">Date Entered</label>
               <div
                 className="rounded-[8px] mt-[6px] w-fit"
                 style={{
@@ -420,17 +528,60 @@ const ProductPage = ({
                 }}
               >
                 <DatePicker
+                  selected={dateEntered}
+                  onChange={(date: Date | null) =>
+                    setValue("date_entered", date ?? undefined, {
+                      shouldDirty: true,
+                    })
+                  }
+                  className="input w-[100%] h-[100%] px-[8px] py-[7px] opacity-[0.5]"
+                  placeholderText="Select Date"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="">
+            <label className="block font-[400]">Date Sold</label>
+            <div className="flex flex-row gap-[10px] mt-[6px]">
+              <div
+                className="rounded-[8px] w-fit"
+                style={{
+                  border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
+                }}
+              >
+                <DatePicker
                   selected={dateSold}
                   onChange={(date: Date | null) =>
-                    setValue("date_sold", date ?? undefined)
+                    setValue("date_sold", date ?? undefined, {
+                      shouldDirty: true,
+                    })
                   }
                   className="input w-[100%] h-[100%] px-[8px] py-[7px]"
                   placeholderText="Select Date"
                 />
               </div>
+
+              {dateSold && (
+                <div
+                  onClick={() =>
+                    setValue("date_sold", undefined, { shouldDirty: true })
+                  }
+                  style={{
+                    backgroundColor: appTheme[currentUser.theme].background_3,
+                  }}
+                  className="flex items-center justify-center w-[34.5px] h-[34px] pb-[0.5px] pr-[0.5px] rounded-[6px] cursor-pointer dim hover:brightness-75"
+                >
+                  <IoClose
+                    color={appTheme[currentUser.theme].background_1}
+                    size={29}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
+
         <div className="w-[100%] mt-[10px]">
           <label className="block font-[400]">Note</label>
           <textarea
@@ -444,30 +595,31 @@ const ProductPage = ({
         </div>
 
         <div className="flex flex-row gap-[16px]">
-          <button
-            type="submit"
-            className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold"
-            style={{
-              backgroundColor: appTheme[currentUser.theme].app_color_1,
-            }}
-          >
-            <div className="flex items-center justify-center">Submit</div>
-          </button>
-
-          {newProduct && (
-            <div
-              onClick={() => {
-                setAddProductPage(false);
-                resetForm();
-              }}
-              className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold flex items-center justify-center"
+          {isDirty && (
+            <button
+              type="submit"
+              className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold"
               style={{
-                backgroundColor: currentUser.theme === "dark" ? "#999" : "#bbb",
+                backgroundColor: appTheme[currentUser.theme].app_color_1,
               }}
             >
-              Cancel
-            </div>
+              <div className="flex items-center justify-center">Submit</div>
+            </button>
           )}
+
+          <div
+            onClick={() => {
+              handleBackButton();
+              // resetForm();
+              reset();
+            }}
+            className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold flex items-center justify-center"
+            style={{
+              backgroundColor: currentUser.theme === "dark" ? "#999" : "#bbb",
+            }}
+          >
+            Cancel
+          </div>
         </div>
       </form>
     </div>

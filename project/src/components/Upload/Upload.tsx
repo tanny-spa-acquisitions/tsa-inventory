@@ -12,7 +12,7 @@ const UploadModal = () => {
   const { currentUser } = useContext(AuthContext);
   const { uploadPopup, setUploadPopup, handleFiles, uploadPopupRef } =
     useAppContext();
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <>
@@ -71,7 +71,7 @@ const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
     handleFiles(files);
   };
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <div

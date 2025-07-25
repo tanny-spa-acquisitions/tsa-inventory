@@ -30,10 +30,10 @@ export default function CustomToast() {
     };
   }, []);
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
-    <div className="z-[999] fixed bottom-4 right-4 z-50">
+    <div className="z-[999] fixed bottom-4 right-4">
       <AnimatePresence>
         {visible && (
           <motion.div

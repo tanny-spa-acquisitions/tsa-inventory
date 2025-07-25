@@ -45,12 +45,12 @@ const UserSettings = () => {
   });
 
   const handleThemeChange = () => {
-    if (!currentUser) return;
+    if (!currentUser) return null;
     const newTheme = currentUser.theme === "light" ? "dark" : "light";
     toggleThemeMutation.mutate(newTheme);
   };
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <div className="ml-[5px] md:ml-[8px] w-full h-full flex flex-col pt-[50px]">

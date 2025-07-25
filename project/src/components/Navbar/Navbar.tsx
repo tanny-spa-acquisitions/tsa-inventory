@@ -64,7 +64,7 @@ const Navbar = () => {
     });
   };
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <div

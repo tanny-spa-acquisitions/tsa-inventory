@@ -17,7 +17,7 @@ const Modal2Continue: React.FC<Modal2ContinueProps> = ({
   const setModal2 = useModal2Store((state: any) => state.setModal2);
 
   const { currentUser } = useContext(AuthContext);
-  if (!currentUser) return;
+  if (!currentUser) return null;
   return (
     <div className="pt-[10px] w-full h-full flex items-center justify-center flex-col gap-[15px]">
       <div

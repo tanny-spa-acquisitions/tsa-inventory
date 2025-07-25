@@ -120,7 +120,7 @@ const PageLayout = ({ children }: { children: ReactNode }) => {
     setPageLayoutRef(pageLayoutRef as RefObject<HTMLDivElement>);
   }, [setPageLayoutRef, pageLayoutRef]);
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <div

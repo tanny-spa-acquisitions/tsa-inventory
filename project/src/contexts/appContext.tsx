@@ -80,7 +80,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
       if (response.status === 200) {
-        return response.data.urls;
+        const isValidUrl = (url: string) =>
+          typeof url === "string" && url.startsWith("https://");
+        const cleanUrls = response.data.urls.filter(isValidUrl);
+        return cleanUrls;
       } else {
         return [];
       }
@@ -135,13 +138,11 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const handleFiles = async (files: File[]) => {
     const newImages = await handleFileProcessing(files);
+    if (newImages.length === 0) return
     setProductImages([...productImages, ...newImages]);
   };
 
-  const [productImages, setProductImages] = useState<string[]>([
-    "https://res.cloudinary.com/dsw56yw2e/image/upload/v1752695895/tsa/t0ztnj6oleyzrq9imi2j.webp",
-    "https://res.cloudinary.com/dsw56yw2e/image/upload/v1752695894/tsa/soluzd06ni8uvbqyxs4t.webp",
-  ]);
+  const [productImages, setProductImages] = useState<string[]>([]);
 
   const [addProductPage, setAddProductPage] = useState<boolean>(false);
 

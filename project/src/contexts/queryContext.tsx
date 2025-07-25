@@ -16,7 +16,8 @@ export type Product = {
   make: string;
   model: string;
   price: number;
-  date_sold: Date;
+  date_sold?: Date;
+  date_entered?: Date;
   repair_status: "In Progress" | "Complete";
   sale_status:
     | "Not Yet Posted"

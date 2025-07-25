@@ -46,7 +46,7 @@ const PremiumPopup = () => {
   const [timelineSelected, setTimelineSelected] =
     useState<TimelineType>("Annual");
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
   return (
     <div className="pt-[45px] px-[50px]">
       <p className="mb-[12px] font-[500] text-[19px]">Upgrade Your Plan</p>

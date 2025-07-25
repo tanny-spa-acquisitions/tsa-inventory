@@ -7,7 +7,7 @@ import { FaPlus } from "react-icons/fa6";
 
 const EmptyInventoryFrame = () => {
   const { currentUser } = useContext(AuthContext);
-  if (!currentUser) return;
+  if (!currentUser) return null;
   return (
     <div
       className="group cursor-pointer dim hover:brightness-75 rounded-[5px] overflow-hidden relative w-[100%] h-[100%] flex flex-col"

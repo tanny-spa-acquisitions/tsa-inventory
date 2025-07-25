@@ -76,7 +76,7 @@ function SortableImage({
     setProductImages(productImagesCopy);
   };
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <div
@@ -118,7 +118,7 @@ export default function DraggableImageGrid() {
   const [imageView, setImageView] = useState<string>("");
 
   const items = productImages.map((url, index) => ({
-    id: url,
+    id: `${url}-${index}`,
     url,
   }));
 
@@ -133,7 +133,7 @@ export default function DraggableImageGrid() {
     setProductImages(reordered);
   };
 
-  if (!currentUser) return;
+  if (!currentUser) return null;
 
   return (
     <>
