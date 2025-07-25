@@ -18,7 +18,7 @@ const ProductsPage = () => {
   const { currentUser } = useContext(AuthContext);
   const { productsData, deleteProduct, isLoadingProductsData } =
     useContextQueries();
-  const { setProductImages, addProductPage, setAddProductPage } =
+  const { addProductPage, setAddProductPage } =
     useAppContext();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
@@ -26,7 +26,6 @@ const ProductsPage = () => {
   const [editMode, setEditMode] = useState<boolean>(false);
 
   const handleAddProduct = () => {
-    setProductImages([]);
     setAddProductPage(true);
   };
 

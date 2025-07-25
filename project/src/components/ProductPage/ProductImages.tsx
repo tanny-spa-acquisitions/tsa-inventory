@@ -20,18 +20,23 @@ import { useAppContext } from "@/contexts/appContext";
 import { appTheme } from "@/util/appTheme";
 import { useContext, useRef, useState } from "react";
 import { AuthContext } from "@/contexts/authContext";
+import { UseFormSetValue, UseFormGetValues } from "react-hook-form";
+import { ProductFormData } from "./ProductPage";
 
 function SortableImage({
   id,
   url,
   setImageView,
+  images,
+  setValue,
 }: {
   id: string;
   url: string;
   setImageView: React.Dispatch<React.SetStateAction<string>>;
+  images: string[];
+  setValue: UseFormSetValue<ProductFormData>;
 }) {
   const { currentUser } = useContext(AuthContext);
-  const { productImages, setProductImages } = useAppContext();
 
   const {
     attributes,
@@ -71,9 +76,8 @@ function SortableImage({
   };
 
   const handleDeleteImage = (url: string) => {
-    let productImagesCopy = [...productImages];
-    productImagesCopy = productImagesCopy.filter((link) => link !== url);
-    setProductImages(productImagesCopy);
+    const updated = images.filter((link) => link !== url);
+    setValue("images", updated, { shouldDirty: true });
   };
 
   if (!currentUser) return null;
@@ -111,13 +115,20 @@ function SortableImage({
   );
 }
 
-export default function DraggableImageGrid() {
+export default function DraggableImageGrid({
+  images,
+  setValue,
+  getValues,
+}: {
+  images: string[];
+  setValue: UseFormSetValue<ProductFormData>;
+  getValues: UseFormGetValues<ProductFormData>;
+}) {
   const { currentUser } = useContext(AuthContext);
-  const { productImages, setProductImages } = useAppContext();
   const sensors = useSensors(useSensor(PointerSensor));
   const [imageView, setImageView] = useState<string>("");
 
-  const items = productImages.map((url, index) => ({
+  const items = images.map((url, index) => ({
     id: `${url}-${index}`,
     url,
   }));
@@ -129,8 +140,8 @@ export default function DraggableImageGrid() {
     const oldIndex = items.findIndex((item) => item.id === active.id);
     const newIndex = items.findIndex((item) => item.id === over.id);
 
-    const reordered = arrayMove(productImages, oldIndex, newIndex);
-    setProductImages(reordered);
+    const reordered = arrayMove(images, oldIndex, newIndex);
+    setValue("images", reordered, { shouldDirty: true });
   };
 
   if (!currentUser) return null;
@@ -160,7 +171,7 @@ export default function DraggableImageGrid() {
           items={items.map((item) => item.id)}
           strategy={rectSortingStrategy}
         >
-          {productImages.length > 0 && (
+          {images.length > 0 && (
             <div className="grid grid-cols-6 gap-[10px] p-4">
               {items.map((item) => (
                 <SortableImage
@@ -168,6 +179,8 @@ export default function DraggableImageGrid() {
                   id={item.id}
                   url={item.url}
                   setImageView={setImageView}
+                  images={images}
+                  setValue={setValue}
                 />
               ))}
             </div>

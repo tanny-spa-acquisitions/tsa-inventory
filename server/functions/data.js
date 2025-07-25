@@ -19,6 +19,7 @@ export function formatTimeStamp(input) {
 }
 
 export const formatSQLDate = (value) => {
+  if (!value) return ""
   const date = typeof value === "string" ? new Date(value) : value;
   if (isNaN(date.getTime())) return "";
   const month = date.getMonth() + 1;

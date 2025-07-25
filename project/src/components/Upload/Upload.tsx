@@ -3,12 +3,19 @@ import { useAppContext } from "@/contexts/appContext";
 import { appTheme } from "@/util/appTheme";
 import React, { useContext, useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
+import { UseFormGetValues, UseFormSetValue } from "react-hook-form";
+import { ProductFormData } from "../ProductPage/ProductPage";
 
 interface UploadProps {
   handleFiles: (files: File[]) => void;
 }
 
-const UploadModal = () => {
+interface UploadModalProps {
+  setValue: UseFormSetValue<ProductFormData>;
+  getValues: UseFormGetValues<ProductFormData>;
+}
+
+const UploadModal: React.FC<UploadModalProps> = ({ setValue, getValues }) => {
   const { currentUser } = useContext(AuthContext);
   const { uploadPopup, setUploadPopup, handleFiles, uploadPopupRef } =
     useAppContext();
@@ -33,7 +40,9 @@ const UploadModal = () => {
                 border: "1.5px solid black",
               }}
             >
-              <Upload handleFiles={handleFiles} />
+              <Upload
+                handleFiles={(files) => handleFiles(files, setValue, getValues)}
+              />
               <IoCloseOutline
                 onClick={() => {
                   setUploadPopup(false);
@@ -71,7 +80,7 @@ const Upload: React.FC<UploadProps> = ({ handleFiles }) => {
     handleFiles(files);
   };
 
-  if (!currentUser) return null;
+  if (!currentUser) return;
 
   return (
     <div

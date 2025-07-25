@@ -137,17 +137,16 @@ export const syncToGoogleSheets = (req, res) => {
       const sheetName = "Inventory";
 
       try {
-        // Format the data
         const rows = data.map((row, index) => {
           return [
-            index + 1, // index instead of ID
+            index + 1,
             row.serial_number,
             row.name,
             row.description || "",
             row.note || "",
             row.make || "",
             row.model || "",
-            `$${row.price}`,
+            row.price || "",
             row.type || "",
             formatSQLDate(row.date_entered),
             formatSQLDate(row.date_sold),
@@ -171,14 +170,14 @@ export const syncToGoogleSheets = (req, res) => {
           "Note",
           "Make",
           "Model",
-          "Price",
+          "Price ($)",
           "Type",
           "Date Entered",
           "Date Sold",
           "Repair Status",
           "Sale Status",
-          "Length",
-          "Width",
+          "Length (in)",
+          "Width (in)",
           "Images",
         ];
 
@@ -307,7 +306,7 @@ export const syncToWix = async (req, res) => {
     db.query(q, async (err, data) => {
       if (err) return res.status(500).json(err);
       
-      const corrected_data = data.map((item) => ({
+      const corrected_data = data.reverse().map((item) => ({
         serialNumber: item.serial_number,
         sold: !!item.date_sold,
         name: item.name,

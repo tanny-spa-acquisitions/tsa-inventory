@@ -31,7 +31,6 @@ import { QueryProvider } from "@/contexts/queryContext";
 import CustomToast from "@/components/CustomToast";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
 import LandingPage from "@/screens/Landing/LandingPage/LandingPage";
-import UploadModal from "@/components/Upload/Upload";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -102,7 +101,6 @@ const ProtectedLayout = ({ children }: { children: ReactNode }) => {
       <Navbar />
       <LeftBar />
       <PageLayout>{children}</PageLayout>
-      <UploadModal />
     </>
   );
 };

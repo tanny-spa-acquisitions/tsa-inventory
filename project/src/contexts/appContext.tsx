@@ -10,6 +10,8 @@ import { fetchInventory } from "../util/functions/Inventory";
 import { getCurrentTimestamp } from "@/util/functions/Data";
 import axios from "axios";
 import { BACKEND_URL } from "@/util/config";
+import { UseFormGetValues, UseFormSetValue } from "react-hook-form";
+import { ProductFormData } from "@/components/ProductPage/ProductPage";
 
 type AppContextType = {
   editingLock: boolean;
@@ -18,10 +20,12 @@ type AppContextType = {
   setInventory: React.Dispatch<React.SetStateAction<any[]>>;
   uploadPopup: boolean;
   setUploadPopup: React.Dispatch<React.SetStateAction<boolean>>;
-  handleFiles: (files: File[]) => void;
+  handleFiles: (
+    files: File[],
+    setValue: UseFormSetValue<ProductFormData>,
+    getValues: UseFormGetValues<ProductFormData>
+  ) => void;
   uploadPopupRef: React.RefObject<HTMLDivElement | null>;
-  productImages: string[];
-  setProductImages: React.Dispatch<React.SetStateAction<string[]>>;
   addProductPage: boolean;
   setAddProductPage: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -136,13 +140,17 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const handleFiles = async (files: File[]) => {
+  const handleFiles = async (
+    files: File[],
+    setValue: UseFormSetValue<ProductFormData>,
+    getValues: UseFormGetValues<ProductFormData>
+  ) => {
     const newImages = await handleFileProcessing(files);
-    if (newImages.length === 0) return
-    setProductImages([...productImages, ...newImages]);
+    if (newImages.length === 0) return;
+    const currentImages = getValues("images") || [];
+    const updated = [...currentImages, ...newImages];
+    setValue("images", updated, { shouldDirty: true });
   };
-
-  const [productImages, setProductImages] = useState<string[]>([]);
 
   const [addProductPage, setAddProductPage] = useState<boolean>(false);
 
@@ -157,8 +165,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setUploadPopup,
         handleFiles,
         uploadPopupRef,
-        productImages,
-        setProductImages,
         addProductPage,
         setAddProductPage,
       }}
