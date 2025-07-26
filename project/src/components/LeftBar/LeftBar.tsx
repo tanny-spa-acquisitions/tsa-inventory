@@ -17,10 +17,12 @@ import { LuPanelLeftClose } from "react-icons/lu";
 import { BiWindows } from "react-icons/bi";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
 import { usePathname } from "next/navigation";
+import { useAppContext } from "@/contexts/appContext";
 
 const LeftBar = () => {
   const pathname = usePathname();
   const { currentUser, handleLogout } = useContext(AuthContext);
+  const { setEditMode } = useAppContext();
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
   const leftBarRef = useRef<HTMLDivElement>(null);
@@ -191,13 +193,14 @@ const LeftBar = () => {
                   color: appTheme[currentUser.theme].text_1,
                 }}
                 onClick={() => {
+                  setEditMode(false);
                   if (windowWidth < 1024) {
                     closeLeftBar();
                   }
                 }}
               >
                 <BiWindows className="w-[17px] h-[17px]" />
-                <p>Google Sheet</p>
+                <p>Data</p>
               </Link>
               <LuPanelLeftClose
                 style={{ color: appTheme[currentUser.theme].text_4 }}
@@ -225,6 +228,7 @@ const LeftBar = () => {
               }}
               href="/products"
               onClick={() => {
+                setEditMode(false);
                 if (windowWidth < 1024) {
                   closeLeftBar();
                 }

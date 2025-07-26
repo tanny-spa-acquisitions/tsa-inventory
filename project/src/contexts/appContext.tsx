@@ -28,11 +28,19 @@ type AppContextType = {
   uploadPopupRef: React.RefObject<HTMLDivElement | null>;
   addProductPage: boolean;
   setAddProductPage: React.Dispatch<React.SetStateAction<boolean>>;
+  dataFilters: DataFilters;
+  setDataFilters: React.Dispatch<React.SetStateAction<DataFilters>>;
+  editMode: boolean;
+  setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type FileImage = {
   name: string;
   file: File;
+};
+
+export type DataFilters = {
+  listings: "All" | "Active" | "Sold";
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -154,6 +162,11 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [addProductPage, setAddProductPage] = useState<boolean>(false);
 
+  const [dataFilters, setDataFilters] = useState<DataFilters>({
+    listings: "All",
+  });
+  const [editMode, setEditMode] = useState<boolean>(false);
+
   return (
     <AppContext.Provider
       value={{
@@ -167,6 +180,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         uploadPopupRef,
         addProductPage,
         setAddProductPage,
+        dataFilters,
+        setDataFilters,
+        editMode,
+        setEditMode,
       }}
     >
       {children}

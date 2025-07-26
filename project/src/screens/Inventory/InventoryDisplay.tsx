@@ -1,6 +1,5 @@
 "use client";
 import React, { useContext, useEffect, useState } from "react";
-import { IoSync } from "react-icons/io5";
 import { appTheme } from "../../util/appTheme";
 import { AuthContext } from "@/contexts/authContext";
 import { useAppContext } from "@/contexts/appContext";
@@ -8,22 +7,16 @@ import { Product, useContextQueries } from "@/contexts/queryContext";
 import { formatSQLDate, parseDateString } from "@/util/functions/Data";
 import Link from "next/link";
 import Image from "next/image";
-import { makeRequest } from "@/util/axios";
-import { CiExport } from "react-icons/ci";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { GOOGLE_SHEET_URL } from "../../util/config";
-import { BsWindow } from "react-icons/bs";
-import { BsPencilSquare } from "react-icons/bs";
-import { toast } from "react-toastify";
+import ProductsHeader from "@/components/ProductsHeader/ProductsHeader";
 
 const InventoryDisplay = () => {
   const { currentUser } = useContext(AuthContext);
   const { productsData, updateProduct, deleteProduct } = useContextQueries();
-  const { setInventory, setEditingLock } = useAppContext();
+  const { editMode, setEditMode } = useAppContext();
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editedRow, setEditedRow] = useState<any>({});
-  const [editMode, setEditMode] = useState<boolean>(false);
 
   const handleEdit = (index: number) => {
     setEditIndex(index);
@@ -51,7 +44,6 @@ const InventoryDisplay = () => {
 
   const handleSave = async () => {
     if (editIndex === null) return;
-
     try {
       const requiredDateFields = [
         "date_entered",
@@ -73,36 +65,8 @@ const InventoryDisplay = () => {
     }
   };
 
-  const [success, setSuccess] = useState(false);
-
-  const handleSync = async () => {
-    setEditingLock(true);
-    setSuccess(false);
-    try {
-      await makeRequest.post("/api/products/google-sync");
-      setSuccess(true);
-      window.open(GOOGLE_SHEET_URL, "_blank");
-    } catch (e) {
-      alert("Sync failed.");
-    } finally {
-      setEditingLock(false);
-    }
-  };
-
   const handleDeleteProduct = async (item: Product) => {
     await deleteProduct(item.serial_number);
-  };
-
-  const handleWixSync = async () => {
-    setEditingLock(true);
-    try {
-      await makeRequest.post("/api/products/wix-sync");
-      toast.success("Updated Wix Data");
-    } catch (e) {
-      toast.error("Wix Sync Failed");
-    } finally {
-      setEditingLock(false);
-    }
   };
 
   const columnWidths: { [key: string]: string } = {
@@ -138,65 +102,8 @@ const InventoryDisplay = () => {
   const columns = Object.keys(productsData[0]) as (keyof Product)[];
 
   return (
-    <div className="p-6">
-      <div className="flex flex-row relative items-center justify-between h-[40px] mb-[17px]">
-        <h1 className="text-2xl font-bold">Hot Tub Inventory</h1>
-        <div className="absolute right-0 top-0 flex flex-row gap-[16px]">
-          <div
-            style={{
-              backgroundColor: appTheme[currentUser.theme].background_2,
-            }}
-            className="dim hover:brightness-75 rounded-[10px] w-[200px] h-[40px] flex flex-row justify-center items-center gap-[10px] text-[15px] mb-4 cursor-pointer"
-            onClick={handleSync}
-          >
-            <p
-              style={{
-                color: appTheme[currentUser.theme].text_1,
-              }}
-            >
-              Export to Sheets
-            </p>
-
-            <CiExport color={appTheme[currentUser.theme].text_1} size={25} />
-          </div>
-
-          <div
-            style={{
-              backgroundColor: appTheme[currentUser.theme].background_2,
-            }}
-            className="dim hover:brightness-75 rounded-[10px] w-[200px] h-[40px] flex flex-row justify-center items-center gap-[10px] text-[15px] mb-4 cursor-pointer"
-            onClick={handleWixSync}
-          >
-            <p
-              style={{
-                color: appTheme[currentUser.theme].text_1,
-              }}
-            >
-              Sync To Wix
-            </p>
-
-            <BsWindow color={appTheme[currentUser.theme].text_1} size={20} />
-          </div>
-
-          <div
-            style={{
-              backgroundColor: appTheme[currentUser.theme].background_2,
-            }}
-            className="mr-[2px] dim hover:brightness-75 rounded-[10px] w-[40px] h-[40px] flex flex-row justify-center items-center gap-[10px] text-[15px] cursor-pointer"
-            onClick={() => {
-              setEditMode((prev) => !prev);
-            }}
-          >
-            <BsPencilSquare
-              size={21}
-              color={appTheme[currentUser.theme].text_1}
-              style={{ opacity: editMode ? 0.96 : 0.7 }}
-              className="flex items-center justify-center"
-            />
-          </div>
-        </div>
-      </div>
-
+    <div className="">
+      <ProductsHeader title={"TSA Database"}/>
       <div className="flex flex-row">
         {editMode && (
           <div className="mr-[15px] flex flex-col">
@@ -220,7 +127,7 @@ const InventoryDisplay = () => {
                 ? "0.6px solid #AAA"
                 : "1px solid #333",
           }}
-          className="overflow-auto max-w-full rounded-lg shadow"
+          className="overflow-auto max-w-full"
         >
           <table
             style={{
