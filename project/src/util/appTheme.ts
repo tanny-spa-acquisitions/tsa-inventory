@@ -15,6 +15,10 @@ export const appTheme = {
     user_message: "#DDDDDD",
     bot_time_stamp: "#CCCCCC",
 
+    // Components
+    header_1_1: "#E9E9E9",
+    header_1_2: "#CCCCCC",
+
     // Texts
     text_1: "#000000",
     text_2: "#1F1F1F",
@@ -48,13 +52,17 @@ export const appTheme = {
     user_message: "#222222",
     bot_time_stamp: "#393939",
 
+    // Components
+    header_1_1: "#252525",
+    header_1_2: "#333333",
+
     // Texts
     text_1: "#FFFFFF",
     text_2: "#DDDDDD",
     text_3: "#BBBBBB",
     text_4: "#888888",
 
-      // Tables
+    // Tables
     table_bg_1: "#161616",
     table_bg_2: "#252525",
 
@@ -70,9 +78,13 @@ export const appTheme = {
 };
 
 export const appTextSizes = {
-  textHead1: "text-[16px] sm:text-[18px] md:text-[19px] lg:text-[21px] leading-[23px] sm:leading-[25px] md:leading-[26px] lg:leading-[28px]",
-  textHead3: "text-[14px] sm:text-[16px] md:text-[17px] lg:text-[19px] leading-[21px] sm:leading-[23px] md:leading-[24px] lg:leading-[26px]",
-  textHead5: "text-[14px] sm:text-[14px] md:text-[15px] lg:text-[17px] leading-[19px] sm:leading-[21px] md:leading-[22px] lg:leading-[24px]",
-  
-  textSub1: "text-[11px] sm:text-[11px] md:text-[12px] lg:text-[13px] leading-[11px] sm:leading-[11px] md:leading-[12px] lg:leading-[13px]"
-}
+  textHead1:
+    "text-[16px] sm:text-[18px] md:text-[19px] lg:text-[21px] leading-[23px] sm:leading-[25px] md:leading-[26px] lg:leading-[28px]",
+  textHead3:
+    "text-[14px] sm:text-[16px] md:text-[17px] lg:text-[19px] leading-[21px] sm:leading-[23px] md:leading-[24px] lg:leading-[26px]",
+  textHead5:
+    "text-[14px] sm:text-[14px] md:text-[15px] lg:text-[17px] leading-[19px] sm:leading-[21px] md:leading-[22px] lg:leading-[24px]",
+
+  textSub1:
+    "text-[11px] sm:text-[11px] md:text-[12px] lg:text-[13px] leading-[11px] sm:leading-[11px] md:leading-[12px] lg:leading-[13px]",
+};

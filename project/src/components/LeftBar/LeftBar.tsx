@@ -16,13 +16,14 @@ import { MdLibraryBooks } from "react-icons/md";
 import { LuPanelLeftClose } from "react-icons/lu";
 import { BiWindows } from "react-icons/bi";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAppContext } from "@/contexts/appContext";
+import { useContextQueries } from "@/contexts/queryContext";
 
 const LeftBar = () => {
   const pathname = usePathname();
   const { currentUser, handleLogout } = useContext(AuthContext);
-  const { setEditMode } = useAppContext();
+  const { newRows, saveProducts, formRefs } = useAppContext();
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
   const leftBarRef = useRef<HTMLDivElement>(null);
@@ -31,7 +32,7 @@ const LeftBar = () => {
   const setLeftBarOpen = useLeftBarOpenStore(
     (state: any) => state.setLeftBarOpen
   );
-
+  const router = useRouter();
   const [showLeftBar, setShowLeftBar] = useState<boolean>(false);
   const showLeftBarRef = useRef<HTMLDivElement>(null);
 
@@ -148,6 +149,39 @@ const LeftBar = () => {
     });
   };
 
+  const handleProductsClick = () => {
+    let dirtyRows = 0;
+    for (const [serial, form] of formRefs.current.entries()) {
+      if (Object.keys(form.formState.dirtyFields).length !== 0) {
+        dirtyRows += 1;
+      }
+    }
+    if ((newRows.length > 0 || dirtyRows > 0) && pathname === "/") {
+      if (!currentUser) return null;
+      setModal2({
+        ...modal2,
+        open: !modal2.open,
+        showClose: false,
+        offClickClose: true,
+        width: "w-[300px]",
+        maxWidth: "max-w-[400px]",
+        aspectRatio: "aspect-[5/2]",
+        borderRadius: "rounded-[12px] md:rounded-[15px]",
+        content: (
+          <Modal2Continue
+            text={`Save changes to your data?`}
+            onContinue={async () => {
+              await saveProducts();
+              router.push(`/products/`);
+            }}
+          />
+        ),
+      });
+    } else {
+      router.push(`/products`);
+    }
+  };
+
   if (!currentUser) return null;
 
   return (
@@ -217,7 +251,7 @@ const LeftBar = () => {
               className="w-[100%] h-[1px] rounded-[1px] my-[15px]"
             ></div>
 
-            <Link
+            <div
               className="mt-[5px] dim hover:brightness-75 cursor-pointer w-[100%] flex gap-[7px] items-center rounded-[10px] px-[12px] py-[5px]"
               style={{
                 backgroundColor:
@@ -225,16 +259,16 @@ const LeftBar = () => {
                     ? appTheme[currentUser.theme].background_2
                     : "transparent",
               }}
-              href="/products"
               onClick={() => {
                 if (windowWidth < 1024) {
                   closeLeftBar();
                 }
+                handleProductsClick();
               }}
             >
               <MdLibraryBooks className="w-[17px] h-[17px]" />
               <p>Products</p>
-            </Link>
+            </div>
           </div>
 
           <div

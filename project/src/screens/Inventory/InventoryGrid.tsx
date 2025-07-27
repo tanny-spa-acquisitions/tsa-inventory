@@ -7,11 +7,6 @@ import { appTheme } from "@/util/appTheme";
 import React, { useContext, useRef } from "react";
 import { FaCheck } from "react-icons/fa6";
 import InventoryRowForm from "./InventoryRowForm";
-import { ProductFormData } from "@/util/schemas/productSchema";
-import { UseFormReturn } from "react-hook-form";
-import { toast } from "react-toastify";
-import { useModal2Store } from "@/store/useModalStore";
-import Modal2Input from "@/modals/Modal2Input";
 
 export type InventoryDataItem = {
   title: string;
@@ -21,20 +16,16 @@ export type InventoryDataItem = {
 
 const InventoryGrid = () => {
   const { currentUser } = useContext(AuthContext);
-  const { productsData, updateProducts } = useContextQueries();
+  const { productsData } = useContextQueries();
   const {
     filteredProducts,
     selectedProducts,
     setSelectedProducts,
-    setEditingLock,
     newRows,
     setNewRows,
+    saveProducts,
+    formRefs,
   } = useAppContext();
-  const modal2 = useModal2Store((state: any) => state.modal2);
-  const setModal2 = useModal2Store((state: any) => state.setModal2);
-  const formRefs = useRef<Map<string, UseFormReturn<ProductFormData>>>(
-    new Map()
-  );
 
   const inventoryDataLayout: InventoryDataItem[] = [
     {
@@ -132,92 +123,6 @@ const InventoryGrid = () => {
     }
   };
 
-  const saveProducts = async () => {
-    const updatedProducts: Product[] = [];
-
-    for (const [serial, form] of formRefs.current.entries()) {
-      // if (
-      //   newProduct &&
-      //   productsData.filter((item) => item.serial_number === data.serial_number)
-      //     .length > 0
-      // ) {
-      //   toast.error("Serial # is already used on another product");
-      //   return;
-      // }
-
-      const values = form.getValues();
-
-      if (Object.keys(form.formState.dirtyFields).length === 0) continue;
-
-      updatedProducts.push({
-        ...values,
-        date_entered: values.date_entered ?? undefined,
-        date_sold: values.date_sold ?? undefined,
-        note: values.note ?? "",
-        images: Array.isArray(values.images) ? values.images : [],
-      });
-    }
-
-    if (updatedProducts.length === 0 && newRows.length === 0) {
-      toast.info("No changes to save");
-      return;
-    }
-
-    try {
-      setEditingLock(true);
-      await updateProducts([...updatedProducts, ...newRows]);
-      setNewRows([]);
-      formRefs.current.clear();
-      toast.success("Products updated");
-    } catch (err) {
-      toast.error("Failed to update products");
-    } finally {
-      setEditingLock(false);
-    }
-  };
-
-  const handleAddRow = () => {
-    if (!currentUser) return null;
-    setModal2({
-      ...modal2,
-      open: !modal2.open,
-      showClose: false,
-      offClickClose: true,
-      width: "w-[300px]",
-      maxWidth: "max-w-[400px]",
-      aspectRatio: "aspect-[5/2]",
-      borderRadius: "rounded-[12px] md:rounded-[15px]",
-      content: (
-        <Modal2Input
-          text={`Enter a new product serial number:`}
-          onContinue={(newSerial: string, newMake: string, newModel: string) =>
-            addRow(newSerial, newMake, newModel)
-          }
-        />
-      ),
-    });
-  };
-
-  const addRow = (newSerial: string, newMake: string, newModel: string) => {
-    const newProduct: Product = {
-      serial_number: newSerial,
-      name: "",
-      price: 0,
-      make: newMake,
-      model: newModel,
-      length: 0,
-      width: 0,
-      sale_status: "Not Yet Posted",
-      repair_status: "In Progress",
-      date_entered: undefined,
-      date_sold: undefined,
-      description: "",
-      note: "",
-      images: [],
-    };
-    setNewRows((prev) => [...prev, newProduct]);
-  };
-
   const deleteNewRow = (index: number) => () => {
     const itemIndex = index - productsData.length;
     setNewRows((prev) => {
@@ -231,9 +136,11 @@ const InventoryGrid = () => {
   if (!currentUser) return null;
 
   return (
-    <div>
-      <ProductsHeader title={"TSA Data"} />
-      <div className="w-[100%] px-[20px]">
+    <div className="relative w-[100%] h-[100%] overflow-hidden">
+      <div className="absolute top-0 left-0 h-[60px] w-[100%]">
+        <ProductsHeader title={"TSA Data"} />
+      </div>
+      <div className="absolute pb-[60px] left-0 top-0 mt-[75px] w-[100%] px-[20px] overflow-y-scroll h-[calc(100%-75px)]">
         <div
           className="w-[100%] min-h-[101px] relative rounded-t-[13px]"
           style={{
@@ -366,6 +273,7 @@ const InventoryGrid = () => {
                     registerFormRef={(serial, formInstance) => {
                       formRefs.current.set(serial, formInstance);
                     }}
+                    saveProducts={saveProducts}
                   />
                 </div>
               )
@@ -378,14 +286,6 @@ const InventoryGrid = () => {
         style={{ backgroundColor: appTheme[currentUser.theme].app_color_1 }}
       >
         Save
-      </div>
-
-      <div
-        onClick={handleAddRow}
-        className="absolute bottom-[35px] right-[150px] h-[40px] w-[110px] font-[600] rounded-[25px] dim cursor-pointer hover:brightness-75 items-center justify-center flex"
-        style={{ backgroundColor: appTheme[currentUser.theme].app_color_1 }}
-      >
-        New
       </div>
     </div>
   );

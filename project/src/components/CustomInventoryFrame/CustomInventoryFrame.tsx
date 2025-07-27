@@ -29,7 +29,7 @@ const CustomInventoryFrame = ({
       href={
         TubID && TubID.trim().length !== 0 ? `/products/${TubID}` : "/products"
       }
-      className="group cursor-pointer rounded-[5px] overflow-hidden relative w-[100%] h-[100%] flex flex-col"
+      className="select-none group cursor-pointer rounded-[5px] overflow-hidden relative w-[100%] h-[100%] flex flex-col"
       style={{
         backgroundColor: appTheme[currentUser.theme].background_2,
       }}

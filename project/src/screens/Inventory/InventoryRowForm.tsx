@@ -7,29 +7,36 @@ import { useContext, useEffect } from "react";
 import { AuthContext } from "@/contexts/authContext";
 import { ProductFormData } from "@/util/schemas/productSchema";
 import { InventoryDataItem } from "./InventoryGrid";
-import Link from "next/link";
 import Image from "next/image";
-import app_details from "@/util/appDetails.json";
 import { UseFormReturn } from "react-hook-form";
 import { FaPlus } from "react-icons/fa6";
+import { useRouter } from "next/navigation";
+import { useAppContext } from "@/contexts/appContext";
+import { useModal2Store } from "@/store/useModalStore";
+import Modal2Continue from "@/modals/Modal2Continue";
 
 type InventoryRowFormProps = {
   product: Product;
   inventoryDataLayout: InventoryDataItem[];
+  saveProducts: () => Promise<void>;
   registerFormRef: (
     serial: string,
     form: UseFormReturn<ProductFormData>
   ) => void;
 };
-
 const InventoryRowForm = ({
   product,
   inventoryDataLayout,
   registerFormRef,
+  saveProducts,
 }: InventoryRowFormProps) => {
   const { currentUser } = useContext(AuthContext);
+  const { newRows, formRefs } = useAppContext();
   const { productsData } = useContextQueries();
   const form = useProductForm();
+  const router = useRouter();
+  const modal2 = useModal2Store((state: any) => state.modal2);
+  const setModal2 = useModal2Store((state: any) => state.setModal2);
 
   useEffect(() => {
     if (product.serial_number) {
@@ -58,6 +65,45 @@ const InventoryRowForm = ({
     }
   }, [newProduct, product.serial_number, form.reset]);
 
+  const handleImageClick = () => {
+    const exists = productsData?.some(
+      (p) => p.serial_number === product.serial_number
+    );
+    if (exists) {
+      let dirtyRows = 0;
+      for (const [serial, form] of formRefs.current.entries()) {
+        if (Object.keys(form.formState.dirtyFields).length !== 0) {
+          dirtyRows += 1;
+        }
+      }
+      if (newRows.length > 0 || dirtyRows > 0) {
+        if (!currentUser) return null;
+        setModal2({
+          ...modal2,
+          open: !modal2.open,
+          showClose: false,
+          offClickClose: true,
+          width: "w-[300px]",
+          maxWidth: "max-w-[400px]",
+          aspectRatio: "aspect-[5/2]",
+          borderRadius: "rounded-[12px] md:rounded-[15px]",
+          content: (
+            <Modal2Continue
+              text={`Save changes to your data?`}
+              onContinue={async () => {
+                await saveProducts();
+                router.push(`/products/${product.serial_number}`);
+              }}
+            />
+          ),
+        });
+      } else {
+        router.push(`/products/${product.serial_number}`);
+      }
+    }
+    return;
+  };
+
   if (!currentUser) return null;
 
   return (
@@ -73,13 +119,9 @@ const InventoryRowForm = ({
         }}
         className={`pl-[10.5px] h-[100%] flex items-center ${inventoryDataLayout[0].className}`}
       >
-        <Link
-          href={
-            productsData?.some((p) => p.serial_number === product.serial_number)
-              ? `/products/${product.serial_number}`
-              : "/"
-          }
-          className="dim hover:brightness-75"
+        <div
+          onClick={handleImageClick}
+          className="cursor-pointer dim hover:brightness-75"
         >
           <div className="relative w-[42px] h-[42px]">
             {product.images.length > 0 ? (
@@ -101,23 +143,20 @@ const InventoryRowForm = ({
               </div>
             )}
           </div>
-        </Link>
+        </div>
       </div>
 
-      <ProductInputCell
-        name="serial_number"
-        register={form.register}
-        error={form.formState.errors.serial_number?.message}
-        disabled={!newProduct}
-        inputType={"input"}
-        className={`h-[100%] ${inventoryDataLayout[1].className}`}
-        onInput={(e) => {
-          const value = (e.currentTarget.value = e.currentTarget.value
-            .toUpperCase()
-            .replace(/[^A-Z0-9]/g, ""));
-          form.setValue("serial_number", value, { shouldDirty: true });
+      <div
+        onClick={handleImageClick}
+        className={`cursor-pointer dim hover:brightness-75 flex items-center h-[100%] w-[100%] pl-[7px] pr-[6px] py-[4px] text-[12px] ${inventoryDataLayout[1].className}`}
+        style={{
+          borderRight: `0.5px solid ${
+            appTheme[currentUser.theme].background_3
+          }`,
         }}
-      />
+      >
+        <div>{product.serial_number}</div>
+      </div>
 
       <ProductInputCell
         name="name"

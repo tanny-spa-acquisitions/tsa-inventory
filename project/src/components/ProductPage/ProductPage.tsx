@@ -28,7 +28,7 @@ const ProductPage = ({
   serialNumber?: string;
 }) => {
   const { currentUser } = useContext(AuthContext);
-  const { setUploadPopup, setAddProductPage } = useAppContext();
+  const { setUploadPopup, setAddProductPage, previousPath } = useAppContext();
   const { updateProducts, productsData } = useContextQueries();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
@@ -38,6 +38,7 @@ const ProductPage = ({
   const dateSold = form.watch("date_sold");
   const dateEntered = form.watch("date_entered");
   const images = form.watch("images");
+
   useEffect(() => {
     if (!newProduct && serialNumber && productsData?.length) {
       const matchedProduct = productsData.find(
@@ -107,7 +108,11 @@ const ProductPage = ({
     if (newProduct) {
       setAddProductPage(false);
     } else {
-      router.push("/products");
+      if (previousPath === "/") {
+        router.push("/");
+      } else {
+        router.push("/products");
+      }
     }
   };
 

@@ -10,9 +10,15 @@ import { fetchInventory } from "../util/functions/Inventory";
 import { getCurrentTimestamp } from "@/util/functions/Data";
 import axios from "axios";
 import { BACKEND_URL } from "@/util/config";
-import { UseFormGetValues, UseFormSetValue } from "react-hook-form";
+import {
+  UseFormGetValues,
+  UseFormReturn,
+  UseFormSetValue,
+} from "react-hook-form";
 import { ProductFormData } from "@/components/ProductPage/ProductPage";
-import { Product } from "./queryContext";
+import { Product, useContextQueries } from "./queryContext";
+import { toast } from "react-toastify";
+import { usePathname } from "next/navigation";
 
 type AppContextType = {
   editingLock: boolean;
@@ -38,6 +44,9 @@ type AppContextType = {
   setSelectedProducts: React.Dispatch<React.SetStateAction<string[]>>;
   newRows: Product[];
   setNewRows: React.Dispatch<React.SetStateAction<Product[]>>;
+  saveProducts: () => Promise<void>;
+  formRefs: React.RefObject<Map<string, UseFormReturn<ProductFormData>>>;
+  previousPath: string | null;
 };
 
 export type FileImage = {
@@ -54,6 +63,17 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const pathname = usePathname();
+  const [previousPath, setPreviousPath] = useState<string | null>(null);
+  const lastPathRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (lastPathRef.current !== pathname) {
+      setPreviousPath(lastPathRef.current);
+      lastPathRef.current = pathname;
+    }
+  }, [pathname]);
+
+  const { updateProducts } = useContextQueries();
   const [editingLock, setEditingLock] = useState<boolean>(false);
 
   const [inventory, setInventory] = useState<any[]>([]);
@@ -195,6 +215,54 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [newRows, setNewRows] = useState<Product[]>([]);
 
+  const formRefs = useRef<Map<string, UseFormReturn<ProductFormData>>>(
+    new Map()
+  );
+
+  const saveProducts = async () => {
+    const updatedProducts: Product[] = [];
+
+    for (const [serial, form] of formRefs.current.entries()) {
+      // if (
+      //   newProduct &&
+      //   productsData.filter((item) => item.serial_number === data.serial_number)
+      //     .length > 0
+      // ) {
+      //   toast.error("Serial # is already used on another product");
+      //   return;
+      // }
+
+      const values = form.getValues();
+
+      if (Object.keys(form.formState.dirtyFields).length === 0) continue;
+
+      updatedProducts.push({
+        ...values,
+        date_entered: values.date_entered ?? undefined,
+        date_sold: values.date_sold ?? undefined,
+        note: values.note ?? "",
+        images: Array.isArray(values.images) ? values.images : [],
+      });
+    }
+
+    if (updatedProducts.length === 0 && newRows.length === 0) {
+      toast.info("No changes to save");
+      return;
+    }
+
+    try {
+      setEditingLock(true);
+      await updateProducts([...updatedProducts, ...newRows]);
+      setNewRows([]);
+      formRefs.current.clear();
+      toast.success("Products updated");
+    } catch (err) {
+      toast.error("Failed to update products");
+    } finally {
+      setEditingLock(false);
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -217,6 +285,9 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setSelectedProducts,
         newRows,
         setNewRows,
+        saveProducts,
+        formRefs,
+        previousPath,
       }}
     >
       {children}
