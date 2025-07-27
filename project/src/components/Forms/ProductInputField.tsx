@@ -1,3 +1,4 @@
+"use client";
 import { AuthContext } from "@/contexts/authContext";
 import { appTheme } from "@/util/appTheme";
 import { useContext } from "react";
@@ -10,7 +11,7 @@ import {
 import DatePicker from "react-datepicker";
 import { IoClose } from "react-icons/io5";
 
-const TextField = <T extends FieldValues>({
+const ProductInputField = <T extends FieldValues>({
   inputType,
   label,
   name,
@@ -21,7 +22,6 @@ const TextField = <T extends FieldValues>({
   error,
   disabled = false,
   className,
-  inputStyle,
   rows = 3,
   onInput,
   options,
@@ -39,7 +39,6 @@ const TextField = <T extends FieldValues>({
   error?: string;
   disabled?: boolean;
   className?: string;
-  inputStyle?: React.CSSProperties;
   rows?: number;
   onInput?: React.InputHTMLAttributes<HTMLInputElement>["onInput"];
   options?: string[];
@@ -63,7 +62,6 @@ const TextField = <T extends FieldValues>({
           disabled={disabled}
           className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
           style={{
-            ...inputStyle,
             border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
           }}
         />
@@ -73,7 +71,6 @@ const TextField = <T extends FieldValues>({
           className="resize-none input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
           disabled={disabled}
           style={{
-            ...inputStyle,
             border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
           }}
           rows={rows}
@@ -83,7 +80,6 @@ const TextField = <T extends FieldValues>({
           {...register(name)}
           className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
           style={{
-            ...inputStyle,
             border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
           }}
         >
@@ -110,7 +106,7 @@ const TextField = <T extends FieldValues>({
             />
           </div>
 
-          {selected && (
+          {selected && name === "date_sold" && (
             <div
               onClick={onCancel}
               style={{
@@ -133,4 +129,4 @@ const TextField = <T extends FieldValues>({
   );
 };
 
-export default TextField;
+export default ProductInputField;

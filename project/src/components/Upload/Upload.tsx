@@ -1,3 +1,4 @@
+"use client";
 import { AuthContext } from "@/contexts/authContext";
 import { useAppContext } from "@/contexts/appContext";
 import { appTheme } from "@/util/appTheme";

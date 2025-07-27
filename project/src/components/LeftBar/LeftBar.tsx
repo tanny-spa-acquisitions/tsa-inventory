@@ -193,7 +193,6 @@ const LeftBar = () => {
                   color: appTheme[currentUser.theme].text_1,
                 }}
                 onClick={() => {
-                  setEditMode(false);
                   if (windowWidth < 1024) {
                     closeLeftBar();
                   }
@@ -228,7 +227,6 @@ const LeftBar = () => {
               }}
               href="/products"
               onClick={() => {
-                setEditMode(false);
                 if (windowWidth < 1024) {
                   closeLeftBar();
                 }

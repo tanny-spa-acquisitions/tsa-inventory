@@ -1,9 +1,11 @@
+"use client";
 import { AuthContext } from "@/contexts/authContext";
 import { Product } from "@/contexts/queryContext";
 import { appTheme } from "@/util/appTheme";
 import { capitalizeFirstLetter } from "@/util/functions/Data";
 import Link from "next/link";
 import { useContext } from "react";
+import app_details from "@/util/appDetails.json";
 
 const CustomInventoryFrame = ({
   item,
@@ -39,7 +41,7 @@ const CustomInventoryFrame = ({
             src={
               item.images.length > 0
                 ? item.images[0]
-                : "https://images.unsplash.com/photo-1632341503970-dbec32e7ec76?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                : app_details.default_img
             }
           />
           <div

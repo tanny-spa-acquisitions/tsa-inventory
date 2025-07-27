@@ -16,9 +16,10 @@ import ProductsHeader from "@/components/ProductsHeader/ProductsHeader";
 
 const ProductsPage = () => {
   const { currentUser } = useContext(AuthContext);
-  const { productsData, deleteProduct, isLoadingProductsData } =
+  const { productsData, deleteProducts, isLoadingProductsData } =
     useContextQueries();
-  const { addProductPage, setAddProductPage, editMode } = useAppContext();
+  const { addProductPage, setAddProductPage, editMode, dataFilters } =
+    useAppContext();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
 
@@ -27,7 +28,26 @@ const ProductsPage = () => {
   };
 
   const handleDeleteProduct = async (item: Product) => {
-    await deleteProduct(item.serial_number);
+    await deleteProducts([item.serial_number]);
+  };
+
+  const filteredProducts = (products: Product[]) => {
+    if (products.length === 0) return [];
+    if (dataFilters.listings === "All") {
+      return products;
+    } else if (dataFilters.listings === "Sold") {
+      return products.filter(
+        (product) =>
+          product.sale_status === "Sold Awaiting Delivery" ||
+          product.sale_status === "Delivered"
+      );
+    } else {
+      return products.filter(
+        (product) =>
+          product.sale_status === "Not Yet Posted" ||
+          product.sale_status === "Awaiting Sale"
+      );
+    }
   };
 
   if (!currentUser) return null;
@@ -51,8 +71,8 @@ const ProductsPage = () => {
             </div>
 
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-[30px]">
-              {productsData && productsData.length > 0 ? (
-                productsData.map((item, index) => {
+              {productsData && filteredProducts(productsData).length > 0 ? (
+                filteredProducts(productsData).map((item, index) => {
                   return (
                     <div key={index} className="relative">
                       <CustomInventoryFrame item={item} index={index} />

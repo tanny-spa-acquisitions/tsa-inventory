@@ -1,8 +1,8 @@
 import express from "express";
 import {
   getProducts,
-  updateProduct,
-  deleteProduct,
+  updateProducts,
+  deleteProducts,
   syncToGoogleSheets,
   syncToWix
 } from "../controllers/products.js";
@@ -10,8 +10,8 @@ import {
 const router = express.Router();
 
 router.get("/get", getProducts);
-router.post("/update", updateProduct);
-router.delete("/delete", deleteProduct);
+router.post("/update", updateProducts);
+router.delete("/delete", deleteProducts);
 router.post("/google-sync", syncToGoogleSheets);
 router.post("/wix-sync", syncToWix);
 

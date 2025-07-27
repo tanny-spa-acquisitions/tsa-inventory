@@ -12,6 +12,7 @@ import axios from "axios";
 import { BACKEND_URL } from "@/util/config";
 import { UseFormGetValues, UseFormSetValue } from "react-hook-form";
 import { ProductFormData } from "@/components/ProductPage/ProductPage";
+import { Product } from "./queryContext";
 
 type AppContextType = {
   editingLock: boolean;
@@ -30,8 +31,13 @@ type AppContextType = {
   setAddProductPage: React.Dispatch<React.SetStateAction<boolean>>;
   dataFilters: DataFilters;
   setDataFilters: React.Dispatch<React.SetStateAction<DataFilters>>;
+  filteredProducts: (products: Product[]) => Product[];
   editMode: boolean;
   setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedProducts: string[];
+  setSelectedProducts: React.Dispatch<React.SetStateAction<string[]>>;
+  newRows: Product[];
+  setNewRows: React.Dispatch<React.SetStateAction<Product[]>>;
 };
 
 export type FileImage = {
@@ -165,7 +171,29 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [dataFilters, setDataFilters] = useState<DataFilters>({
     listings: "All",
   });
+  const filteredProducts = (products: Product[]) => {
+    if (products.length === 0) return [];
+    if (dataFilters.listings === "All") {
+      return products;
+    } else if (dataFilters.listings === "Sold") {
+      return products.filter(
+        (product) =>
+          product.sale_status === "Sold Awaiting Delivery" ||
+          product.sale_status === "Delivered"
+      );
+    } else {
+      return products.filter(
+        (product) =>
+          product.sale_status === "Not Yet Posted" ||
+          product.sale_status === "Awaiting Sale"
+      );
+    }
+  };
+
   const [editMode, setEditMode] = useState<boolean>(false);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+
+  const [newRows, setNewRows] = useState<Product[]>([]);
 
   return (
     <AppContext.Provider
@@ -182,8 +210,13 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setAddProductPage,
         dataFilters,
         setDataFilters,
+        filteredProducts,
         editMode,
         setEditMode,
+        selectedProducts,
+        setSelectedProducts,
+        newRows,
+        setNewRows,
       }}
     >
       {children}

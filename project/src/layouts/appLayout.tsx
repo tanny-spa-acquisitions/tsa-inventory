@@ -24,9 +24,7 @@ import Modals from "@/modals/Modals";
 import appDetails from "@/util/appDetails.json";
 import { usePathname, useRouter } from "next/navigation";
 import LandingNav from "@/screens/Landing/LandingNav/LandingNav";
-import {
-  useLeftBarOpenStore,
-} from "@/store/useLeftBarOpenStore";
+import { useLeftBarOpenStore } from "@/store/useLeftBarOpenStore";
 import { QueryProvider } from "@/contexts/queryContext";
 import CustomToast from "@/components/CustomToast";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
@@ -55,6 +53,14 @@ const AppRoot = ({ children }: { children: ReactNode }) => {
   const { currentUser, isLoadingCurrentUserData } = useContext(AuthContext);
   const router = useRouter();
   const pathname = usePathname();
+
+  const setLeftBarOpen = useLeftBarOpenStore(
+    (state: any) => state.setLeftBarOpen
+  );
+  useEffect(() => {
+    const isDesktop = window.innerWidth > 1024;
+    setLeftBarOpen(isDesktop);
+  }, [setLeftBarOpen]);
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["currentUser"] });
@@ -91,7 +97,16 @@ const UnprotectedLayout = () => {
 };
 
 const ProtectedLayout = ({ children }: { children: ReactNode }) => {
-  const { editingLock } = useAppContext();
+  const { editingLock, setSelectedProducts, setEditMode, setNewRows } =
+    useAppContext();
+  const pathName = usePathname();
+
+  useEffect(() => {
+    setSelectedProducts([]);
+    setEditMode(false);
+    setNewRows([]);
+  }, [setSelectedProducts, pathName]);
+
   return (
     <>
       {editingLock && (

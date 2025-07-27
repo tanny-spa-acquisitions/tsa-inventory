@@ -34,8 +34,8 @@ export type QueryContextType = {
   productsData: Product[];
   isLoadingProductsData: boolean;
   refetchProductsData: () => Promise<QueryObserverResult<Product[], Error>>;
-  updateProduct: (newProduct: Product) => void;
-  deleteProduct: (serial_number: string) => void;
+  updateProducts: (updatedProducts: Product[]) => void;
+  deleteProducts: (serial_numbers: string[]) => void;
 };
 
 const QueryContext = createContext<QueryContextType | undefined>(undefined);
@@ -68,21 +68,25 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   const updateProductsMutation = useMutation({
-    mutationFn: async (product: Product) => {
+    mutationFn: async (products: Product[]) => {
       await makeRequest.post("/api/products/update", {
-        product,
+        products,
       });
     },
-    onMutate: async (updatedProduct: Product) => {
+    onMutate: async (updatedProducts: Product[]) => {
       const queryKey = ["products"];
       await queryClient.cancelQueries({ queryKey });
-      const previousData = queryClient.getQueryData<any[]>(queryKey);
+      const previousData = queryClient.getQueryData<Product[]>(queryKey);
       if (!previousData) return { previousData, queryKey };
-      const newData = previousData.map((product) =>
-        product.serial_number === updatedProduct.serial_number
-          ? updatedProduct
-          : product
+      const updatedSerials = new Set(
+        updatedProducts.map((p) => p.serial_number)
       );
+      const newData = previousData.map((product) => {
+        const updated = updatedProducts.find(
+          (p) => p.serial_number === product.serial_number
+        );
+        return updated ? updated : product;
+      });
       queryClient.setQueryData(queryKey, newData);
       return { previousData, queryKey };
     },
@@ -98,13 +102,23 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     },
   });
 
-  const deleteProductMutation = useMutation({
-    mutationFn: async (serial_number: string) => {
+  type DeleteContext = {
+    previousData: any[] | undefined;
+    queryKey: string[];
+  };
+
+  const deleteProductsMutation = useMutation<
+    void,
+    Error,
+    string[],
+    DeleteContext
+  >({
+    mutationFn: async (serial_numbers: string[]) => {
       await makeRequest.delete("/api/products/delete", {
-        data: { serial_number },
+        data: { serial_numbers },
       });
     },
-    onMutate: async (serial_number: string) => {
+    onMutate: async (serial_numbers: string[]) => {
       const queryKey = ["products"];
       await queryClient.cancelQueries({ queryKey });
 
@@ -112,7 +126,7 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!previousData) return { previousData, queryKey };
 
       const newData = previousData.filter(
-        (product) => product.serial_number !== serial_number
+        (product) => !serial_numbers.includes(product.serial_number)
       );
 
       queryClient.setQueryData(queryKey, newData);
@@ -130,12 +144,12 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     },
   });
 
-  const updateProduct = async (product: Product) => {
-    await updateProductsMutation.mutateAsync(product);
+  const updateProducts = async (updatedProducts: Product[]) => {
+    await updateProductsMutation.mutateAsync(updatedProducts);
   };
 
-  const deleteProduct = async (serial_number: string) => {
-    await deleteProductMutation.mutateAsync(serial_number);
+  const deleteProducts = async (serial_numbers: string[]) => {
+    await deleteProductsMutation.mutateAsync(serial_numbers);
   };
 
   return (
@@ -144,8 +158,8 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
         productsData: productsData ?? [],
         isLoadingProductsData,
         refetchProductsData,
-        updateProduct,
-        deleteProduct,
+        updateProducts,
+        deleteProducts,
       }}
     >
       {children}

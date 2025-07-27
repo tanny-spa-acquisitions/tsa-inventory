@@ -17,7 +17,8 @@ import { IoClose } from "react-icons/io5";
 import UploadModal from "../Upload/Upload";
 import { ProductFormData } from "@/util/schemas/productSchema";
 import { useProductForm } from "@/hooks/useProductForm";
-import TextField from "../Forms/TextField";
+import ProductInputField from "../Forms/ProductInputField";
+import { toast } from "react-toastify";
 
 const ProductPage = ({
   newProduct,
@@ -28,28 +29,24 @@ const ProductPage = ({
 }) => {
   const { currentUser } = useContext(AuthContext);
   const { setUploadPopup, setAddProductPage } = useAppContext();
-  const { updateProduct, productsData } = useContextQueries();
+  const { updateProducts, productsData } = useContextQueries();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
   const router = useRouter();
 
   const form = useProductForm();
-
   const dateSold = form.watch("date_sold");
   const dateEntered = form.watch("date_entered");
   const images = form.watch("images");
-
   useEffect(() => {
     if (!newProduct && serialNumber && productsData?.length) {
       const matchedProduct = productsData.find(
         (product) => product.serial_number === serialNumber
       );
-
       if (!matchedProduct) {
         console.warn("No product found for serial number:", serialNumber);
         return;
       }
-
       const formDefaults: Partial<ProductFormData> = {
         ...matchedProduct,
         date_sold: matchedProduct.date_sold
@@ -62,7 +59,6 @@ const ProductPage = ({
         length: matchedProduct.length ? Number(matchedProduct.length) : 0,
         width: matchedProduct.width ? Number(matchedProduct.width) : 0,
       };
-
       form.reset(formDefaults);
     }
   }, [newProduct, serialNumber, productsData, form.reset]);
@@ -76,17 +72,23 @@ const ProductPage = ({
   };
 
   const onSubmit = async (data: ProductFormData) => {
+    if (
+      newProduct &&
+      productsData.filter((item) => item.serial_number === data.serial_number)
+        .length > 0
+    ) {
+      toast.error("Serial # is already used on another product");
+      return;
+    }
     const normalizedData: Product = {
       ...data,
       note: data.note ?? "",
       images: Array.isArray(data.images) ? data.images : [],
     };
-    await updateProduct(normalizedData);
+    await updateProducts([normalizedData]);
     resetForm();
     handleBackButton();
   };
-
-  if (!currentUser) return null;
 
   if (!newProduct && serialNumber && productsData?.length) {
     const productExists = productsData.some(
@@ -108,6 +110,8 @@ const ProductPage = ({
       router.push("/products");
     }
   };
+
+  if (!currentUser) return null;
 
   return (
     <div>
@@ -184,7 +188,7 @@ const ProductPage = ({
           onSubmit={form.handleSubmit(onSubmit)}
           className="gap-[10px] mt-[10px]"
         >
-          <TextField
+          <ProductInputField
             label="Name"
             name="name"
             register={form.register}
@@ -194,7 +198,7 @@ const ProductPage = ({
             inputType={"input"}
           />
 
-          <TextField
+          <ProductInputField
             label="Description"
             name="description"
             register={form.register}
@@ -206,7 +210,7 @@ const ProductPage = ({
           />
 
           <div className="grid grid-cols-2 gap-[10px] gap-x-[5vw]">
-            <TextField
+            <ProductInputField
               label="Serial Number"
               name="serial_number"
               register={form.register}
@@ -221,7 +225,7 @@ const ProductPage = ({
               }}
             />
 
-            <TextField
+            <ProductInputField
               label="Price ($)"
               name="price"
               inputMode="decimal"
@@ -250,7 +254,7 @@ const ProductPage = ({
               className="col-span-2 sm:col-span-1"
             />
 
-            <TextField
+            <ProductInputField
               label="Make"
               name="make"
               register={form.register}
@@ -259,7 +263,7 @@ const ProductPage = ({
               inputType={"input"}
             />
 
-            <TextField
+            <ProductInputField
               label="Model"
               name="model"
               register={form.register}
@@ -268,7 +272,7 @@ const ProductPage = ({
               inputType={"input"}
             />
 
-            <TextField
+            <ProductInputField
               label="Repair Status"
               name="repair_status"
               register={form.register}
@@ -277,11 +281,11 @@ const ProductPage = ({
               options={["In Progress", "Complete"]}
             />
 
-            <TextField
+            <ProductInputField
               label="Sale Status"
               name="sale_status"
               register={form.register}
-              className="col-span-2 sm:col-span-1 mt-[10px] sm:mt-0"
+              className="col-span-2 sm:col-span-1"
               inputType={"dropdown"}
               options={[
                 "Not Yet Posted",
@@ -291,7 +295,7 @@ const ProductPage = ({
               ]}
             />
 
-            <TextField
+            <ProductInputField
               label="Length (in)"
               name="length"
               inputMode="decimal"
@@ -319,10 +323,10 @@ const ProductPage = ({
                 setValueAs: (v) => (v === "" ? undefined : parseFloat(v)),
               }}
               error={form.formState.errors.length?.message}
-              className="col-span-2 sm:col-span-1 mt-[10px]"
+              className="col-span-2 sm:col-span-1"
             />
 
-            <TextField
+            <ProductInputField
               label="Width (in)"
               name="width"
               inputMode="decimal"
@@ -350,18 +354,18 @@ const ProductPage = ({
                 setValueAs: (v) => (v === "" ? undefined : parseFloat(v)),
               }}
               error={form.formState.errors.width?.message}
-              className="col-span-2 sm:col-span-1 sm:mt-[10px]"
+              className="col-span-2 sm:col-span-1"
             />
           </div>
 
           <div className="flex flex-row">
             {!newProduct && (
               <div className="mr-[25px] pointer-events-none">
-                <TextField
+                <ProductInputField
                   label="Date Entered"
                   name="date_entered"
                   register={form.register}
-                  className="opacity-[0.5]"
+                  className="mt-[12px] opacity-[0.5]"
                   inputType={"date"}
                   selected={dateEntered}
                   disabled={true}
@@ -374,11 +378,11 @@ const ProductPage = ({
               </div>
             )}
 
-            <TextField
+            <ProductInputField
               label="Date Sold"
               name="date_sold"
               register={form.register}
-              className=""
+              className="mt-[12px]"
               inputType={"date"}
               selected={dateSold}
               disabled={false}
@@ -395,7 +399,7 @@ const ProductPage = ({
             />
           </div>
 
-          <TextField
+          <ProductInputField
             label="Note"
             name="note"
             register={form.register}

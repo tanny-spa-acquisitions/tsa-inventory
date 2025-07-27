@@ -1,9 +1,11 @@
 "use client";
 import React, { } from "react";
-import InventoryDisplay from "@/screens/Inventory/InventoryDisplay";
+// import InventoryDisplay from "@/screens/Inventory/InventoryDisplay";
+import InventoryGrid from "@/screens/Inventory/InventoryGrid";
 
 const HomePage = () => {
-  return <InventoryDisplay />
+  return <InventoryGrid />
+  // return <InventoryDisplay />
 };
 
 export default HomePage;

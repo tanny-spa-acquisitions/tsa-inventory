@@ -4,6 +4,7 @@ import appDetails from "../util/appDetails.json";
 import AppLayout from "../layouts/appLayout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "react-datepicker/dist/react-datepicker.css";
 import "../styles/globals.css";
 
 export const metadata: Metadata = {

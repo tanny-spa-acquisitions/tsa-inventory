@@ -20,35 +20,28 @@ export const getProducts = (req, res) => {
   });
 };
 
-export const updateProduct = (req, res) => {
+export const updateProducts = (req, res) => {
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Access token missing");
 
-  const {
-    serial_number,
-    name,
-    description,
-    note,
-    make,
-    model,
-    price,
-    date_sold,
-    repair_status,
-    sale_status,
-    length,
-    width,
-    images,
-  } = req.body.product;
-
   jwt.verify(token, process.env.JWT_SECRET, (err, userInfo) => {
     if (err) return res.status(403).json("Token is invalid!");
+
+    const { products } = req.body;
+    if (!Array.isArray(products)) {
+      return res.status(400).json("Expected 'products' to be an array");
+    }
+
+    if (products.length === 0) {
+      return res.status(200).json({ success: true, message: "No products to update" });
+    }
 
     const q = `
       INSERT INTO tubs (
         serial_number, name, description, note, make, model, price, type, date_sold,
         repair_status, sale_status, length, width, images
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES ${products.map(() => `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).join(", ")}
       ON DUPLICATE KEY UPDATE
         name = VALUES(name),
         description = VALUES(description),
@@ -65,22 +58,22 @@ export const updateProduct = (req, res) => {
         images = VALUES(images)
     `;
 
-    const values = [
-      serial_number,
-      name,
-      description,
-      note,
-      make,
-      model,
-      price,
+    const values = products.flatMap(p => [
+      p.serial_number,
+      p.name,
+      p.description,
+      p.note ?? "",
+      p.make,
+      p.model,
+      p.price,
       "TSA",
-      date_sold ? formatDateToMySQL(date_sold) : null,
-      repair_status,
-      sale_status,
-      length,
-      width,
-      JSON.stringify(images),
-    ];
+      p.date_sold ? formatDateToMySQL(p.date_sold) : null,
+      p.repair_status,
+      p.sale_status,
+      p.length,
+      p.width,
+      JSON.stringify(Array.isArray(p.images) ? p.images : []),
+    ]);
 
     db.query(q, values, (err, result) => {
       if (err) {
@@ -88,37 +81,39 @@ export const updateProduct = (req, res) => {
         return res.status(500).json("Database error");
       }
 
-      return res.status(200).json({ success: true });
+      return res.status(200).json({ success: true, affectedRows: result.affectedRows });
     });
   });
 };
 
-export const deleteProduct = (req, res) => {
+export const deleteProducts = (req, res) => {
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Access token missing");
 
-  const { serial_number } = req.body;
+  const { serial_numbers } = req.body;
 
-  if (!serial_number) {
-    return res.status(400).json("Missing serial number");
+  if (!serial_numbers || serial_numbers.length === 0) {
+    return res.status(400).json("Missing serial numbers");
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, userInfo) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err) => {
     if (err) return res.status(403).json("Token is invalid!");
 
-    const q = `DELETE FROM tubs WHERE serial_number = ?`;
+    const q = `DELETE FROM tubs WHERE serial_number IN (?)`;
 
-    db.query(q, [serial_number], (err, result) => {
+    db.query(q, [serial_numbers], (err, result) => {
       if (err) {
         console.error("DB error:", err);
         return res.status(500).json("Database error");
       }
 
       if (result.affectedRows === 0) {
-        return res.status(404).json("Product not found");
+        return res.status(404).json("No products found to delete");
       }
 
-      return res.status(200).json({ success: true });
+      return res
+        .status(200)
+        .json({ success: true, deleted: result.affectedRows });
     });
   });
 };
@@ -305,7 +300,7 @@ export const syncToWix = async (req, res) => {
     const q = "SELECT * FROM tubs";
     db.query(q, async (err, data) => {
       if (err) return res.status(500).json(err);
-      
+
       const corrected_data = data.reverse().map((item) => ({
         serialNumber: item.serial_number,
         sold: !!item.date_sold,
@@ -318,7 +313,7 @@ export const syncToWix = async (req, res) => {
         width: parseFloat(item.width) || 0,
         images: item.images?.join(" ") || "",
       }));
-      
+
       try {
         await axios.post(
           "https://tannyspaacquisitions.com/_functions/addHotTub",
@@ -334,49 +329,12 @@ export const syncToWix = async (req, res) => {
         );
         return res.status(200).json({ success: true });
       } catch (err) {
-        console.error("Failed to sync with Wix:", err.response?.data || err.message);
+        console.error(
+          "Failed to sync with Wix:",
+          err.response?.data || err.message
+        );
         return res.status(500).json("Wix sync failed.");
       }
     });
   });
 };
-
-
-
-
-
-
-
-
-
-
-// export const syncToWix = async () => {
-//   const hotTubData = {
-//     serialNumber: "4321",
-//     sold: false,
-//     name: "Another Tub 2",
-//     description_fld: "Soothing luxury 2",
-//     make: "DreamTubs 2",
-//     model: "XT500",
-//     price: 12999,
-//     length: 80,
-//     width: 85,
-//     images: "https://example.com/tub.jpg",
-//   };
-
-//   try {
-//     const res = await axios.post(
-//       "https://tannyspaacquisitions.com/_functions/addHotTub",
-//       hotTubData,
-//       {
-//         headers: {
-//           Authorization:
-//             "Bearer 06f86df10d2b9dee119ec5f3d879c8431aac47dee6b8bc1bd8eed7900e7165e4",
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//   } catch (err) {
-//     console.error("Failed to insert:", err.response?.data || err.message);
-//   }
-// };

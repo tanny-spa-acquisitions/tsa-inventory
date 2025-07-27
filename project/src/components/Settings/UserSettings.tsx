@@ -1,5 +1,4 @@
 "use client";
-
 import { AuthContext } from "@/contexts/authContext";
 import { appTheme, ThemeType } from "@/util/appTheme";
 import { makeRequest } from "@/util/axios";
