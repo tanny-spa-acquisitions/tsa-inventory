@@ -55,7 +55,7 @@ const ProductsPage = () => {
   return (
     <>
       {addProductPage ? (
-        <ProductPage newProduct={true} />
+        <ProductPage />
       ) : (
         <div className="w-[100%] h-[100%] relative">
           <div className="z-[800] absolute top-0 left-0 h-[60px] w-[100%]">

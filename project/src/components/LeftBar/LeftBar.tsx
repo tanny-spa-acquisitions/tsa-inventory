@@ -9,21 +9,17 @@ import Modal2Continue from "../../modals/Modal2Continue";
 import { appTheme } from "../../util/appTheme";
 import appDetails from "../../util/appDetails.json";
 import { AuthContext } from "@/contexts/authContext";
-import Link from "next/link";
-import { FRONTEND_URL } from "@/util/config";
-import { LuCircleFadingPlus } from "react-icons/lu";
 import { MdLibraryBooks } from "react-icons/md";
 import { LuPanelLeftClose } from "react-icons/lu";
 import { BiWindows } from "react-icons/bi";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppContext } from "@/contexts/appContext";
-import { useContextQueries } from "@/contexts/queryContext";
 
 const LeftBar = () => {
   const pathname = usePathname();
   const { currentUser, handleLogout } = useContext(AuthContext);
-  const { newRows, saveProducts, formRefs } = useAppContext();
+  const { pageClick } = useAppContext();
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
   const leftBarRef = useRef<HTMLDivElement>(null);
@@ -32,7 +28,6 @@ const LeftBar = () => {
   const setLeftBarOpen = useLeftBarOpenStore(
     (state: any) => state.setLeftBarOpen
   );
-  const router = useRouter();
   const [showLeftBar, setShowLeftBar] = useState<boolean>(false);
   const showLeftBarRef = useRef<HTMLDivElement>(null);
 
@@ -149,37 +144,11 @@ const LeftBar = () => {
     });
   };
 
-  const handleProductsClick = () => {
-    let dirtyRows = 0;
-    for (const [serial, form] of formRefs.current.entries()) {
-      if (Object.keys(form.formState.dirtyFields).length !== 0) {
-        dirtyRows += 1;
-      }
+  const handlePageClick = (newPage: string) => {
+    if (windowWidth < 1024) {
+      closeLeftBar();
     }
-    if ((newRows.length > 0 || dirtyRows > 0) && pathname === "/") {
-      if (!currentUser) return null;
-      setModal2({
-        ...modal2,
-        open: !modal2.open,
-        showClose: false,
-        offClickClose: true,
-        width: "w-[300px]",
-        maxWidth: "max-w-[400px]",
-        aspectRatio: "aspect-[5/2]",
-        borderRadius: "rounded-[12px] md:rounded-[15px]",
-        content: (
-          <Modal2Continue
-            text={`Save changes to your data?`}
-            onContinue={async () => {
-              await saveProducts();
-              router.push(`/products/`);
-            }}
-          />
-        ),
-      });
-    } else {
-      router.push(`/products`);
-    }
+    pageClick(newPage);
   };
 
   if (!currentUser) return null;
@@ -216,8 +185,10 @@ const LeftBar = () => {
             className="relative w-[100%] h-[100%] px-[20px] pt-[11px] items-start flex flex-col"
           >
             <div className="w-[100%] justify-between flex flex-row items-center">
-              <Link
-                href="/"
+              <div
+                onClick={() => {
+                  handlePageClick("/");
+                }}
                 className="mt-[5px] dim hover:brightness-75 cursor-pointer w-[100%] flex gap-[7px] items-center rounded-[10px] px-[12px] py-[5px]"
                 style={{
                   backgroundColor:
@@ -226,15 +197,10 @@ const LeftBar = () => {
                       : "transparent",
                   color: appTheme[currentUser.theme].text_1,
                 }}
-                onClick={() => {
-                  if (windowWidth < 1024) {
-                    closeLeftBar();
-                  }
-                }}
               >
                 <BiWindows className="w-[17px] h-[17px]" />
                 <p>Data</p>
-              </Link>
+              </div>
               <LuPanelLeftClose
                 style={{ color: appTheme[currentUser.theme].text_4 }}
                 className="hidden lg:block dim cursor-pointer brightness-75 hover:brightness-50 w-[24px] h-[24px] mr-[-8px] ml-[10px] mt-[5px]"
@@ -260,10 +226,7 @@ const LeftBar = () => {
                     : "transparent",
               }}
               onClick={() => {
-                if (windowWidth < 1024) {
-                  closeLeftBar();
-                }
-                handleProductsClick();
+                handlePageClick("/products");
               }}
             >
               <MdLibraryBooks className="w-[17px] h-[17px]" />

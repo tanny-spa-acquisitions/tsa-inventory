@@ -18,7 +18,7 @@ import "./Navbar.css";
 
 const Navbar = () => {
   const { currentUser } = useContext(AuthContext);
-  const { editingLock } = useAppContext();
+  const { editingLock, pageClick } = useAppContext();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
   const leftBarOpen = useLeftBarOpenStore((state: any) => state.leftBarOpen);
@@ -97,8 +97,8 @@ const Navbar = () => {
             color={appTheme[currentUser.theme].text_1}
             fontSize={29}
           />
-          <Link
-            href="/"
+          <div
+            onClick={() => pageClick("/")}
             className="flex flex-row gap-[5px] items-center cursor-pointer dim hover:brightness-75 pr-[6px]"
           >
             <img
@@ -121,7 +121,7 @@ const Navbar = () => {
             >
               {appDetails.project_name}
             </p>
-          </Link>
+          </div>
         </div>
 
         <div className="h-[100%] mr-[10px] pr-[2px] hidden min-[500px]:flex flex-row items-center gap-[18px]">

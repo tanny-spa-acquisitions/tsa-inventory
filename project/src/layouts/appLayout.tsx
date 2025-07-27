@@ -97,14 +97,20 @@ const UnprotectedLayout = () => {
 };
 
 const ProtectedLayout = ({ children }: { children: ReactNode }) => {
-  const { editingLock, setSelectedProducts, setEditMode, setNewRows } =
-    useAppContext();
+  const {
+    editingLock,
+    setSelectedProducts,
+    setEditMode,
+    setNewRows,
+    setAddProductPage,
+  } = useAppContext();
   const pathName = usePathname();
 
   useEffect(() => {
     setSelectedProducts([]);
     setEditMode(false);
     setNewRows([]);
+    setAddProductPage(false);
   }, [setSelectedProducts, pathName]);
 
   return (

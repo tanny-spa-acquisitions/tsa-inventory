@@ -144,9 +144,6 @@ const InventoryGrid = () => {
       <div className="absolute w-[100%] h-[100%] left-0 top-0 px-[20px]">
         <div
           className="mt-[75px] h-[calc(100%-75px)] w-[100%] min-h-[101px] relative rounded-t-[13px]"
-          // style={{
-          //   border: `0.5px solid ${appTheme[currentUser.theme].background_3}`,
-          // }}
         >
           <div
             style={{

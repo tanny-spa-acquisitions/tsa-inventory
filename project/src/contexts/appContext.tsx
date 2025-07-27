@@ -18,7 +18,9 @@ import {
 import { ProductFormData } from "@/components/ProductPage/ProductPage";
 import { Product, useContextQueries } from "./queryContext";
 import { toast } from "react-toastify";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useModal2Store } from "@/store/useModalStore";
+import Modal2Continue from "@/modals/Modal2Continue";
 
 type AppContextType = {
   editingLock: boolean;
@@ -45,8 +47,13 @@ type AppContextType = {
   newRows: Product[];
   setNewRows: React.Dispatch<React.SetStateAction<Product[]>>;
   saveProducts: () => Promise<void>;
+  productFormRef: React.RefObject<UseFormReturn<ProductFormData> | null>;
   formRefs: React.RefObject<Map<string, UseFormReturn<ProductFormData>>>;
   previousPath: string | null;
+  pageClick: (newPage: string) => void;
+  // onSubmit: (newProduct: boolean, data: ProductFormData) => void;
+  onSubmit: (data: ProductFormData, overrideNewProduct?: boolean) => void;
+  submitProductForm: () => Promise<void>;
 };
 
 export type FileImage = {
@@ -63,9 +70,14 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { productsData } = useContextQueries();
   const pathname = usePathname();
   const [previousPath, setPreviousPath] = useState<string | null>(null);
   const lastPathRef = useRef<string | null>(null);
+  const router = useRouter();
+  const modal2 = useModal2Store((state: any) => state.modal2);
+  const setModal2 = useModal2Store((state: any) => state.setModal2);
+
   useEffect(() => {
     if (lastPathRef.current !== pathname) {
       setPreviousPath(lastPathRef.current);
@@ -191,6 +203,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [dataFilters, setDataFilters] = useState<DataFilters>({
     listings: "All",
   });
+
   const filteredProducts = (products: Product[]) => {
     if (products.length === 0) return [];
     if (dataFilters.listings === "All") {
@@ -218,6 +231,8 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const formRefs = useRef<Map<string, UseFormReturn<ProductFormData>>>(
     new Map()
   );
+  type ProductFormRef = React.RefObject<UseFormReturn<ProductFormData> | null>;
+  const productFormRef: ProductFormRef = useRef(null);
 
   const saveProducts = async () => {
     const updatedProducts: Product[] = [];
@@ -263,6 +278,92 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const promptSave = (onContinue: () => void) => {
+    setModal2({
+      ...modal2,
+      open: !modal2.open,
+      showClose: false,
+      offClickClose: true,
+      width: "w-[300px]",
+      maxWidth: "max-w-[400px]",
+      aspectRatio: "aspect-[5/2]",
+      borderRadius: "rounded-[12px] md:rounded-[15px]",
+      content: (
+        <Modal2Continue
+          text={`Save changes to your data?`}
+          onContinue={onContinue}
+        />
+      ),
+    });
+  };
+
+  const pageClick = (newPage: string) => {
+    if (pathname === "/") {
+      if (newPage === "/") return;
+      let dirtyRows = 0;
+      for (const [serial, form] of formRefs.current.entries()) {
+        if (Object.keys(form.formState.dirtyFields).length !== 0) {
+          dirtyRows += 1;
+        }
+      }
+      if (newRows.length > 0 || dirtyRows > 0) {
+        const onContinue = async () => {
+          await saveProducts();
+          router.push(`/products/`);
+        };
+        promptSave(onContinue);
+      } else {
+        router.push(newPage);
+      }
+    } else if (pathname.startsWith("/products")) {
+      const isDirty = productFormRef?.current?.formState?.isDirty;
+      if (isDirty) {
+        const onContinue = async () => {
+          await submitProductForm();
+          router.push(newPage);
+        };
+        promptSave(onContinue);
+      } else {
+        router.push(newPage);
+      }
+    } else {
+      router.push(newPage);
+    }
+  };
+
+  const onSubmit = async (
+    data: ProductFormData,
+    overrideNewProduct?: boolean
+  ) => {
+    try {
+      const isNew = overrideNewProduct ?? addProductPage;
+      if (
+        isNew &&
+        productsData.filter((item) => item.serial_number === data.serial_number)
+          .length > 0
+      ) {
+        toast.error("Serial # is already used on another product");
+        return;
+      }
+      const normalizedData: Product = {
+        ...data,
+        note: data.note ?? "",
+        images: Array.isArray(data.images) ? data.images : [],
+      };
+      await updateProducts([normalizedData]);
+      toast.success("Updated products");
+    } catch (error) {
+      toast.error("Error updating products");
+    }
+  };
+
+  const submitProductForm = async () => {
+    const form = productFormRef.current;
+    if (!form) return;
+    const data = form.getValues();
+    await onSubmit(data);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -287,7 +388,11 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setNewRows,
         saveProducts,
         formRefs,
+        productFormRef,
         previousPath,
+        pageClick,
+        onSubmit,
+        submitProductForm,
       }}
     >
       {children}

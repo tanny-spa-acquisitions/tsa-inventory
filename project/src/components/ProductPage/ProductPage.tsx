@@ -5,32 +5,30 @@ import React from "react";
 import { useAppContext } from "@/contexts/appContext";
 import { appTheme } from "@/util/appTheme";
 import { useModal1Store, useModal2Store } from "@/store/useModalStore";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Product, useContextQueries } from "@/contexts/queryContext";
+import { useContextQueries } from "@/contexts/queryContext";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import ProductImages from "@/components/ProductPage/ProductImages";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaChevronLeft } from "react-icons/fa6";
-import { IoClose } from "react-icons/io5";
 import UploadModal from "../Upload/Upload";
 import { ProductFormData } from "@/util/schemas/productSchema";
 import { useProductForm } from "@/hooks/useProductForm";
 import ProductInputField from "../Forms/ProductInputField";
-import { toast } from "react-toastify";
 import Modal2Continue from "@/modals/Modal2Continue";
+import { toast } from "react-toastify";
 
-const ProductPage = ({
-  newProduct,
-  serialNumber,
-}: {
-  newProduct: boolean;
-  serialNumber?: string;
-}) => {
+const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
   const { currentUser } = useContext(AuthContext);
-  const { setUploadPopup, setAddProductPage, previousPath } = useAppContext();
-  const { updateProducts, productsData } = useContextQueries();
+  const {
+    setUploadPopup,
+    setAddProductPage,
+    previousPath,
+    productFormRef,
+    onSubmit,
+    addProductPage: newProduct,
+  } = useAppContext();
+  const { productsData } = useContextQueries();
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
   const router = useRouter();
@@ -41,6 +39,12 @@ const ProductPage = ({
   const dateSold = form.watch("date_sold");
   const dateEntered = form.watch("date_entered");
   const images = form.watch("images");
+
+  useEffect(() => {
+    if (productFormRef) {
+      productFormRef.current = form;
+    }
+  }, [form, productFormRef]);
 
   useEffect(() => {
     if (!newProduct && serialNumber && productsData?.length) {
@@ -75,25 +79,6 @@ const ProductPage = ({
     form.reset();
   };
 
-  const onSubmit = async (data: ProductFormData) => {
-    if (
-      newProduct &&
-      productsData.filter((item) => item.serial_number === data.serial_number)
-        .length > 0
-    ) {
-      toast.error("Serial # is already used on another product");
-      return;
-    }
-    const normalizedData: Product = {
-      ...data,
-      note: data.note ?? "",
-      images: Array.isArray(data.images) ? data.images : [],
-    };
-    await updateProducts([normalizedData]);
-    resetForm();
-    handleBackButton();
-  };
-
   if (!newProduct && serialNumber && productsData?.length) {
     const productExists = productsData.some(
       (p) => p.serial_number === serialNumber
@@ -107,15 +92,16 @@ const ProductPage = ({
     }
   }
 
-  const handleBackButton = () => {
-    const goToPrev = () => {
-      if (previousPath === "/") {
-        router.push("/");
-      } else {
-        router.push("/products");
-      }
-    };
+  const goToPrev = () => {
+    if (previousPath === "/") {
+      router.push("/");
+    } else {
+      setAddProductPage(false);
+      router.push("/products");
+    }
+  };
 
+  const handleBackButton = () => {
     if (form.formState.isDirty) {
       if (!currentUser) return null;
       setModal2({
@@ -132,7 +118,7 @@ const ProductPage = ({
             text={`Save changes to your data?`}
             onContinue={form.handleSubmit(async (data) => {
               await onSubmit(data);
-              goToPrev()
+              goToPrev();
             })}
           />
         ),
@@ -141,7 +127,7 @@ const ProductPage = ({
       if (newProduct) {
         setAddProductPage(false);
       } else {
-        goToPrev()
+        goToPrev();
       }
     }
   };
@@ -171,6 +157,12 @@ const ProductPage = ({
     } else {
       router.push("/products");
     }
+  };
+
+  const handleSubmit = async (data: ProductFormData) => {
+    await onSubmit(data);
+    resetForm();
+    goToPrev();
   };
 
   if (!currentUser) return null;
@@ -247,7 +239,7 @@ const ProductPage = ({
         />
 
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(handleSubmit)}
           className="gap-[10px] mt-[10px]"
         >
           <ProductInputField
@@ -283,7 +275,8 @@ const ProductPage = ({
               onInput={(e) => {
                 e.currentTarget.value = e.currentTarget.value
                   .toUpperCase()
-                  .replace(/[^A-Z0-9]/g, "");
+                  .replace(/[^A-Z0-9]/g, "")
+                  .slice(0, 14);
               }}
             />
 
@@ -487,7 +480,7 @@ const ProductPage = ({
 
             <div
               onClick={() => {
-                handleBackButton();
+                goToPrev();
                 form.reset();
               }}
               className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold flex items-center justify-center"

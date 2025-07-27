@@ -42,7 +42,7 @@ const ProductInputField = <T extends FieldValues>({
   rows?: number;
   onInput?: React.InputHTMLAttributes<HTMLInputElement>["onInput"];
   options?: string[];
-  selected?: Date | undefined
+  selected?: Date | undefined;
   onChange?: (date: Date | null) => void;
   onCancel?: () => void;
 }) => {
@@ -50,7 +50,14 @@ const ProductInputField = <T extends FieldValues>({
   if (!currentUser) return null;
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      style={{
+        position: "relative",
+        ["--custom-input-text-color" as any]:
+          appTheme[currentUser.theme].text_1,
+      }}
+    >
       <label className="block font-[400]">{label}</label>
       {inputType === "input" ? (
         <input
