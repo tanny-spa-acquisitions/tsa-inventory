@@ -35,6 +35,27 @@ const ProductsHeader = ({ title }: { title: String }) => {
   const setModal2 = useModal2Store((state: any) => state.setModal2);
 
   const handleWixSync = async () => {
+    if (!currentUser) return null;
+    setModal2({
+      ...modal2,
+      open: !modal2.open,
+      showClose: false,
+      offClickClose: true,
+      width: "w-[300px]",
+      maxWidth: "max-w-[400px]",
+      aspectRatio: "aspect-[5/2]",
+      borderRadius: "rounded-[12px] md:rounded-[15px]",
+      content: (
+        <Modal2Continue
+          text={`Sync data to Wix website?`}
+          onContinue={wixSync}
+          threeOptions={false}
+        />
+      ),
+    });
+  };
+
+  const wixSync = async () => {
     setEditingLock(true);
     try {
       await makeRequest.post("/api/products/wix-sync");

@@ -20,8 +20,6 @@ const ProductsPage = () => {
     useContextQueries();
   const { addProductPage, setAddProductPage, editMode, dataFilters } =
     useAppContext();
-  const modal1 = useModal1Store((state: any) => state.modal1);
-  const setModal1 = useModal1Store((state: any) => state.setModal1);
 
   const handleAddProduct = () => {
     setAddProductPage(true);
