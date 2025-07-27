@@ -278,7 +278,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const promptSave = (onContinue: () => void) => {
+  const promptSave = (onNoSave: () => void, onContinue: () => void) => {
     setModal2({
       ...modal2,
       open: !modal2.open,
@@ -290,8 +290,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       borderRadius: "rounded-[12px] md:rounded-[15px]",
       content: (
         <Modal2Continue
-          text={`Save changes to your data?`}
+          text={`Save products before continuing?`}
           onContinue={onContinue}
+          threeOptions={true}
+          onNoSave={onNoSave}
         />
       ),
     });
@@ -311,7 +313,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
           await saveProducts();
           router.push(`/products/`);
         };
-        promptSave(onContinue);
+        promptSave(() => router.push(newPage), onContinue);
       } else {
         router.push(newPage);
       }
@@ -322,7 +324,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
           await submitProductForm();
           router.push(newPage);
         };
-        promptSave(onContinue);
+        promptSave(() => router.push(newPage), onContinue);
       } else {
         router.push(newPage);
       }

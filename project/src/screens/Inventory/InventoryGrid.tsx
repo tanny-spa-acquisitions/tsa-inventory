@@ -124,7 +124,7 @@ const InventoryGrid = () => {
   };
 
   const deleteNewRow = (index: number) => () => {
-    const itemIndex = index - productsData.length;
+    const itemIndex = index - filteredProducts(productsData).length;
     setNewRows((prev) => {
       if (itemIndex >= 0 && itemIndex < prev.length) {
         return prev.filter((_, i) => i !== itemIndex);

@@ -90,7 +90,9 @@ const InventoryRowForm = ({
           borderRadius: "rounded-[12px] md:rounded-[15px]",
           content: (
             <Modal2Continue
-              text={`Save changes to your data?`}
+              threeOptions={true}
+              onNoSave={() => router.push(`/products/${product.serial_number}`)}
+              text={`Save products before continuing?`}
               onContinue={async () => {
                 await saveProducts();
                 router.push(`/products/${product.serial_number}`);
@@ -115,7 +117,9 @@ const InventoryRowForm = ({
           borderRadius: "rounded-[12px] md:rounded-[15px]",
           content: (
             <Modal2Continue
-              text={`Save changes to your data?`}
+              threeOptions={true}
+              text={`Save products before continuing?`}
+              onNoSave={() => router.push(`/products/${product.serial_number}`)}
               onContinue={async () => {
                 await saveProducts();
                 router.push(`/products/${product.serial_number}`);

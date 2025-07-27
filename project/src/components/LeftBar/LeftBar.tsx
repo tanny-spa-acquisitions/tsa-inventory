@@ -13,7 +13,7 @@ import { MdLibraryBooks } from "react-icons/md";
 import { LuPanelLeftClose } from "react-icons/lu";
 import { BiWindows } from "react-icons/bi";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAppContext } from "@/contexts/appContext";
 
 const LeftBar = () => {
@@ -139,6 +139,7 @@ const LeftBar = () => {
             "?"
           }
           onContinue={handleLogout}
+          threeOptions={false}
         />
       ),
     });

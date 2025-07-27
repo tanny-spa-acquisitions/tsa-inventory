@@ -9,7 +9,6 @@ import { toast } from "react-toastify";
 import { useAppContext } from "@/contexts/appContext";
 import { makeRequest } from "@/util/axios";
 import { GOOGLE_SHEET_URL } from "@/util/config";
-import { GoTrash } from "react-icons/go";
 import { IoTrashSharp } from "react-icons/io5";
 import { Product, useContextQueries } from "@/contexts/queryContext";
 import { usePathname } from "next/navigation";
@@ -76,6 +75,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
             selectedProducts.length > 1 ? "s" : ""
           } from inventory?`}
           onContinue={handleDeleteSelected}
+          threeOptions={false}
         />
       ),
     });

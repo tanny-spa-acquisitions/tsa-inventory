@@ -58,7 +58,6 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     queryKey: ["products"],
     queryFn: async () => {
       const res = await makeRequest.get("/api/products/get", {});
-      console.log(res.data.products);
       return res.data.products || [];
     },
     staleTime: 1000 * 60 * 5,
@@ -78,9 +77,6 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
       await queryClient.cancelQueries({ queryKey });
       const previousData = queryClient.getQueryData<Product[]>(queryKey);
       if (!previousData) return { previousData, queryKey };
-      const updatedSerials = new Set(
-        updatedProducts.map((p) => p.serial_number)
-      );
       const newData = previousData.map((product) => {
         const updated = updatedProducts.find(
           (p) => p.serial_number === product.serial_number

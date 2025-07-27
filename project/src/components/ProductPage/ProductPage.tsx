@@ -16,7 +16,6 @@ import { ProductFormData } from "@/util/schemas/productSchema";
 import { useProductForm } from "@/hooks/useProductForm";
 import ProductInputField from "../Forms/ProductInputField";
 import Modal2Continue from "@/modals/Modal2Continue";
-import { toast } from "react-toastify";
 
 const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
   const { currentUser } = useContext(AuthContext);
@@ -115,11 +114,13 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
         borderRadius: "rounded-[12px] md:rounded-[15px]",
         content: (
           <Modal2Continue
-            text={`Save changes to your data?`}
+            text={`Save products before continuing?`}
             onContinue={form.handleSubmit(async (data) => {
               await onSubmit(data);
               goToPrev();
             })}
+            threeOptions={true}
+            onNoSave={() => goToPrev()}
           />
         ),
       });
@@ -146,11 +147,13 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
         borderRadius: "rounded-[12px] md:rounded-[15px]",
         content: (
           <Modal2Continue
-            text={`Save changes to your data?`}
+            text={`Save products before continuing?`}
             onContinue={form.handleSubmit(async (data) => {
               await onSubmit(data);
               router.push("/products");
             })}
+            threeOptions={true}
+            onNoSave={() => goToPrev()}
           />
         ),
       });
