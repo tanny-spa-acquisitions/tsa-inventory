@@ -11,7 +11,7 @@ const Product = () => {
 
   if (!currentUser) return null;
 
-  return <ProductsPage newProduct={false} serialNumber={serialNumber} />;
+  return <ProductsPage serialNumber={serialNumber} />;
 };
 
 export default Product;
