@@ -149,7 +149,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
   return (
     <div className="flex flex-row relative items-center sm:justify-between justify-end h-[60px] mb-[17px] pt-[20px] px-[20px]">
       <div className="hidden sm:flex flex-row gap-[19px] items-center">
-        <h1 className="select-none hidden md:flex mt-[-5px] text-2xl font-[600]">
+        <h1 className="hidden md:flex mt-[-5px] text-2xl font-[600]">
           {title}
         </h1>
         <div
@@ -169,7 +169,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
                   ? appTheme[currentUser.theme].header_1_2
                   : "transparent",
             }}
-            className="select-none cursor-pointer w-[64px] h-[26px] flex items-center justify-center text-[13px] font-[500] rounded-[18px]"
+            className="cursor-pointer w-[64px] h-[26px] flex items-center justify-center text-[13px] font-[500] rounded-[18px]"
           >
             All
           </div>
@@ -191,7 +191,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
                   ? appTheme[currentUser.theme].header_1_2
                   : "transparent",
             }}
-            className="select-none cursor-pointer w-[64px] h-[26px] flex items-center justify-center text-[13px] font-[500] rounded-[18px]"
+            className="cursor-pointer w-[64px] h-[26px] flex items-center justify-center text-[13px] font-[500] rounded-[18px]"
           >
             Active
           </div>
@@ -213,7 +213,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
                   ? appTheme[currentUser.theme].header_1_2
                   : "transparent",
             }}
-            className="select-none cursor-pointer w-[64px] h-[26px] flex items-center justify-center text-[13px] font-[500] rounded-[18px]"
+            className="cursor-pointer w-[64px] h-[26px] flex items-center justify-center text-[13px] font-[500] rounded-[18px]"
           >
             Sold
           </div>
@@ -225,7 +225,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
           style={{
             backgroundColor: appTheme[currentUser.theme].background_2,
           }}
-          className="select-none dim hover:brightness-75 rounded-[25px] w-[150px] h-[32px] flex flex-row justify-center items-center gap-[6px] text-[13px] font-[600] cursor-pointer"
+          className="dim hover:brightness-75 rounded-[25px] w-[150px] h-[32px] flex flex-row justify-center items-center gap-[6px] text-[13px] font-[600] cursor-pointer"
           onClick={handleGoogleExport}
         >
           <p
@@ -243,7 +243,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
           style={{
             backgroundColor: appTheme[currentUser.theme].background_2,
           }}
-          className="select-none dim hover:brightness-75 rounded-[25px] w-[140px] h-[32px] flex flex-row justify-center items-center gap-[10px] text-[13px] font-[600] cursor-pointer"
+          className="dim hover:brightness-75 rounded-[25px] w-[140px] h-[32px] flex flex-row justify-center items-center gap-[10px] text-[13px] font-[600] cursor-pointer"
           onClick={handleWixSync}
         >
           <p
@@ -264,7 +264,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
               ? `1px solid ${appTheme[currentUser.theme].text_1}`
               : "none",
           }}
-          className="select-none mr-[2px] dim hover:brightness-75 rounded-[25px] w-[33px] h-[33px] flex flex-row justify-center items-center gap-[10px] text-[15px] cursor-pointer"
+          className="mr-[2px] dim hover:brightness-75 rounded-[25px] w-[33px] h-[33px] flex flex-row justify-center items-center gap-[10px] text-[15px] cursor-pointer"
           onClick={() => {
             setEditMode((prev) => !prev);
           }}
@@ -280,7 +280,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
           style={{
             backgroundColor: appTheme[currentUser.theme].background_2,
           }}
-          className="select-none mr-[2px] dim hover:brightness-75 rounded-[25px] w-[33px] h-[33px] flex flex-row justify-center items-center gap-[10px] text-[15px] cursor-pointer"
+          className="mr-[2px] dim hover:brightness-75 rounded-[25px] w-[33px] h-[33px] flex flex-row justify-center items-center gap-[10px] text-[15px] cursor-pointer"
           onClick={handleAddRow}
         >
           <FaPlus
@@ -295,7 +295,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
             style={{
               backgroundColor: appTheme[currentUser.theme].background_2,
             }}
-            className="select-none mr-[2px] dim hover:brightness-75 rounded-[25px] w-[33px] h-[33px] flex flex-row justify-center items-center gap-[10px] text-[15px] cursor-pointer"
+            className="mr-[2px] dim hover:brightness-75 rounded-[25px] w-[33px] h-[33px] flex flex-row justify-center items-center gap-[10px] text-[15px] cursor-pointer"
             onClick={handleConfirmDelete}
           >
             <IoTrashSharp

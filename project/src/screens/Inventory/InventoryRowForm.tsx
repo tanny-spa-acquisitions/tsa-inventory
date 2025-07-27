@@ -135,7 +135,7 @@ const InventoryRowForm = ({
             ) : (
               <div
                 style={{
-                  backgroundColor: appTheme[currentUser.theme].background_1_2,
+                  backgroundColor: appTheme[currentUser.theme].header_1_1,
                 }}
                 className="w-[100%] h-[100%] rounded-[5px] flex items-center justify-center pb-[2px] pr-[2px]"
               >

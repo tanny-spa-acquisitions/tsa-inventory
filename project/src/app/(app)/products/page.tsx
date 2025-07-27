@@ -58,7 +58,7 @@ const ProductsPage = () => {
         <ProductPage newProduct={true} />
       ) : (
         <div className="w-[100%] h-[100%] relative">
-          <div className="absolute top-0 left-0 h-[60px] w-[100%]">
+          <div className="z-[800] absolute top-0 left-0 h-[60px] w-[100%]">
             <ProductsHeader title={"TSA Products"} />
           </div>
           <div className="absolute h-[calc(100%-75px)] mt-[75px] overflow-scroll left-0 w-[100%] px-[30px] pb-[50px]">

@@ -137,21 +137,22 @@ const InventoryGrid = () => {
 
   return (
     <div className="relative w-[100%] h-[100%] overflow-hidden">
-      <div className="absolute top-0 left-0 h-[60px] w-[100%]">
+      <div className="z-[800] absolute top-0 left-0 h-[60px] w-[100%]">
         <ProductsHeader title={"TSA Data"} />
       </div>
-      <div className="absolute pb-[60px] left-0 top-0 mt-[75px] w-[100%] px-[20px] overflow-y-scroll h-[calc(100%-75px)]">
+
+      <div className="absolute w-[100%] h-[100%] left-0 top-0 px-[20px]">
         <div
-          className="w-[100%] min-h-[101px] relative rounded-t-[13px]"
-          style={{
-            border: `0.5px solid ${appTheme[currentUser.theme].background_3}`,
-          }}
+          className="mt-[75px] h-[calc(100%-75px)] w-[100%] min-h-[101px] relative rounded-t-[13px]"
+          // style={{
+          //   border: `0.5px solid ${appTheme[currentUser.theme].background_3}`,
+          // }}
         >
           <div
             style={{
               backgroundColor: appTheme[currentUser.theme].background_2,
             }}
-            className="w-[100%] flex flex-row h-[40px] items-center rounded-t-[13px]"
+            className="absolute top-0 left-0 h-[40px] w-[100%] flex flex-row items-center rounded-t-[13px]"
           >
             <div className="w-[48px] h-[100%] items-center justify-center flex">
               <div
@@ -186,100 +187,125 @@ const InventoryGrid = () => {
             })}
           </div>
 
-          {productsData &&
-            newRows &&
-            filteredProducts(productsData).length > 0 &&
-            [...filteredProducts(productsData), ...newRows].map(
-              (product: Product, index: number) => (
-                <div
-                  style={{
-                    borderTop: `1px solid ${
-                      appTheme[currentUser.theme].background_3
-                    }`,
-                  }}
-                  key={index}
-                  className="select-none w-[100%] flex flex-row h-[60px] items-center"
-                >
-                  <div
-                    className="w-[48px] h-[100%] items-center justify-center flex"
-                    style={{
-                      borderRight: `1px solid ${
-                        appTheme[currentUser.theme].background_3
-                      }`,
-                    }}
-                  >
-                    {productsData?.some(
-                      (p) => p.serial_number === product.serial_number
-                    ) ? (
+          <div className="absolute top-0 left-0 w-[100%] h-[calc(100%-40px)] mt-[40px]">
+            <div className="w-[100%] h-[100%] overflow-y-scroll pb-[20px]">
+              {productsData &&
+                newRows &&
+                filteredProducts(productsData).length > 0 &&
+                [...filteredProducts(productsData), ...newRows].map(
+                  (product: Product, index: number) => (
+                    <div
+                      style={{
+                        borderTop: `0.5px solid ${
+                          appTheme[currentUser.theme].background_3
+                        }`,
+                        borderLeft: `0.5px solid ${
+                          appTheme[currentUser.theme].background_3
+                        }`,
+                        borderRight: `0.5px solid ${
+                          appTheme[currentUser.theme].background_3
+                        }`,
+                        borderBottom:
+                          index ===
+                          [...filteredProducts(productsData), ...newRows]
+                            .length -
+                            1
+                            ? `1px solid ${
+                                appTheme[currentUser.theme].background_3
+                              }`
+                            : `0.5px solid ${
+                                appTheme[currentUser.theme].background_3
+                              }`,
+                      }}
+                      key={index}
+                      className="select-none w-[100%] flex flex-row h-[60px] items-center"
+                    >
                       <div
-                        onClick={() => {
-                          if (
-                            selectedProducts.includes(product.serial_number)
-                          ) {
-                            setSelectedProducts(
-                              selectedProducts.filter(
-                                (sn) => sn !== product.serial_number
-                              )
-                            );
-                          } else {
-                            setSelectedProducts([
-                              ...selectedProducts,
-                              product.serial_number,
-                            ]);
-                          }
-                        }}
+                        className="w-[48px] h-[100%] items-center justify-center flex"
                         style={{
-                          border: `1px solid ${
+                          borderRight: `1px solid ${
                             appTheme[currentUser.theme].background_3
                           }`,
-                          backgroundColor: selectedProducts.includes(
-                            product.serial_number
-                          )
-                            ? appTheme[currentUser.theme].app_color_1
-                            : "transparent",
                         }}
-                        className="cursor-pointer dim w-[17px] h-[17px] rounded-[4px] flex items-center justify-center"
                       >
-                        {selectedProducts.includes(product.serial_number) && (
-                          <FaCheck
-                            color={appTheme[currentUser.theme].text_1}
-                            size={11}
-                          />
+                        {productsData?.some(
+                          (p) => p.serial_number === product.serial_number
+                        ) ? (
+                          <div
+                            onClick={() => {
+                              if (
+                                selectedProducts.includes(product.serial_number)
+                              ) {
+                                setSelectedProducts(
+                                  selectedProducts.filter(
+                                    (sn) => sn !== product.serial_number
+                                  )
+                                );
+                              } else {
+                                setSelectedProducts([
+                                  ...selectedProducts,
+                                  product.serial_number,
+                                ]);
+                              }
+                            }}
+                            style={{
+                              border: `1px solid ${
+                                appTheme[currentUser.theme].background_3
+                              }`,
+                              backgroundColor: selectedProducts.includes(
+                                product.serial_number
+                              )
+                                ? appTheme[currentUser.theme].app_color_1
+                                : "transparent",
+                            }}
+                            className="cursor-pointer dim w-[17px] h-[17px] rounded-[4px] flex items-center justify-center"
+                          >
+                            {selectedProducts.includes(
+                              product.serial_number
+                            ) && (
+                              <FaCheck
+                                color={appTheme[currentUser.theme].text_1}
+                                size={11}
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <div
+                            onClick={deleteNewRow(index)}
+                            style={{
+                              backgroundColor:
+                                appTheme[currentUser.theme].background_2,
+                            }}
+                            className="cursor-pointer dim w-[17px] h-[17px] rounded-full flex items-center justify-center"
+                          >
+                            <div
+                              style={{
+                                backgroundColor:
+                                  appTheme[currentUser.theme].text_1,
+                              }}
+                              className="w-[8px] h-[1px] rounded-[3px]"
+                            ></div>
+                          </div>
                         )}
                       </div>
-                    ) : (
-                      <div
-                        onClick={deleteNewRow(index)}
-                        style={{
-                          backgroundColor:
-                            appTheme[currentUser.theme].background_2,
-                        }}
-                        className="cursor-pointer dim w-[17px] h-[17px] rounded-full flex items-center justify-center"
-                      >
-                        <div
-                          style={{
-                            backgroundColor: appTheme[currentUser.theme].text_1,
-                          }}
-                          className="w-[8px] h-[1px] rounded-[3px]"
-                        ></div>
-                      </div>
-                    )}
-                  </div>
 
-                  <InventoryRowForm
-                    key={product.serial_number}
-                    product={product}
-                    inventoryDataLayout={inventoryDataLayout}
-                    registerFormRef={(serial, formInstance) => {
-                      formRefs.current.set(serial, formInstance);
-                    }}
-                    saveProducts={saveProducts}
-                  />
-                </div>
-              )
-            )}
+                      <InventoryRowForm
+                        key={product.serial_number}
+                        product={product}
+                        inventoryDataLayout={inventoryDataLayout}
+                        registerFormRef={(serial, formInstance) => {
+                          formRefs.current.set(serial, formInstance);
+                        }}
+                        saveProducts={saveProducts}
+                      />
+                    </div>
+                  )
+                )}
+            </div>
+          </div>
         </div>
       </div>
+
       <div
         onClick={saveProducts}
         className="absolute bottom-[35px] right-[30px] h-[40px] w-[110px] font-[600] rounded-[25px] dim cursor-pointer hover:brightness-75 items-center justify-center flex"
