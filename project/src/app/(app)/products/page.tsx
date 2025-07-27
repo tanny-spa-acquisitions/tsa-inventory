@@ -13,6 +13,7 @@ import { Product, useContextQueries } from "@/contexts/queryContext";
 import ProductPage from "../../../components/ProductPage/ProductPage";
 import { IoCloseOutline } from "react-icons/io5";
 import ProductsHeader from "@/components/ProductsHeader/ProductsHeader";
+import { toast } from "react-toastify";
 
 const ProductsPage = () => {
   const { currentUser } = useContext(AuthContext);
@@ -22,7 +23,12 @@ const ProductsPage = () => {
     useAppContext();
 
   const handleDeleteProduct = async (item: Product) => {
-    await deleteProducts([item.serial_number]);
+    try {
+      await deleteProducts([item.serial_number]);
+      toast.success("Deleted product");
+    } catch (error) {
+      toast.error("Failed to delete product");
+    }
   };
 
   const filteredProducts = (products: Product[]) => {

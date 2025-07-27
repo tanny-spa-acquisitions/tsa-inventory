@@ -79,13 +79,18 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
     form.reset();
   };
 
+  if (!currentUser) return null
+
   if (!newProduct && serialNumber && productsData?.length) {
     const productExists = productsData.some(
       (p) => p.serial_number === serialNumber
     );
     if (!productExists) {
       return (
-        <div className="text-center text-xl text-red-500 py-20">
+        <div
+          className="text-center text-xl py-20"
+          style={{ color: appTheme[currentUser.theme].text_1 }}
+        >
           No product found for serial number: <strong>{serialNumber}</strong>
         </div>
       );
@@ -94,7 +99,7 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
 
   const goToPrev = () => {
     if (pathname === "/products") {
-      form.reset()
+      form.reset();
       setAddProductPage(false);
     } else if (previousPath) {
       form.reset();

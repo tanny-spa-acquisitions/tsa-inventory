@@ -27,6 +27,7 @@ const ProductInputCell = <T extends FieldValues>({
   selected,
   onChange,
   onCancel,
+  onType,
 }: {
   inputType: "input" | "textarea" | "dropdown" | "date";
   name: Path<T>;
@@ -38,11 +39,12 @@ const ProductInputCell = <T extends FieldValues>({
   disabled?: boolean;
   className?: string;
   rows?: number;
-  onInput?: React.InputHTMLAttributes<HTMLInputElement>["onInput"];
+  onInput?: React.InputHTMLAttributes<HTMLInputElement | HTMLSelectElement>["onInput"];
   options?: string[];
   selected?: Date | undefined;
   onChange?: (date: Date | null) => void;
   onCancel?: () => void;
+  onType?: (newValue: string) => void;
 }) => {
   const { currentUser } = useContext(AuthContext);
   if (!currentUser) return null;
@@ -79,6 +81,11 @@ const ProductInputCell = <T extends FieldValues>({
           className="resize-none input h-[100%] w-[100%] px-[6px] py-[4px] text-[12px]"
           disabled={disabled}
           rows={rows}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            if (onType) {
+              onType(e.target.value);
+            }
+          }}
           style={{
             borderRight: `0.5px solid ${
               appTheme[currentUser.theme].background_3
@@ -94,6 +101,7 @@ const ProductInputCell = <T extends FieldValues>({
             }`,
           }}
           className="input w-[100%] h-[100%] px-[6px] py-[4px] text-[12px]"
+          onInput={onInput}
         >
           {options &&
             options.map((option: string) => (

@@ -3,6 +3,8 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { appTheme } from "../util/appTheme";
 import { AuthContext } from "../contexts/authContext";
 import { useModal2Store } from "../store/useModalStore";
+import { Product, useContextQueries } from "@/contexts/queryContext";
+import { toast } from "react-toastify";
 
 type Modal2InputProps = {
   text: string;
@@ -13,6 +15,7 @@ const Modal2Input: React.FC<Modal2InputProps> = ({ text, onContinue }) => {
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
   const { currentUser } = useContext(AuthContext);
+  const { productsData } = useContextQueries();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [inputValues, setInputValues] = useState({
@@ -33,10 +36,17 @@ const Modal2Input: React.FC<Modal2InputProps> = ({ text, onContinue }) => {
 
   const handleContinue = () => {
     const trimmed = input.trim();
-    if (step === "serial" && trimmed.length !== 14) {
-      setError(true);
-      inputRef.current?.focus();
-      return;
+    if (step === "serial") {
+      if (trimmed.length !== 14) {
+        setError(true);
+        inputRef.current?.focus();
+        return;
+      } else if (
+        productsData.some((item: Product) => item.serial_number === trimmed)
+      ) {
+        toast.error("Product # already in use");
+        return;
+      }
     }
 
     setError(false);

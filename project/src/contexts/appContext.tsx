@@ -51,9 +51,11 @@ type AppContextType = {
   formRefs: React.RefObject<Map<string, UseFormReturn<ProductFormData>>>;
   previousPath: string | null;
   pageClick: (newPage: string) => void;
-  // onSubmit: (newProduct: boolean, data: ProductFormData) => void;
-  onSubmit: (data: ProductFormData, overrideNewProduct?: boolean) => void;
-  submitProductForm: () => Promise<void>;
+  onSubmit: (
+    data: ProductFormData,
+    overrideNewProduct?: boolean
+  ) => Promise<boolean>;
+  submitProductForm: () => Promise<boolean>;
 };
 
 export type FileImage = {
@@ -236,19 +238,8 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const saveProducts = async () => {
     const updatedProducts: Product[] = [];
-
     for (const [serial, form] of formRefs.current.entries()) {
-      // if (
-      //   newProduct &&
-      //   productsData.filter((item) => item.serial_number === data.serial_number)
-      //     .length > 0
-      // ) {
-      //   toast.error("Serial # is already used on another product");
-      //   return;
-      // }
-
       const values = form.getValues();
-
       if (Object.keys(form.formState.dirtyFields).length === 0) continue;
 
       updatedProducts.push({
@@ -269,7 +260,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       setEditingLock(true);
       await updateProducts([...updatedProducts, ...newRows]);
       setNewRows([]);
-      formRefs.current.clear();
+      for (const [serial, form] of formRefs.current.entries()) {
+        form.reset(form.getValues());
+      }
+
       toast.success("Products updated");
     } catch (err) {
       toast.error("Failed to update products");
@@ -318,16 +312,21 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         router.push(newPage);
       }
     } else if (pathname.startsWith("/products")) {
+      const onContinue = async () => {
+        const result = await submitProductForm();
+        if (result) {
+          router.push(newPage);
+        }
+      };
       if (pathname === "/products") {
-        router.push(newPage);
+        if (addProductPage) {
+          promptSave(() => router.push(newPage), onContinue);
+        } else {
+          router.push(newPage);
+        }
       } else {
         const isDirty = productFormRef?.current?.formState?.isDirty;
         if (isDirty) {
-          console.log(productFormRef.current?.formState.dirtyFields);
-          const onContinue = async () => {
-            await submitProductForm();
-            router.push(newPage);
-          };
           promptSave(() => router.push(newPage), onContinue);
         } else {
           router.push(newPage);
@@ -346,7 +345,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       const isNew = overrideNewProduct ?? addProductPage;
       if (data.serial_number.length !== 14) {
         toast.error("Serial # is not 14 characters");
-        return;
+        return false;
       }
       if (
         isNew &&
@@ -354,7 +353,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
           .length > 0
       ) {
         toast.error("Serial # is already used on another product");
-        return;
+        return false;
       }
       const normalizedData: Product = {
         ...data,
@@ -363,16 +362,22 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       };
       await updateProducts([normalizedData]);
       toast.success("Updated products");
+      return true;
     } catch (error) {
       toast.error("Error updating products");
+      return false;
     }
   };
 
   const submitProductForm = async () => {
     const form = productFormRef.current;
-    if (!form) return;
+    if (!form) return false;
     const data = form.getValues();
-    await onSubmit(data);
+    try {
+      return await onSubmit(data);
+    } catch (err) {
+      return false;
+    }
   };
 
   return (

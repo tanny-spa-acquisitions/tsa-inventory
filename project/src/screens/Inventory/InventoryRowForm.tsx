@@ -213,10 +213,9 @@ const InventoryRowForm = ({
             value = parts[0] + "." + parts[1];
           }
           e.currentTarget.value = value;
-          form.setValue("price", parseFloat(value), {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
+          // form.setValue("price", parseFloat(value), {
+          //   shouldDirty: true,
+          // });
         }}
         register={form.register}
         registerOptions={{
@@ -268,10 +267,10 @@ const InventoryRowForm = ({
             value = parts[0] + "." + parts[1];
           }
           e.currentTarget.value = value;
-          form.setValue("length", parseFloat(value), {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
+          // form.setValue("length", parseFloat(value), {
+          //   shouldDirty: true,
+          //   shouldValidate: true,
+          // });
         }}
         register={form.register}
         registerOptions={{
@@ -301,10 +300,10 @@ const InventoryRowForm = ({
             value = parts[0] + "." + parts[1];
           }
           e.currentTarget.value = value;
-          form.setValue("width", parseFloat(value), {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
+          // form.setValue("width", parseFloat(value), {
+          //   shouldDirty: true,
+          //   shouldValidate: true,
+          // });
         }}
         register={form.register}
         registerOptions={{
@@ -401,16 +400,25 @@ const InventoryRowForm = ({
         inputType={"textarea"}
         rows={1}
         className={`h-[100%] ${inventoryDataLayout[12].className}`}
+        onType={(newValue: string) => {
+          form.setValue("description", newValue, {
+            shouldDirty: true,
+          });
+        }}
       />
 
       <ProductInputCell
         name="note"
         register={form.register}
         error={form.formState.errors.note?.message}
-        disabled={false}
-        className={`h-[100%] ${inventoryDataLayout[13].className}`}
         inputType={"textarea"}
         rows={1}
+        className={`h-[100%] ${inventoryDataLayout[13].className}`}
+        onType={(newValue: string) => {
+          form.setValue("note", newValue, {
+            shouldDirty: true,
+          });
+        }}
       />
     </form>
   );
