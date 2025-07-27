@@ -318,15 +318,20 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         router.push(newPage);
       }
     } else if (pathname.startsWith("/products")) {
-      const isDirty = productFormRef?.current?.formState?.isDirty;
-      if (isDirty) {
-        const onContinue = async () => {
-          await submitProductForm();
-          router.push(newPage);
-        };
-        promptSave(() => router.push(newPage), onContinue);
-      } else {
+      if (pathname === "/products") {
         router.push(newPage);
+      } else {
+        const isDirty = productFormRef?.current?.formState?.isDirty;
+        if (isDirty) {
+          console.log(productFormRef.current?.formState.dirtyFields);
+          const onContinue = async () => {
+            await submitProductForm();
+            router.push(newPage);
+          };
+          promptSave(() => router.push(newPage), onContinue);
+        } else {
+          router.push(newPage);
+        }
       }
     } else {
       router.push(newPage);
@@ -339,6 +344,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     try {
       const isNew = overrideNewProduct ?? addProductPage;
+      if (data.serial_number.length !== 14) {
+        toast.error("Serial # is not 14 characters");
+        return;
+      }
       if (
         isNew &&
         productsData.filter((item) => item.serial_number === data.serial_number)

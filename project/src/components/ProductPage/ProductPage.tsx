@@ -9,7 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useContextQueries } from "@/contexts/queryContext";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import ProductImages from "@/components/ProductPage/ProductImages";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FaChevronLeft } from "react-icons/fa6";
 import UploadModal from "../Upload/Upload";
 import { ProductFormData } from "@/util/schemas/productSchema";
@@ -33,6 +33,7 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
   const router = useRouter();
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
+  const pathname = usePathname();
 
   const form = useProductForm();
   const dateSold = form.watch("date_sold");
@@ -92,11 +93,13 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
   }
 
   const goToPrev = () => {
-    if (previousPath === "/") {
-      router.push("/");
-    } else {
+    if (pathname === "/products") {
+      form.reset()
       setAddProductPage(false);
-      router.push("/products");
+    } else if (previousPath) {
+      form.reset();
+      setAddProductPage(false);
+      router.push(previousPath);
     }
   };
 
@@ -482,10 +485,7 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
             )}
 
             <div
-              onClick={() => {
-                goToPrev();
-                form.reset();
-              }}
+              onClick={handleBackButton}
               className="cursor-pointer dim hover:brightness-75 mt-[20px] w-[200px] h-[40px] rounded-[8px] text-white font-semibold flex items-center justify-center"
               style={{
                 backgroundColor: currentUser.theme === "dark" ? "#999" : "#bbb",

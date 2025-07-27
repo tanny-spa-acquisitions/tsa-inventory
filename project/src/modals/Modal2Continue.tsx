@@ -3,6 +3,8 @@ import { useContext, useEffect } from "react";
 import { appTheme } from "../util/appTheme";
 import { AuthContext } from "../contexts/authContext";
 import { useModal2Store } from "../store/useModalStore";
+import { useAppContext } from "@/contexts/appContext";
+import { usePathname } from "next/navigation";
 
 type Modal2ContinueProps = {
   text: string;
@@ -48,6 +50,7 @@ const Modal2Continue: React.FC<Modal2ContinueProps> = ({
       ...modal2,
       open: false,
     });
+
     if (onNoSave) {
       onNoSave();
     }

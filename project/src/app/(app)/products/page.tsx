@@ -21,10 +21,6 @@ const ProductsPage = () => {
   const { addProductPage, setAddProductPage, editMode, dataFilters } =
     useAppContext();
 
-  const handleAddProduct = () => {
-    setAddProductPage(true);
-  };
-
   const handleDeleteProduct = async (item: Product) => {
     await deleteProducts([item.serial_number]);
   };
@@ -60,16 +56,6 @@ const ProductsPage = () => {
             <ProductsHeader title={"TSA Products"} />
           </div>
           <div className="absolute h-[calc(100%-70px)] mt-[70px] pt-[8px] overflow-scroll left-0 w-[100%] px-[30px] pb-[50px]">
-            <div
-              onClick={handleAddProduct}
-              style={{
-                backgroundColor: appTheme[currentUser.theme].app_color_1,
-              }}
-              className="cursor-pointer dim hover:brightness-75 items-center justify-center flex z-[900] rounded-full fixed bottom-[45px] right-[45px] w-[50px] h-[50px]"
-            >
-              <FaPlus className="w-[23px] h-[23px]" color="white" />
-            </div>
-
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-[30px]">
               {productsData && filteredProducts(productsData).length > 0 ? (
                 filteredProducts(productsData).map((item, index) => {

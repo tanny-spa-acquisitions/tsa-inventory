@@ -29,10 +29,12 @@ const ProductsHeader = ({ title }: { title: String }) => {
     selectedProducts,
     setSelectedProducts,
     setNewRows,
+    setAddProductPage,
   } = useAppContext();
   const { deleteProducts } = useContextQueries();
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
+  const pathname = usePathname();
 
   const handleWixSync = async () => {
     if (!currentUser) return null;
@@ -124,25 +126,31 @@ const ProductsHeader = ({ title }: { title: String }) => {
   };
 
   const handleAddRow = () => {
-    if (!currentUser) return null;
-    setModal2({
-      ...modal2,
-      open: !modal2.open,
-      showClose: false,
-      offClickClose: true,
-      width: "w-[300px]",
-      maxWidth: "max-w-[400px]",
-      aspectRatio: "aspect-[5/2]",
-      borderRadius: "rounded-[12px] md:rounded-[15px]",
-      content: (
-        <Modal2Input
-          text={`Enter a new product serial number:`}
-          onContinue={(newSerial: string, newMake: string, newModel: string) =>
-            addRow(newSerial, newMake, newModel)
-          }
-        />
-      ),
-    });
+    if (pathname.startsWith("/products")) {
+      setAddProductPage(true);
+    } else {
+      if (!currentUser) return null;
+      setModal2({
+        ...modal2,
+        open: !modal2.open,
+        showClose: false,
+        offClickClose: true,
+        width: "w-[300px]",
+        maxWidth: "max-w-[400px]",
+        aspectRatio: "aspect-[5/2]",
+        borderRadius: "rounded-[12px] md:rounded-[15px]",
+        content: (
+          <Modal2Input
+            text={`Enter a new product serial number:`}
+            onContinue={(
+              newSerial: string,
+              newMake: string,
+              newModel: string
+            ) => addRow(newSerial, newMake, newModel)}
+          />
+        ),
+      });
+    }
   };
 
   const addRow = (newSerial: string, newMake: string, newModel: string) => {
