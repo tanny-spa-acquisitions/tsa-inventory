@@ -36,7 +36,7 @@ const InventoryGrid = () => {
     {
       title: "Serial",
       titlePaddingLeft: "6px",
-      className: "hidden [@media(min-width:650px)]:flex w-[120px]",
+      className: "hidden [@media(min-width:670px)]:flex w-[134px]",
     },
     {
       title: "Title",
@@ -52,23 +52,23 @@ const InventoryGrid = () => {
       title: "Make",
       titlePaddingLeft: "6px",
       className:
-        "hidden [@media(min-width:800px)]:flex min-w-[80px] flex-grow basis-0",
+        "hidden [@media(min-width:820px)]:flex min-w-[80px] flex-grow basis-0",
     },
     {
       title: "Model",
       titlePaddingLeft: "5px",
       className:
-        "hidden [@media(min-width:800px)]:flex min-w-[80px] flex-grow basis-0",
+        "hidden [@media(min-width:820px)]:flex min-w-[80px] flex-grow basis-0",
     },
     {
       title: "Length",
       titlePaddingLeft: "0px",
-      className: "hidden [@media(min-width:1150px)]:flex w-[65px]",
+      className: "hidden [@media(min-width:1150px)]:flex w-[58px]",
     },
     {
       title: "Width",
       titlePaddingLeft: "3px",
-      className: "hidden [@media(min-width:1150px)]:flex w-[65px]",
+      className: "hidden [@media(min-width:1150px)]:flex w-[58px]",
     },
     {
       title: "Repairs",
@@ -83,13 +83,13 @@ const InventoryGrid = () => {
     {
       title: "Entered",
       titlePaddingLeft: "2px",
-      className: "hidden [@media(min-width:1360px)]:flex w-[85px]",
+      className: "hidden [@media(min-width:1380px)]:flex w-[85px]",
     },
     {
       title: "Sold",
       titlePaddingLeft: "3px",
 
-      className: "hidden [@media(min-width:1360px)]:flex w-[85px]",
+      className: "hidden [@media(min-width:1380px)]:flex w-[85px]",
     },
     {
       title: "Description",
