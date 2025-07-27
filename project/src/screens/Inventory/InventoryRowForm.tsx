@@ -66,16 +66,17 @@ const InventoryRowForm = ({
   }, [newProduct, product.serial_number, form.reset]);
 
   const handleImageClick = () => {
+    let dirtyRows = 0;
+    for (const [serial, form] of formRefs.current.entries()) {
+      if (Object.keys(form.formState.dirtyFields).length !== 0) {
+        dirtyRows += 1;
+      }
+    }
+
     const exists = productsData?.some(
       (p) => p.serial_number === product.serial_number
     );
     if (exists) {
-      let dirtyRows = 0;
-      for (const [serial, form] of formRefs.current.entries()) {
-        if (Object.keys(form.formState.dirtyFields).length !== 0) {
-          dirtyRows += 1;
-        }
-      }
       if (newRows.length > 0 || dirtyRows > 0) {
         if (!currentUser) return null;
         setModal2({
@@ -100,8 +101,32 @@ const InventoryRowForm = ({
       } else {
         router.push(`/products/${product.serial_number}`);
       }
+    } else {
+      if (newRows.length > 0 || dirtyRows > 0) {
+        if (!currentUser) return null;
+        setModal2({
+          ...modal2,
+          open: !modal2.open,
+          showClose: false,
+          offClickClose: true,
+          width: "w-[300px]",
+          maxWidth: "max-w-[400px]",
+          aspectRatio: "aspect-[5/2]",
+          borderRadius: "rounded-[12px] md:rounded-[15px]",
+          content: (
+            <Modal2Continue
+              text={`Save changes to your data?`}
+              onContinue={async () => {
+                await saveProducts();
+                router.push(`/products/${product.serial_number}`);
+              }}
+            />
+          ),
+        });
+      } else {
+        return;
+      }
     }
-    return;
   };
 
   if (!currentUser) return null;
