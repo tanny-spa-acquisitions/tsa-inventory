@@ -1,8 +1,8 @@
 import { z } from "zod";
  
 export const ProductSchema = z.object({
-  name: z.string().min(1, "Required"),
-  description: z.string().min(1, "Required"),
+  name: z.string(),
+  description: z.string(),
   serial_number: z
     .string()
     .min(14, "14 Characters Required")

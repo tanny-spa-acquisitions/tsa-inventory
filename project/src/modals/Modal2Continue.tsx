@@ -1,5 +1,5 @@
 "use client";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { appTheme } from "../util/appTheme";
 import { AuthContext } from "../contexts/authContext";
 import { useModal2Store } from "../store/useModalStore";
@@ -15,6 +15,22 @@ const Modal2Continue: React.FC<Modal2ContinueProps> = ({
 }) => {
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
+
+  const handleContinue = () => {
+    setModal2({ ...modal2, open: false });
+    onContinue();
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        handleContinue();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const { currentUser } = useContext(AuthContext);
   if (!currentUser) return null;
@@ -48,10 +64,7 @@ const Modal2Continue: React.FC<Modal2ContinueProps> = ({
             color: appTheme[currentUser.theme].background_1_2,
             backgroundColor: appTheme[currentUser.theme].text_3,
           }}
-          onClick={() => {
-            setModal2({ ...modal2, open: false });
-            onContinue();
-          }}
+          onClick={handleContinue}
         >
           Continue
         </div>

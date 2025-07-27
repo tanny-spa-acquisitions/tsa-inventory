@@ -51,7 +51,8 @@ function SortableImage({
     transform: CSS.Transform.toString(transform),
     transition,
     cursor: "grab",
-    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 999 : 1,
+    position: "relative", 
   };
 
   const startPos = useRef<{ x: number; y: number } | null>(null);
@@ -91,25 +92,27 @@ function SortableImage({
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
     >
-      <div {...listeners} className="absolute inset-0 z-10 cursor-grab" />
-      <Image
-        src={url}
-        alt="image"
-        width={200}
-        height={200}
-        className="object-cover w-full h-full rounded-[10px]"
-      />
-      <div
-        style={{
-          border: `1px solid ${appTheme[currentUser.theme].text_4}`,
-          backgroundColor: appTheme[currentUser.theme].background_1,
-        }}
-        className="ignore-click w-[20px] h-[20px] flex items-center justify-center dim hover:brightness-75 cursor-pointer rounded-[10px] absolute top-[-8px] right-[-9px] z-20"
-        onClick={() => {
-          handleDeleteImage(url);
-        }}
-      >
-        <IoCloseOutline color={appTheme[currentUser.theme].text_2} />
+      <div className=" cursor-pointer hover:brightness-75 dim w-[100%] h-[100%] inset-0">
+        <div {...listeners} className="absolute inset-0 z-10 cursor-grab" />
+        <Image
+          src={url}
+          alt="image"
+          width={200}
+          height={200}
+          className="object-cover w-full h-full rounded-[10px]"
+        />
+        <div
+          style={{
+            border: `1px solid ${appTheme[currentUser.theme].text_4}`,
+            backgroundColor: appTheme[currentUser.theme].background_1,
+          }}
+          className="ignore-click w-[20px] h-[20px] flex items-center justify-center dim hover:brightness-75 cursor-pointer rounded-[10px] absolute top-[-8px] right-[-9px] z-20"
+          onClick={() => {
+            handleDeleteImage(url);
+          }}
+        >
+          <IoCloseOutline color={appTheme[currentUser.theme].text_2} />
+        </div>
       </div>
     </div>
   );

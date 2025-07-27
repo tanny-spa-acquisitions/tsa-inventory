@@ -29,12 +29,12 @@ const CustomInventoryFrame = ({
       href={
         TubID && TubID.trim().length !== 0 ? `/products/${TubID}` : "/products"
       }
-      className="select-none group cursor-pointer rounded-[5px] overflow-hidden relative w-[100%] h-[100%] flex flex-col"
+      className="select-none group hover:brightness-75 dim cursor-pointer rounded-[5px] overflow-hidden relative w-[100%] h-[100%] flex flex-col"
       style={{
         backgroundColor: appTheme[currentUser.theme].background_2,
       }}
     >
-      <div className="dim group-hover:brightness-75 w-[100%] h-[100%]">
+      <div className="dim w-[100%] h-[100%]">
         <div className="relative w-[100%] aspect-[16/9] overflow-hidden">
           <img
             className="w-[100%] h-[100%] object-cover"
@@ -70,7 +70,7 @@ const CustomInventoryFrame = ({
         </div>
       </div>
 
-      <div className="group-hover:brightness-75 hover:brightness-100 dim absolute bottom-[7px] left-0 mx-[9px] py-[2px] pr-[6px] pl-[4px]  w-fit flex flex-row gap-[8px] items-center">
+      <div className="dim absolute bottom-[7px] left-0 mx-[9px] py-[2px] pr-[6px] pl-[4px]  w-fit flex flex-row gap-[8px] items-center">
         <div
           className="w-[25px] h-[25px] min-w-[25px] overflow-hidden rounded-full"
           style={{

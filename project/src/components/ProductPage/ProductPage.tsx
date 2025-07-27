@@ -4,7 +4,7 @@ import { AuthContext } from "../../contexts/authContext";
 import React from "react";
 import { useAppContext } from "@/contexts/appContext";
 import { appTheme } from "@/util/appTheme";
-import { useModal1Store } from "@/store/useModalStore";
+import { useModal1Store, useModal2Store } from "@/store/useModalStore";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Product, useContextQueries } from "@/contexts/queryContext";
@@ -19,6 +19,7 @@ import { ProductFormData } from "@/util/schemas/productSchema";
 import { useProductForm } from "@/hooks/useProductForm";
 import ProductInputField from "../Forms/ProductInputField";
 import { toast } from "react-toastify";
+import Modal2Continue from "@/modals/Modal2Continue";
 
 const ProductPage = ({
   newProduct,
@@ -33,6 +34,8 @@ const ProductPage = ({
   const modal1 = useModal1Store((state: any) => state.modal1);
   const setModal1 = useModal1Store((state: any) => state.setModal1);
   const router = useRouter();
+  const modal2 = useModal2Store((state: any) => state.modal2);
+  const setModal2 = useModal2Store((state: any) => state.setModal2);
 
   const form = useProductForm();
   const dateSold = form.watch("date_sold");
@@ -105,14 +108,68 @@ const ProductPage = ({
   }
 
   const handleBackButton = () => {
-    if (newProduct) {
-      setAddProductPage(false);
-    } else {
+    const goToPrev = () => {
       if (previousPath === "/") {
         router.push("/");
       } else {
         router.push("/products");
       }
+    };
+
+    if (form.formState.isDirty) {
+      if (!currentUser) return null;
+      setModal2({
+        ...modal2,
+        open: !modal2.open,
+        showClose: false,
+        offClickClose: true,
+        width: "w-[300px]",
+        maxWidth: "max-w-[400px]",
+        aspectRatio: "aspect-[5/2]",
+        borderRadius: "rounded-[12px] md:rounded-[15px]",
+        content: (
+          <Modal2Continue
+            text={`Save changes to your data?`}
+            onContinue={form.handleSubmit(async (data) => {
+              await onSubmit(data);
+              goToPrev()
+            })}
+          />
+        ),
+      });
+    } else {
+      if (newProduct) {
+        setAddProductPage(false);
+      } else {
+        goToPrev()
+      }
+    }
+  };
+
+  const handleProductsClick = () => {
+    if (form.formState.isDirty) {
+      if (!currentUser) return null;
+      setModal2({
+        ...modal2,
+        open: !modal2.open,
+        showClose: false,
+        offClickClose: true,
+        width: "w-[300px]",
+        maxWidth: "max-w-[400px]",
+        aspectRatio: "aspect-[5/2]",
+        borderRadius: "rounded-[12px] md:rounded-[15px]",
+        content: (
+          <Modal2Continue
+            text={`Save changes to your data?`}
+            onContinue={form.handleSubmit(async (data) => {
+              await onSubmit(data);
+              router.push("/products");
+            })}
+          />
+        ),
+      });
+    } else {
+      router.push("/products");
     }
   };
 
@@ -151,12 +208,12 @@ const ProductPage = ({
               className="ml-[2px] flex flex-row gap-[10px] text-[25px] font-[400] mb-[20px] opacity-[0.5]"
               style={{ color: currentUser.theme === "dark" ? "#bbb" : "black" }}
             >
-              <Link
-                href="/products"
+              <div
+                onClick={handleProductsClick}
                 className="cursor-pointer dim hover:brightness-75"
               >
                 Products
-              </Link>
+              </div>
 
               <h1>/</h1>
 
