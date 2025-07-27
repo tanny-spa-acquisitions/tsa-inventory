@@ -23,25 +23,29 @@ import { db } from "./connection/connect.js";
 import { google } from "googleapis";
 dotenv.config();
 
-// const isProduction = process.env.NODE_ENV === "production";
-const isProduction = true;
+const isProduction = process.env.NODE_ENV === "production";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const server = !isProduction
-  ? http.createServer(app)
-  : https.createServer(
-      {
-        key: fs.readFileSync("./ssl/key.pem"),
-        cert: fs.readFileSync("./ssl/cert.pem"),
-      },
-      app
-    );
-
-const __dirname = new URL(".", import.meta.url).pathname;
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+const useHTTPS = true;
+const server =
+  useHTTPS && !isProduction
+    ? (() => {
+        try {
+          return https.createServer(
+            {
+              key: fs.readFileSync("./ssl/key.pem"),
+              cert: fs.readFileSync("./ssl/cert.pem"),
+            },
+            app
+          );
+        } catch (err) {
+          console.error("⚠️ Failed to load SSL certs. Falling back to HTTP.");
+          return http.createServer(app);
+        }
+      })()
+    : http.createServer(app);
 
 // App
 app.use((req, res, next) => {
@@ -130,7 +134,7 @@ app.post("/google/get-notes", async (req, res) => {
 });
 
 const imagesColumn = "P";
-const rowCount = 1000
+const rowCount = 1000;
 
 app.get("/wix-inventory", async (req, res) => {
   console.log("wix inventory");
@@ -156,7 +160,7 @@ app.get("/wix-inventory", async (req, res) => {
     const rows = valuesRes.data.values || [];
     console.log(rows.length);
     const notesData = notesRes.data.sheets[0].data[0].rowData || [];
-    console.log("NOTES", notesData.length)
+    console.log("NOTES", notesData.length);
 
     const headers = rows[0];
     const data = rows.slice(1).map((row, i) => {
