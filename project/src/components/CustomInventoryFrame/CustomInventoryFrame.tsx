@@ -34,7 +34,7 @@ const CustomInventoryFrame = ({
   return (
     <div
       onClick={handleClick}
-      className="aspect-[1.215/1] select-none group hover:brightness-75 dim cursor-pointer rounded-[5px] overflow-hidden relative w-[100%] flex flex-col"
+      className="select-none group hover:brightness-75 dim cursor-pointer rounded-[5px] overflow-hidden relative w-[100%] flex flex-col"
       style={{
         backgroundColor: appTheme[currentUser.theme].background_2,
       }}
@@ -69,7 +69,9 @@ const CustomInventoryFrame = ({
               color: appTheme[currentUser.theme].text_1,
             }}
           >
-            {capitalizeFirstLetter(TubTitle)}
+            {TubTitle.trim().length > 0
+              ? capitalizeFirstLetter(TubTitle)
+              : TubID}
           </p>
         </div>
       </div>
@@ -88,7 +90,11 @@ const CustomInventoryFrame = ({
             src={"/assets/logo-black.png"}
           />
         </div>
-        <div className="overflow-hidden flex flex-col w-[100%] gap-[3px]">
+        <div
+          className={`overflow-hidden flex flex-col w-[100%] gap-[3px] ${
+            TubTitle.trim().length === 0 && "py-[6.5px]"
+          }`}
+        >
           <p
             className="truncate overflow-hidden font-[400] w-[100%] text-[14px] leading-[14px] tracking-[0.2px]"
             style={{
@@ -105,12 +111,20 @@ const CustomInventoryFrame = ({
           </p>
 
           <p
-            className="truncate overflow-hidden font-[300] w-[100%] text-[10px] leading-[12px] tracking-[0.2px]"
+            className={`truncate overflow-hidden font-[300] w-[100%] text-[10px] leading-[12px] tracking-[0.2px]`}
             style={{
               color: appTheme[currentUser.theme].text_1,
             }}
           >
-            {TubID && TubID.trim().length !== 0 ? TubID : "No ID"}
+            {TubTitle.trim().length > 0 ? (
+              TubID && TubID.trim().length !== 0 ? (
+                TubID
+              ) : (
+                "No ID"
+              )
+            ) : (
+              <></>
+            )}
           </p>
         </div>
       </div>

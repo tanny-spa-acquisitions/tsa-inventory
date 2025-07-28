@@ -113,7 +113,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
     setEditingLock(true);
     try {
       await deleteProducts(selectedProducts);
-      resetTimer()
+      resetTimer();
       // toast.success("Deleted successfully");
     } catch (e) {
       toast.error(
@@ -272,13 +272,14 @@ const ProductsHeader = ({ title }: { title: String }) => {
           style={{
             backgroundColor: appTheme[currentUser.theme].background_2,
           }}
-          className="dim hover:brightness-75 rounded-[25px] w-[150px] h-[32px] flex flex-row justify-center items-center gap-[6px] text-[13px] font-[600] cursor-pointer"
+          className="dim hover:brightness-75 rounded-[25px] w-[33px] [@media(min-width:460px)]:w-[150px] h-[33px] flex flex-row justify-center items-center gap-[6px] text-[13px] font-[600] cursor-pointer"
           onClick={handleGoogleExport}
         >
           <p
             style={{
               color: appTheme[currentUser.theme].text_1,
             }}
+            className="hidden [@media(min-width:460px)]:block"
           >
             Export Sheet
           </p>
@@ -290,13 +291,14 @@ const ProductsHeader = ({ title }: { title: String }) => {
           style={{
             backgroundColor: appTheme[currentUser.theme].background_2,
           }}
-          className="dim hover:brightness-75 rounded-[25px] w-[140px] h-[32px] flex flex-row justify-center items-center gap-[10px] text-[13px] font-[600] cursor-pointer"
+          className="dim hover:brightness-75 rounded-[25px] w-[33px] [@media(min-width:460px)]:w-[140px] h-[33px] flex flex-row justify-center items-center gap-[10px] text-[13px] font-[600] cursor-pointer"
           onClick={handleWixSync}
         >
           <p
             style={{
               color: appTheme[currentUser.theme].text_1,
             }}
+            className="hidden [@media(min-width:460px)]:block"
           >
             Sync Wix
           </p>

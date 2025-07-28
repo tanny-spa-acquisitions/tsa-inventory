@@ -33,12 +33,11 @@ const UploadModal: React.FC<UploadModalProps> = ({ setValue, getValues }) => {
           <div className="absolute top-0 w-[100vw] h-[100vh] flex items-center justify-center">
             <div
               ref={uploadPopupRef}
-              className="w-[70%] aspect-[1.5/1] relative"
+              className="shadow-lg w-[85%] sm:w-[70%] aspect-[1/1.2] sm:aspect-[1.5/1] relative"
               style={{
                 userSelect: "none",
-                backgroundColor: "white",
                 borderRadius: "30px",
-                border: "1.5px solid black",
+                border: `0.5px solid ${appTheme[currentUser.theme].text_2}`,
               }}
             >
               <Upload

@@ -110,11 +110,11 @@ const Navbar = () => {
               alt="logo"
               className={`${
                 !leftBarOpen ? "hidden" : "hidden lg:block"
-              }  select-none ml-[3px]  mt-[-4px] w-[29px] h-[29px] object-cover`}
+              }  select-none ml-[3px] mt-[-4px] w-[29px] h-[29px] object-cover`}
             />
 
             <p
-              className="select-none text-[23px] font-[700] ml-[10px]"
+              className="hidden [@media(min-width:450px)]:block select-none text-[23px] font-[700] ml-[10px]"
               style={{
                 color: appTheme[currentUser.theme].text_1,
               }}
@@ -124,7 +124,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="h-[100%] mr-[10px] pr-[2px] hidden min-[500px]:flex flex-row items-center gap-[18px]">
+        <div className="h-[100%] mr-[10px] pr-[2px] flex flex-row items-center gap-[18px]">
           {editingLock && (
             <div
               style={{

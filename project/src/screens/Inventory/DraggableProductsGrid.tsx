@@ -175,7 +175,7 @@ const DraggableProductsGrid = ({
         >
           <div
             ref={containerRef}
-            className="relative pt-[8px] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[20px] md:gap-[30px]"
+            className="relative pt-[8px] grid grid-cols-1 [@media(min-width:400px)]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[20px] md:gap-[30px]"
           >
             {filteredProducts(localDataRef.current).map((product, index) => (
               <SortableItem

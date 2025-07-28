@@ -22,7 +22,7 @@ const Settings = ({ initialPage }: SettingsProps) => {
 
   return (
     <div className="w-full h-full flex flex-row">
-      <div className="select-none w-[25%] min-w-[200px] h-full pl-[30px] py-[30px]">
+      <div className="hidden sm:block pl-[30px] select-none w-[25%] min-w-[200px] h-full py-[30px]">
         <div
           className="font-[600] text-[25px] leading-[18px] h-[35px]"
           style={{ color: appTheme[currentUser.theme].text_1 }}
@@ -39,7 +39,7 @@ const Settings = ({ initialPage }: SettingsProps) => {
                 className="cursor-pointer w-full h-[40px] rounded-[10px]"
                 // transition-colors duration-500 group
                 style={{
-                  backgroundColor: appTheme[currentUser.theme].background_2_2
+                  backgroundColor: appTheme[currentUser.theme].background_2_2,
                   // backgroundColor: isSelected
                   //   ? appTheme[currentUser.theme].background_2_2
                   //   : appTheme[currentUser.theme].background_1_2,
@@ -60,8 +60,20 @@ const Settings = ({ initialPage }: SettingsProps) => {
             );
           })}
         </div>
+
+        {/* <div
+          // onClick={handleSignOut}
+          className="dim select-none cursor-pointer m-[-10px] w-[calc(25%-10px)] hover:brightness-75 h-[40px] absolute bottom-[29px] flex items-center justify-center font-[600]"
+          style={{
+            borderRadius: "6px",
+            backgroundColor: appTheme[currentUser.theme].background_2,
+            color: appTheme[currentUser.theme].text_2,
+          }}
+        >
+          Sign out
+        </div> */}
       </div>
-      <div className="w-[75%] h-full max-w-[calc(100%-200px)]">
+      <div className="w-[100%] sm:w-[75%] pl-[30px] sm:pl-0 h-full sm:max-w-[calc(100%-200px)]">
         {selectedPage === "Account" && <Account />}
       </div>
     </div>
