@@ -23,15 +23,6 @@ const ProductsPage = () => {
   const { addProductPage, setAddProductPage, editMode, dataFilters } =
     useAppContext();
 
-  const handleDeleteProduct = async (item: Product) => {
-    try {
-      await deleteProducts([item.serial_number]);
-      toast.success("Deleted product");
-    } catch (error) {
-      toast.error("Failed to delete product");
-    }
-  };
-
   const filteredProducts = (products: Product[]) => {
     if (products.length === 0) return [];
     if (dataFilters.listings === "All") {
@@ -62,9 +53,9 @@ const ProductsPage = () => {
           <div className="z-[800] absolute top-0 left-0 h-[60px] w-[100%]">
             <ProductsHeader title={"TSA Products"} />
           </div>
-          <div className="absolute h-[calc(100%-70px)] mt-[70px] pt-[8px] overflow-scroll left-0 w-[100%] px-[30px] pb-[50px]">
+          <div className="absolute h-[calc(100%-65px)] mt-[65px] left-0 w-[100%]">
             {productsData && filteredProducts(productsData).length > 0 ? (
-              <div className="w-[100%] h-[100%] overflow-y-scroll">
+              <div className="w-[100%] h-[100%] overflow-y-scroll overflow-x-hidden px-[30px]">
                 {productsData && filteredProducts(productsData).length > 0 && (
                   <DraggableProductsGrid
                     data={filteredProducts(productsData)}

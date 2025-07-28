@@ -29,7 +29,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
     selectedProducts,
     setSelectedProducts,
     setAddProductPage,
-    saveProducts
+    saveProducts,
   } = useAppContext();
   const { deleteProducts, updateProducts, localData } = useContextQueries();
   const modal2 = useModal2Store((state: any) => state.modal2);
@@ -184,16 +184,12 @@ const ProductsHeader = ({ title }: { title: String }) => {
   };
 
   const handleEditClick = () => {
-    if (pathname === "/") {
-      if (dataFilters.listings === "All") {
-        setEditMode((prev) => !prev);
-      } else {
-        toast.info("Edit disabled when filtering", {
-          toastId: "edit-disabled-toast",
-        });
-      }
-    } else {
+    if (dataFilters.listings === "All") {
       setEditMode((prev) => !prev);
+    } else {
+      toast.info("Edit disabled when filtering", {
+        toastId: "edit-disabled-toast",
+      });
     }
   };
 
@@ -203,7 +199,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
     if (pathname === "/" && (filter === "Active" || filter === "Sold")) {
       setEditMode(false);
     }
-    await saveProducts()
+    await saveProducts();
   };
 
   if (!currentUser) return null;

@@ -20,6 +20,7 @@ import { Product, useContextQueries } from "@/contexts/queryContext";
 import { verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
   restrictToVerticalAxis,
+  restrictToParentElement,
   restrictToFirstScrollableAncestor,
 } from "@dnd-kit/modifiers";
 import { useAppContext } from "@/contexts/appContext";
@@ -45,6 +46,7 @@ function SortableItem({
 }) {
   const { currentUser } = useContext(AuthContext);
   const { editMode } = useAppContext();
+  const { deleteProducts } = useContextQueries();
 
   const {
     attributes,
@@ -63,6 +65,15 @@ function SortableItem({
     position: "relative",
   };
 
+  const handleDeleteProduct = async (item: Product) => {
+    try {
+      await deleteProducts([item.serial_number]);
+      toast.success("Deleted product");
+    } catch (error) {
+      toast.error("Failed to delete product");
+    }
+  };
+
   if (!currentUser) return null;
 
   return (
@@ -70,19 +81,33 @@ function SortableItem({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="relative w-full h-full"
+      className="relative w-full"
     >
       {editMode && (
         <div
           {...listeners}
-          className="absolute inset-0 z-[999] w-[100%] h-[100%] cursor-grab"
+          className="absolute inset-0 z-[999] w-[100%] cursor-grab"
         />
       )}
       {sheet ? (
         <InventoryRow index={index} product={product} />
       ) : (
-        <div key={product.serial_number} className="relative">
+        <div key={product.serial_number} className="relative w-[100%] h-[100%]">
           <CustomInventoryFrame item={product} index={index} />
+          {editMode && (
+            <div
+              style={{
+                border: `1px solid ${appTheme[currentUser.theme].text_4}`,
+                backgroundColor: appTheme[currentUser.theme].background_1,
+              }}
+              className="ignore-click w-[26px] h-[26px] flex items-center justify-center dim hover:brightness-75 cursor-pointer rounded-[20px] absolute top-[-8px] right-[-9px] z-20"
+              onClick={() => {
+                handleDeleteProduct(product);
+              }}
+            >
+              <IoCloseOutline color={appTheme[currentUser.theme].text_2} />
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -102,6 +127,7 @@ const DraggableProductsGrid = ({
   const { localData, setLocalData, localDataRef, productsData } =
     useContextQueries();
   const { filteredProducts, saveProducts } = useAppContext();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -133,19 +159,21 @@ const DraggableProductsGrid = ({
   if (!currentUser) return null;
 
   if (!sheet) {
-    // Display only products (no DnD)
     return (
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
-        modifiers={[restrictToFirstScrollableAncestor]}
+        modifiers={[restrictToParentElement]}
       >
         <SortableContext
           items={localDataRef.current.map((p) => p.serial_number)}
           strategy={rectSortingStrategy}
         >
-          <div className=" flex-col max-h-full pb-[46px] mb-[46px] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[20px] md:gap-[30px]">
+          <div
+            ref={containerRef}
+            className="relative pt-[8px] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[20px] md:gap-[30px]"
+          >
             {filteredProducts(localDataRef.current).map((product, index) => (
               <SortableItem
                 key={product.serial_number}
@@ -157,7 +185,6 @@ const DraggableProductsGrid = ({
               />
             ))}
           </div>
-          <div className="h-[61px] w-[100%]" />
         </SortableContext>
       </DndContext>
     );
@@ -168,7 +195,7 @@ const DraggableProductsGrid = ({
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
-      modifiers={[restrictToFirstScrollableAncestor]}
+      modifiers={[restrictToVerticalAxis, restrictToParentElement]}
     >
       <SortableContext
         items={localData.map((p) => p.serial_number)}
