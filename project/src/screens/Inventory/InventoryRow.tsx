@@ -44,6 +44,14 @@ const InventoryRow = ({
     }
   }, [product.serial_number]);
 
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      console.log(`Form changed: ${product.serial_number}`);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   if (!currentUser) return null;
 
   return (

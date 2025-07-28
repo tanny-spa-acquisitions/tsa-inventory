@@ -30,6 +30,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
     setSelectedProducts,
     setAddProductPage,
     saveProducts,
+    resetTimer,
   } = useAppContext();
   const { deleteProducts, updateProducts, localData } = useContextQueries();
   const modal2 = useModal2Store((state: any) => state.modal2);
@@ -112,13 +113,12 @@ const ProductsHeader = ({ title }: { title: String }) => {
     setEditingLock(true);
     try {
       await deleteProducts(selectedProducts);
+      resetTimer()
       // toast.success("Deleted successfully");
     } catch (e) {
-      if (selectedProducts.length === 1) {
-        toast.error("Failed to delete product");
-      } else {
-        toast.error("Failed to delete products");
-      }
+      toast.error(
+        `Failed to delete product${selectedProducts.length > 1 && "s"}`
+      );
     } finally {
       setEditingLock(false);
       setSelectedProducts([]);
@@ -187,9 +187,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
     if (dataFilters.listings === "All") {
       setEditMode((prev) => !prev);
     } else {
-      toast.info("Edit disabled when filtering", {
-        toastId: "edit-disabled-toast",
-      });
+      setDataFilters({ ...dataFilters, listings: "All" });
     }
   };
 

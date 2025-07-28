@@ -99,8 +99,6 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
         return updated ? updated : product;
       });
       queryClient.setQueryData(queryKey, newData);
-      // localDataRef.current = newData;
-      // setLocalData(newData);
       isOptimisticUpdate.current = true;
       return { previousData, queryKey };
     },

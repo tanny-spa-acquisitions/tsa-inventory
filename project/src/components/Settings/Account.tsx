@@ -102,7 +102,7 @@ const Account = () => {
 
       <div
         onClick={handleThemeChange}
-        className="cursor-pointer w-[160px] h-[40px] rounded-[10px] transition-colors duration-500 group"
+        className="cursor-pointer w-[160px] h-[40px] rounded-[10px] group transition-colors duration-500"
       >
         <div
           className="gap-[12px] w-full h-full group-hover:border-0 group-hover:bg-[var(--hover-bg)] rounded-[10px] flex justify-left items-center px-[15px] truncate font-[500] text-[16px]"

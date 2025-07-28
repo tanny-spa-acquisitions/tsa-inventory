@@ -3,7 +3,7 @@ import { Product, useContextQueries } from "@/contexts/queryContext";
 import { useProductForm } from "@/hooks/useProductForm";
 import { appTheme } from "@/util/appTheme";
 import ProductInputCell from "@/components/Forms/ProductInputCell";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { AuthContext } from "@/contexts/authContext";
 import { ProductFormData } from "@/util/schemas/productSchema";
 import { InventoryDataItem } from "./InventoryGrid";
@@ -29,7 +29,7 @@ const InventoryRowForm = ({
   registerFormRef,
 }: InventoryRowFormProps) => {
   const { currentUser } = useContext(AuthContext);
-  const { formRefs, saveProducts } = useAppContext();
+  const { formRefs, saveProducts, resetTimer } = useAppContext();
   const { productsData, localData } = useContextQueries();
   const form = useProductForm();
   const router = useRouter();
@@ -130,6 +130,17 @@ const InventoryRowForm = ({
       }
     }
   };
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      // if (name) {
+      //   console.log(product, name, value[name as keyof typeof value]);
+      // }
+      resetTimer()
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, product.serial_number]);
 
   if (!currentUser) return null;
 

@@ -21,11 +21,9 @@ import { verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
   restrictToVerticalAxis,
   restrictToParentElement,
-  restrictToFirstScrollableAncestor,
 } from "@dnd-kit/modifiers";
 import { useAppContext } from "@/contexts/appContext";
 import InventoryRow from "./InventoryRow";
-import { makeRequest } from "@/util/axios";
 import { toast } from "react-toastify";
 import CustomInventoryFrame from "@/components/CustomInventoryFrame/CustomInventoryFrame";
 import { appTheme } from "@/util/appTheme";
@@ -45,7 +43,7 @@ function SortableItem({
   sheet: boolean;
 }) {
   const { currentUser } = useContext(AuthContext);
-  const { editMode } = useAppContext();
+  const { editMode, resetTimer } = useAppContext();
   const { deleteProducts } = useContextQueries();
 
   const {
@@ -60,7 +58,6 @@ function SortableItem({
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    // cursor: "grab",
     zIndex: isDragging ? 999 : 1,
     position: "relative",
   };
@@ -68,7 +65,8 @@ function SortableItem({
   const handleDeleteProduct = async (item: Product) => {
     try {
       await deleteProducts([item.serial_number]);
-      toast.success("Deleted product");
+      resetTimer()
+      // toast.success("Deleted product");
     } catch (error) {
       toast.error("Failed to delete product");
     }
@@ -158,7 +156,6 @@ const DraggableProductsGrid = ({
     );
 
     setLocalData(sorted);
-    localDataRef.current = sorted;
     await saveProducts();
   };
 

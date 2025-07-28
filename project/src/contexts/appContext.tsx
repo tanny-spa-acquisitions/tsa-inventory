@@ -54,6 +54,7 @@ type AppContextType = {
     overrideNewProduct?: boolean
   ) => Promise<boolean>;
   submitProductForm: () => Promise<boolean>;
+  resetTimer: () => void;
 };
 
 export type FileImage = {
@@ -285,15 +286,16 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       // toast.info("No changes to save", {
       //   toastId: "no-changes-toast",
       // });
-      setEditMode(false);
       return;
     }
+
+    cancelTimer();
 
     try {
       setEditingLock(true);
       await updateProducts(updatedProducts);
       for (const [, form] of formRefs.current.entries()) {
-        form.reset(form.getValues());  
+        form.reset(form.getValues());
       }
       // toast.success("Products updated");
     } catch (err) {
@@ -419,6 +421,31 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(async () => {
+      console.log("Saving");
+      await saveProducts();
+    }, 3000);
+  };
+
+  const resetTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    startTimer();
+  };
+
+  const cancelTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -446,6 +473,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         pageClick,
         onSubmit,
         submitProductForm,
+        resetTimer,
       }}
     >
       {children}

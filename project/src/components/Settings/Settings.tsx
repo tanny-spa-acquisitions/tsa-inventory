@@ -36,11 +36,13 @@ const Settings = ({ initialPage }: SettingsProps) => {
               <div
                 key={index}
                 onClick={() => setSelectedPage(settingsPages[index])}
-                className="cursor-pointer w-full h-[40px] rounded-[10px] transition-colors duration-500 group"
+                className="cursor-pointer w-full h-[40px] rounded-[10px]"
+                // transition-colors duration-500 group
                 style={{
-                  backgroundColor: isSelected
-                    ? appTheme[currentUser.theme].background_2_2
-                    : appTheme[currentUser.theme].background_1_2,
+                  backgroundColor: appTheme[currentUser.theme].background_2_2
+                  // backgroundColor: isSelected
+                  //   ? appTheme[currentUser.theme].background_2_2
+                  //   : appTheme[currentUser.theme].background_1_2,
                 }}
               >
                 <div
