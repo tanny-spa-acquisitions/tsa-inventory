@@ -282,9 +282,9 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     if (updatedProducts.length === 0) {
-      toast.info("No changes to save", {
-        toastId: "no-changes-toast",
-      });
+      // toast.info("No changes to save", {
+      //   toastId: "no-changes-toast",
+      // });
       setEditMode(false);
       return;
     }

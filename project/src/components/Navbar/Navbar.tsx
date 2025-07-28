@@ -128,17 +128,17 @@ const Navbar = () => {
           {editingLock && (
             <div
               style={{
-                opacity: 0.1,
+                opacity: currentUser.theme === "dark" ? 0.1 : 0.7,
                 border:
                   currentUser.theme === "light"
-                    ? "3px solid #bbbbbb"
-                    : "3px solid #444444",
+                    ? "2px solid #dddddd"
+                    : "2px solid #555",
                 borderTop:
                   currentUser.theme === "light"
-                    ? appTheme[currentUser.theme].app_color_1
-                    : "3px solid #dddddd",
+                    ? `2px solid #bbbbbb`
+                    : "2px solid #dddddd",
               }}
-              className="absolute top-4 right-[218px] w-[30px] h-[30px] mt-[3px] simple-spinner"
+              className="absolute top-4 right-[218px] w-[28px] h-[28px] mt-[3px] simple-spinner"
             ></div>
           )}
           <div

@@ -29,6 +29,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
     selectedProducts,
     setSelectedProducts,
     setAddProductPage,
+    saveProducts
   } = useAppContext();
   const { deleteProducts, updateProducts, localData } = useContextQueries();
   const modal2 = useModal2Store((state: any) => state.modal2);
@@ -111,7 +112,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
     setEditingLock(true);
     try {
       await deleteProducts(selectedProducts);
-      toast.success("Deleted successfully");
+      // toast.success("Deleted successfully");
     } catch (e) {
       if (selectedProducts.length === 1) {
         toast.error("Failed to delete product");
@@ -196,12 +197,13 @@ const ProductsHeader = ({ title }: { title: String }) => {
     }
   };
 
-  const handleFilterClick = (filter: DataFilters["listings"]) => {
+  const handleFilterClick = async (filter: DataFilters["listings"]) => {
     setDataFilters({ ...dataFilters, listings: filter });
     setSelectedProducts([]);
     if (pathname === "/" && (filter === "Active" || filter === "Sold")) {
       setEditMode(false);
     }
+    await saveProducts()
   };
 
   if (!currentUser) return null;
