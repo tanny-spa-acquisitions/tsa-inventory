@@ -218,9 +218,9 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
                 Products
               </div>
 
-              <h1 className="hidden [@media(min-width:400px)]:block">/</h1>
+              <h1 className="hidden [@media(min-width:480px)]:block">/</h1>
 
-              <div className="hidden [@media(min-width:400px)]:block cursor-pointer dim hover:brightness-75 text-[23px] mt-[1px]">
+              <div className="hidden [@media(min-width:480px)]:block cursor-pointer dim hover:brightness-75 text-[23px] mt-[1px]">
                 {serialNumber}
               </div>
             </div>

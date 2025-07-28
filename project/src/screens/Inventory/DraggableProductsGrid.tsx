@@ -6,6 +6,8 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  TouchSensor,
+  MouseSensor,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -65,7 +67,7 @@ function SortableItem({
   const handleDeleteProduct = async (item: Product) => {
     try {
       await deleteProducts([item.serial_number]);
-      resetTimer()
+      resetTimer();
       // toast.success("Deleted product");
     } catch (error) {
       toast.error("Failed to delete product");
@@ -85,7 +87,7 @@ function SortableItem({
         {editMode && (
           <div
             {...listeners}
-            className="absolute top-0 left-0 w-full h-full z-[902] cursor-pointer"
+            className="absolute top-0 left-0 w-full h-full z-[902] cursor-pointer touch-none"
           />
         )}
 
@@ -126,11 +128,16 @@ const DraggableProductsGrid = ({
   sheet: boolean;
 }) => {
   const { currentUser } = useContext(AuthContext);
-  const sensors = useSensors(useSensor(PointerSensor));
+  // const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor),
+    useSensor(PointerSensor)
+  );
   const [imageView, setImageView] = useState<string>("");
   const { localData, setLocalData, localDataRef, productsData } =
     useContextQueries();
-  const { filteredProducts, saveProducts } = useAppContext();
+  const { filteredProducts, saveProducts, resetTimer } = useAppContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -156,7 +163,8 @@ const DraggableProductsGrid = ({
     );
 
     setLocalData(sorted);
-    await saveProducts();
+    // await saveProducts();
+    resetTimer();
   };
 
   if (!currentUser) return null;

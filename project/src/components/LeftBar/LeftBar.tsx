@@ -183,8 +183,32 @@ const LeftBar = () => {
             style={{
               color: appTheme[currentUser.theme].text_1,
             }}
-            className="relative w-[100%] h-[100%] px-[20px] pt-[11px] items-start flex flex-col"
+            className="relative w-[100%] h-[100%] px-[20px] pt-[5px] items-start flex flex-col"
           >
+            <div
+              onClick={() => pageClick("/")}
+              className="flex flex-row mt-[20px] gap-[5px] mb-[18px] items-center cursor-pointer dim hover:brightness-75 pr-[6px]"
+            >
+              <img
+                src={
+                  currentUser.theme === "dark"
+                    ? "/assets/logo-black.png"
+                    : "/assets/logo-black.png"
+                }
+                alt="logo"
+                className={`select-none ml-[3px] mt-[-4px] w-[29px] h-[29px] object-cover`}
+              />
+
+              <p
+                className="hidden [@media(min-width:450px)]:block select-none text-[23px] font-[700] ml-[10px]"
+                style={{
+                  color: appTheme[currentUser.theme].text_1,
+                }}
+              >
+                {appDetails.project_name_short}
+              </p>
+            </div>
+
             <div className="w-[100%] justify-between flex flex-row items-center">
               <div
                 onClick={() => {

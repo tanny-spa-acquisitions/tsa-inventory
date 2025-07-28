@@ -4,7 +4,7 @@ import { useAppContext } from "@/contexts/appContext";
 import { AuthContext } from "@/contexts/authContext";
 import { Product, useContextQueries } from "@/contexts/queryContext";
 import { appTheme } from "@/util/appTheme";
-import React, { useContext, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import DraggableProductsGrid from "./DraggableProductsGrid";
 
 export type InventoryDataItem = {
@@ -100,7 +100,6 @@ const InventoryGrid = () => {
     filteredProducts,
     selectedProducts,
     setSelectedProducts,
-    saveProducts,
   } = useAppContext();
 
   const selectAllProducts = () => {
@@ -171,7 +170,10 @@ const InventoryGrid = () => {
           <div className="absolute top-0 left-0 w-[100%] h-[calc(100%-40px)] mt-[40px]">
             <div className="w-[100%] h-[100%] overflow-y-scroll">
               {localData && filteredProducts(localData).length > 0 && (
-                <DraggableProductsGrid data={filteredProducts(localData)} sheet={true}/>
+                <DraggableProductsGrid
+                  data={filteredProducts(localData)}
+                  sheet={true}
+                />
               )}
               <div className="h-[60px] w-[100%]" />
             </div>
@@ -179,16 +181,16 @@ const InventoryGrid = () => {
         </div>
       </div>
 
-      <div
-        onClick={() => saveProducts()}
-        className="absolute z-[800] bottom-[35px] right-[30px] h-[40px] w-[110px] font-[600] rounded-[25px] dim cursor-pointer hover:brightness-75 items-center justify-center flex"
-        style={{
-          color: "white",
-          backgroundColor: appTheme[currentUser.theme].app_color_1,
-        }}
-      >
-        Save
-      </div>
+      {/* <div
+          onClick={() => saveProducts()}
+          className="absolute z-[800] bottom-[35px] right-[30px] h-[40px] w-[110px] font-[600] rounded-[25px] dim cursor-pointer hover:brightness-75 items-center justify-center flex"
+          style={{
+            color: "white",
+            backgroundColor: appTheme[currentUser.theme].app_color_1,
+          }}
+        >
+          Save
+        </div> */}
     </div>
   );
 };

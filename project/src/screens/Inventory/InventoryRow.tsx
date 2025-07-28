@@ -25,6 +25,7 @@ const InventoryRow = ({
     selectedProducts,
     setSelectedProducts,
     formRefs,
+    resetTimer,
   } = useAppContext();
   const { productsData, localData, setLocalData } = useContextQueries();
 
@@ -39,16 +40,13 @@ const InventoryRow = ({
   });
 
   useEffect(() => {
-    if (form.getValues("serial_number") !== product.serial_number) {
-      form.reset(product);
-    }
-  }, [product.serial_number]);
+    form.reset(product);
+  }, [product]);
 
   useEffect(() => {
     const subscription = form.watch(() => {
-      console.log(`Form changed: ${product.serial_number}`);
+      resetTimer();
     });
-
     return () => subscription.unsubscribe();
   }, []);
 

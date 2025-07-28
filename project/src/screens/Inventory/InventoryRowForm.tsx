@@ -35,12 +35,7 @@ const InventoryRowForm = ({
   const router = useRouter();
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
-
-  useEffect(() => {
-    if (product.serial_number) {
-      registerFormRef(product.serial_number, form);
-    }
-  }, [product.serial_number, form]);
+  registerFormRef(product.serial_number, form);
 
   let newProduct = false;
 
@@ -136,7 +131,7 @@ const InventoryRowForm = ({
       // if (name) {
       //   console.log(product, name, value[name as keyof typeof value]);
       // }
-      resetTimer()
+      resetTimer();
     });
 
     return () => subscription.unsubscribe();

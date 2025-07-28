@@ -55,6 +55,7 @@ type AppContextType = {
   ) => Promise<boolean>;
   submitProductForm: () => Promise<boolean>;
   resetTimer: () => void;
+  checkForUnsavedChanges: () => boolean;
 };
 
 export type FileImage = {
@@ -233,18 +234,15 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   type ProductFormRef = React.RefObject<UseFormReturn<ProductFormData> | null>;
   const productFormRef: ProductFormRef = useRef(null);
 
-  const saveProducts = async () => {
-    let updatedProducts: Product[] = [];
+  const getUnsavedProducts = (): Product[] => {
+    const updatedProducts: Product[] = [];
 
     const localData = localDataRef.current;
-
-    // Step 1: Build a map from serial -> ordinal (from localDataRef)
     const ordinalMap = new Map<string, number>();
     for (const item of localData) {
       ordinalMap.set(item.serial_number, item.ordinal);
     }
 
-    // Step 2: Loop through formRefs and override values with the form ones
     for (const [serial, form] of formRefs.current.entries()) {
       const values = form.getValues();
       const isDirty = Object.keys(form.formState.dirtyFields).length > 0;
@@ -265,7 +263,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     }
 
-    // Step 3: Handle any new items in localData that weren’t in formRefs (e.g., new unsaved items)
     for (const item of localData) {
       const existsInForm = formRefs.current.has(item.serial_number);
       const existsInUpdated = updatedProducts.some(
@@ -274,7 +271,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       const stored = productsData.find(
         (p) => p.serial_number === item.serial_number
       );
-
       const ordinalChanged = stored?.ordinal !== item.ordinal;
 
       if (!existsInForm && ordinalChanged && !existsInUpdated) {
@@ -282,12 +278,17 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     }
 
-    if (updatedProducts.length === 0) {
-      // toast.info("No changes to save", {
-      //   toastId: "no-changes-toast",
-      // });
-      return;
-    }
+    return updatedProducts;
+  };
+
+  const checkForUnsavedChanges = () => {
+    return getUnsavedProducts().length > 0;
+  };
+
+  const saveProducts = async () => {
+    const updatedProducts = getUnsavedProducts();
+
+    if (updatedProducts.length === 0) return;
 
     cancelTimer();
 
@@ -297,7 +298,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       for (const [, form] of formRefs.current.entries()) {
         form.reset(form.getValues());
       }
-      // toast.success("Products updated");
     } catch (err) {
       toast.error("Failed to update products");
     } finally {
@@ -427,7 +427,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       clearTimeout(timerRef.current);
     }
     timerRef.current = setTimeout(async () => {
-      console.log("Saving");
       await saveProducts();
     }, 3000);
   };
@@ -474,6 +473,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         onSubmit,
         submitProductForm,
         resetTimer,
+        checkForUnsavedChanges,
       }}
     >
       {children}

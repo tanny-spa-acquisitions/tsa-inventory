@@ -83,7 +83,7 @@ const Account = () => {
   if (!currentUser) return null;
 
   return (
-    <div className="ml-[5px] md:ml-[8px] w-full h-full flex flex-col pt-[50px] pr-[80px]">
+    <div className="ml-[5px] md:ml-[8px] w-full h-full flex flex-col pt-[50px] pr-[43px] sm:pr-[80px]">
       <div className="ml-[1px] w-[90%] flex flex-col items-center justify-center">
         <p className="font-[600] lg:mb-[21px] mb-[19px] text-[29px] leading-[29px] md:text-[32px] md:leading-[32px] w-[100%] items-start">
           {currentUser.first_name} {currentUser.last_name}
@@ -131,10 +131,10 @@ const Account = () => {
         </div>
       </div>
 
-      <div className="flex flex-row gap-[15px] mt-[18px]">
+      <div className="flex flex-col-reverse sm:flex-row gap-[15px] mt-[0] absolute bottom-[32px] pr-[73px] sm:flex sm:mt-[18px] w-[100%]">
         <div
           onClick={handleSignOut}
-          className="dim select-none cursor-pointer w-[180px] hover:brightness-75 h-[40px] flex items-center justify-center font-[600]"
+          className="dim select-none cursor-pointer w-[100%] sm:w-[50%] hover:brightness-75 h-[40px] flex items-center justify-center font-[600]"
           style={{
             borderRadius: "6px",
             backgroundColor: appTheme[currentUser.theme].background_2,
@@ -146,10 +146,10 @@ const Account = () => {
 
         <div
           onClick={handleThemeChange}
-          className="cursor-pointer w-[180px] h-[40px] rounded-[10px] group transition-colors duration-500"
+          className="cursor-pointer w-[100%] sm:w-[50%] h-[40px] rounded-[10px] group transition-colors duration-500"
         >
           <div
-            className="gap-[12px] w-full h-full group-hover:border-0 group-hover:bg-[var(--hover-bg)] rounded-[10px] flex justify-left items-center px-[15px] truncate font-[500] text-[16px]"
+            className="gap-[12px] w-full h-full group-hover:border-0 group-hover:bg-[var(--hover-bg)] rounded-[10px] flex justify-center items-center px-[15px] truncate font-[500] text-[16px]"
             style={
               {
                 border: "0.5px solid " + appTheme[currentUser.theme].text_4,
