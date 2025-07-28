@@ -60,7 +60,7 @@ function SortableItem({
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    cursor: "grab",
+    // cursor: "grab",
     zIndex: isDragging ? 999 : 1,
     position: "relative",
   };
@@ -83,33 +83,39 @@ function SortableItem({
       {...attributes}
       className="relative w-full"
     >
-      {editMode && (
-        <div
-          {...listeners}
-          className="absolute inset-0 z-[999] w-[100%] cursor-grab"
-        />
-      )}
-      {sheet ? (
-        <InventoryRow index={index} product={product} />
-      ) : (
-        <div key={product.serial_number} className="relative w-[100%] h-[100%]">
-          <CustomInventoryFrame item={product} index={index} />
-          {editMode && (
+      <div className="group/grabber relative w-full h-full cursor-pointer">
+        {editMode && (
+          <div
+            {...listeners}
+            className="absolute top-0 left-0 w-full h-full z-[902] cursor-pointer"
+          />
+        )}
+
+        <div className="transition-[filter] duration-300 ease-in-out group-hover/grabber:brightness-75">
+          {sheet ? (
+            <InventoryRow index={index} product={product} />
+          ) : (
             <div
-              style={{
-                border: `1px solid ${appTheme[currentUser.theme].text_4}`,
-                backgroundColor: appTheme[currentUser.theme].background_1,
-              }}
-              className="ignore-click w-[26px] h-[26px] flex items-center justify-center dim hover:brightness-75 cursor-pointer rounded-[20px] absolute top-[-8px] right-[-9px] z-20"
-              onClick={() => {
-                handleDeleteProduct(product);
-              }}
+              key={product.serial_number}
+              className="relative w-[100%] h-[100%]"
             >
-              <IoCloseOutline color={appTheme[currentUser.theme].text_2} />
+              <CustomInventoryFrame item={product} index={index} />
+              {editMode && (
+                <div
+                  style={{
+                    border: `1px solid ${appTheme[currentUser.theme].text_4}`,
+                    backgroundColor: appTheme[currentUser.theme].background_1,
+                  }}
+                  className="ignore-click w-[26px] h-[26px] flex items-center justify-center dim hover:brightness-75 cursor-pointer rounded-[20px] absolute top-[-8px] right-[-9px]"
+                  onClick={() => handleDeleteProduct(product)}
+                >
+                  <IoCloseOutline color={appTheme[currentUser.theme].text_2} />
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

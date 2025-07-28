@@ -319,7 +319,11 @@ export const syncToGoogleSheets = (req, res) => {
       const sheetName = "Inventory";
 
       try {
-        const rows = data.map((row, index) => {
+        const sortedData = data.sort(
+          (a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0)
+        );
+
+        const rows = sortedData.map((row, index) => {
           return [
             index + 1,
             row.serial_number,
@@ -487,8 +491,10 @@ export const syncToWix = async (req, res) => {
     const q = "SELECT * FROM tubs";
     db.query(q, async (err, data) => {
       if (err) return res.status(500).json(err);
-
-      const corrected_data = data.reverse().map((item) => ({
+      const sortedData = data.sort(
+        (a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0)
+      ).reverse();
+      const corrected_data = sortedData.map((item) => ({
         serialNumber: item.serial_number,
         sold: !!item.date_sold,
         name: item.name,

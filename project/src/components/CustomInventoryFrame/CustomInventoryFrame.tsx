@@ -34,7 +34,7 @@ const CustomInventoryFrame = ({
   return (
     <div
       onClick={handleClick}
-      className="select-none group hover:brightness-75 dim cursor-pointer rounded-[5px] overflow-hidden relative w-[100%] h-[100%] flex flex-col"
+      className="h-[215px] select-none group hover:brightness-75 dim cursor-pointer rounded-[5px] overflow-hidden relative w-[100%] flex flex-col"
       style={{
         backgroundColor: appTheme[currentUser.theme].background_2,
       }}
