@@ -14,6 +14,7 @@ import ProductPage from "../../../components/ProductPage/ProductPage";
 import { IoCloseOutline } from "react-icons/io5";
 import ProductsHeader from "@/components/ProductsHeader/ProductsHeader";
 import { toast } from "react-toastify";
+import DraggableProductsGrid from "@/screens/Inventory/DraggableProductsGrid";
 
 const ProductsPage = () => {
   const { currentUser } = useContext(AuthContext);
@@ -62,48 +63,29 @@ const ProductsPage = () => {
             <ProductsHeader title={"TSA Products"} />
           </div>
           <div className="absolute h-[calc(100%-70px)] mt-[70px] pt-[8px] overflow-scroll left-0 w-[100%] px-[30px] pb-[50px]">
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-[30px]">
-              {productsData && filteredProducts(productsData).length > 0 ? (
-                filteredProducts(productsData).map((item, index) => {
+            {productsData && filteredProducts(productsData).length > 0 ? (
+              <div className="w-[100%] h-[100%] overflow-y-scroll">
+                {productsData && filteredProducts(productsData).length > 0 && (
+                  <DraggableProductsGrid
+                    data={filteredProducts(productsData)}
+                    sheet={false}
+                  />
+                )}
+                <div className="h-[60px] w-[100%]" />
+              </div>
+            ) : isLoadingProductsData ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[20px] md:gap-[30px]">
+                {Array.from({ length: 6 }, (_, index) => {
                   return (
-                    <div key={index} className="relative">
-                      <CustomInventoryFrame item={item} index={index} />
-                      {editMode && (
-                        <div
-                          style={{
-                            border: `1px solid ${
-                              appTheme[currentUser.theme].text_4
-                            }`,
-                            backgroundColor:
-                              appTheme[currentUser.theme].background_1,
-                          }}
-                          className="ignore-click w-[26px] h-[26px] flex items-center justify-center dim hover:brightness-75 cursor-pointer rounded-[20px] absolute top-[-8px] right-[-9px] z-20"
-                          onClick={() => {
-                            handleDeleteProduct(item);
-                          }}
-                        >
-                          <IoCloseOutline
-                            color={appTheme[currentUser.theme].text_2}
-                          />
-                        </div>
-                      )}
+                    <div key={index}>
+                      <CustomInventoryFrameSkeleton />
                     </div>
                   );
-                })
-              ) : isLoadingProductsData ? (
-                <>
-                  {Array.from({ length: 6 }, (_, index) => {
-                    return (
-                      <div key={index}>
-                        <CustomInventoryFrameSkeleton />
-                      </div>
-                    );
-                  })}
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
+                })}
+              </div>
+            ) : (
+              <></>
+            )}
           </div>
         </div>
       )}

@@ -7,7 +7,12 @@ import {
   useSensors,
   DragEndEvent,
 } from "@dnd-kit/core";
-import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  useSortable,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/contexts/authContext";
@@ -21,17 +26,22 @@ import { useAppContext } from "@/contexts/appContext";
 import InventoryRow from "./InventoryRow";
 import { makeRequest } from "@/util/axios";
 import { toast } from "react-toastify";
+import CustomInventoryFrame from "@/components/CustomInventoryFrame/CustomInventoryFrame";
+import { appTheme } from "@/util/appTheme";
+import { IoCloseOutline } from "react-icons/io5";
 
 function SortableItem({
   id,
   setImageView,
   product,
   index,
+  sheet,
 }: {
   id: string;
   setImageView: React.Dispatch<React.SetStateAction<string>>;
   product: Product;
   index: number;
+  sheet: boolean;
 }) {
   const { currentUser } = useContext(AuthContext);
   const { editMode } = useAppContext();
@@ -60,25 +70,37 @@ function SortableItem({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="relative w-full"
+      className="relative w-full h-full"
     >
-      <div
-        className={`w-full h-full inset-0 ${
-          editMode && "hover:brightness-75 dim cursor-pointer"
-        }`}
-      >
-        {editMode && <div {...listeners} className="absolute inset-0 z-10" />}
+      {editMode && (
+        <div
+          {...listeners}
+          className="absolute inset-0 z-[999] w-[100%] h-[100%] cursor-grab"
+        />
+      )}
+      {sheet ? (
         <InventoryRow index={index} product={product} />
-      </div>
+      ) : (
+        <div key={product.serial_number} className="relative">
+          <CustomInventoryFrame item={product} index={index} />
+        </div>
+      )}
     </div>
   );
 }
 
-const DraggableProductsGrid = ({ data }: { data: Product[] }) => {
+const DraggableProductsGrid = ({
+  data,
+  sheet,
+}: {
+  data: Product[];
+  sheet: boolean;
+}) => {
   const { currentUser } = useContext(AuthContext);
   const sensors = useSensors(useSensor(PointerSensor));
   const [imageView, setImageView] = useState<string>("");
-  const { localData, setLocalData, localDataRef } = useContextQueries();
+  const { localData, setLocalData, localDataRef, productsData } =
+    useContextQueries();
   const { filteredProducts, saveProducts } = useAppContext();
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -110,29 +132,61 @@ const DraggableProductsGrid = ({ data }: { data: Product[] }) => {
 
   if (!currentUser) return null;
 
+  if (!sheet) {
+    // Display only products (no DnD)
+    return (
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToFirstScrollableAncestor]}
+      >
+        <SortableContext
+          items={localDataRef.current.map((p) => p.serial_number)}
+          strategy={rectSortingStrategy}
+        >
+          <div className=" flex-col max-h-full pb-[46px] mb-[46px] grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[20px] md:gap-[30px]">
+            {filteredProducts(localDataRef.current).map((product, index) => (
+              <SortableItem
+                key={product.serial_number}
+                id={product.serial_number}
+                setImageView={setImageView}
+                product={product}
+                index={index}
+                sheet={sheet}
+              />
+            ))}
+          </div>
+          <div className="h-[61px] w-[100%]" />
+        </SortableContext>
+      </DndContext>
+    );
+  }
+
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
-      modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
+      modifiers={[restrictToFirstScrollableAncestor]}
     >
       <SortableContext
         items={localData.map((p) => p.serial_number)}
         strategy={verticalListSortingStrategy}
       >
         <div className="flex flex-col max-h-full pb-[46px] mb-[46px]">
-          {[...filteredProducts(localDataRef.current)].map((product, index) => (
+          {filteredProducts(localDataRef.current).map((product, index) => (
             <SortableItem
               key={product.serial_number}
               id={product.serial_number}
               setImageView={setImageView}
               product={product}
               index={index}
+              sheet={sheet}
             />
           ))}
         </div>
-        <div className="h-[61px] w-[100%]"></div>
+        <div className="h-[61px] w-[100%]" />
       </SortableContext>
     </DndContext>
   );

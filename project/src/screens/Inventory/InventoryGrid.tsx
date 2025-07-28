@@ -171,7 +171,7 @@ const InventoryGrid = () => {
           <div className="absolute top-0 left-0 w-[100%] h-[calc(100%-40px)] mt-[40px]">
             <div className="w-[100%] h-[100%] overflow-y-scroll">
               {localData && filteredProducts(localData).length > 0 && (
-                <DraggableProductsGrid data={filteredProducts(localData)} />
+                <DraggableProductsGrid data={filteredProducts(localData)} sheet={true}/>
               )}
               <div className="h-[60px] w-[100%]" />
             </div>

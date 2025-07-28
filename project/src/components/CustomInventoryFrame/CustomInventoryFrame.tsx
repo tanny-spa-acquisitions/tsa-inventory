@@ -6,6 +6,7 @@ import { capitalizeFirstLetter } from "@/util/functions/Data";
 import Link from "next/link";
 import { useContext } from "react";
 import app_details from "@/util/appDetails.json";
+import { useRouter } from "next/navigation";
 
 const CustomInventoryFrame = ({
   item,
@@ -15,33 +16,36 @@ const CustomInventoryFrame = ({
   index: number;
 }) => {
   const { currentUser } = useContext(AuthContext);
-
+  const router = useRouter();
   const TubTitle = item.name;
   const TubMake = item.make;
   const TubModel = item.model;
   const TubPrice = "$" + item.price;
   const TubID = item.serial_number;
 
+  const handleClick = () => {
+    router.push(
+      TubID && TubID.trim().length !== 0 ? `/products/${TubID}` : "/products"
+    );
+  };
+
   if (!currentUser) return null;
 
   return (
-    <Link
-      href={
-        TubID && TubID.trim().length !== 0 ? `/products/${TubID}` : "/products"
-      }
+    <div
+      onClick={handleClick}
       className="select-none group hover:brightness-75 dim cursor-pointer rounded-[5px] overflow-hidden relative w-[100%] h-[100%] flex flex-col"
       style={{
         backgroundColor: appTheme[currentUser.theme].background_2,
       }}
     >
-      <div className="dim w-[100%] h-[100%]">
+      <div className="dim w-[100%] h-[100%] select-none">
         <div className="relative w-[100%] aspect-[16/9] overflow-hidden">
           <img
+            draggable={false}
             className="w-[100%] h-[100%] object-cover"
             src={
-              item.images.length > 0
-                ? item.images[0]
-                : app_details.default_img
+              item.images.length > 0 ? item.images[0] : app_details.default_img
             }
           />
           <div
@@ -79,6 +83,7 @@ const CustomInventoryFrame = ({
           }}
         >
           <img
+            draggable={false}
             className="w-[100%] h-[100%] p-[5px] object-contain"
             src={"/assets/logo-black.png"}
           />
@@ -109,7 +114,7 @@ const CustomInventoryFrame = ({
           </p>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
