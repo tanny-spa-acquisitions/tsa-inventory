@@ -104,12 +104,130 @@ export const updateProducts = (req, res) => {
   });
 };
 
+// export const deleteProducts = (req, res) => {
+//   const token = req.cookies.accessToken;
+//   if (!token) return res.status(401).json("Access token missing");
+
+//   const { serial_numbers } = req.body;
+
+//   if (!serial_numbers || serial_numbers.length === 0) {
+//     return res.status(400).json("Missing serial numbers");
+//   }
+
+//   jwt.verify(token, process.env.JWT_SECRET, async (err) => {
+//     if (err) return res.status(403).json("Token is invalid!");
+
+//     // First, fetch the ordinals of the items being deleted
+//     const fetchOrdinalsQuery = `SELECT ordinal FROM tubs WHERE serial_number IN (?)`;
+
+//     db.query(fetchOrdinalsQuery, [serial_numbers], (err, rows) => {
+//       if (err) {
+//         console.error("DB error fetching ordinals:", err);
+//         return res.status(500).json("Database error");
+//       }
+
+//       if (!rows.length) {
+//         return res.status(404).json("No products found to delete");
+//       }
+
+//       const ordinalsToRemove = rows.map((r) => r.ordinal).sort((a, b) => a - b);
+//       const minOrdinalToRemove = ordinalsToRemove[0];
+
+//       // 1. Delete the products
+//       const deleteQuery = `DELETE FROM tubs WHERE serial_number IN (?)`;
+
+//       db.query(deleteQuery, [serial_numbers], (err, result) => {
+//         if (err) {
+//           console.error("DB error deleting:", err);
+//           return res.status(500).json("Database error");
+//         }
+
+//         // 2. Decrement ordinals of all items with ordinal > minOrdinalToRemove
+//         const updateOrdinalsQuery = `
+//           UPDATE tubs
+//           SET ordinal = ordinal - 1
+//           WHERE ordinal > ?
+//         `;
+
+//         db.query(updateOrdinalsQuery, [minOrdinalToRemove], (err2, result2) => {
+//           if (err2) {
+//             console.error("DB error updating ordinals:", err2);
+//             return res.status(500).json("Error updating ordinals");
+//           }
+
+//           return res.status(200).json({
+//             success: true,
+//             deleted: result.affectedRows,
+//             ordinalsUpdated: result2.affectedRows,
+//           });
+//         });
+//       });
+//     });
+//   });
+// };
+
+// export const deleteProducts = (req, res) => {
+//   const token = req.cookies.accessToken;
+//   if (!token) return res.status(401).json("Access token missing");
+
+//   const { serial_numbers } = req.body;
+
+//   if (!serial_numbers || serial_numbers.length === 0) {
+//     return res.status(400).json("Missing serial numbers");
+//   }
+
+//   jwt.verify(token, process.env.JWT_SECRET, async (err) => {
+//     if (err) return res.status(403).json("Token is invalid!");
+
+//     // Step 1: Delete the selected products
+//     const deleteQuery = `DELETE FROM tubs WHERE serial_number IN (?)`;
+
+//     db.query(deleteQuery, [serial_numbers], (err, deleteResult) => {
+//       if (err) {
+//         console.error("DB error deleting:", err);
+//         return res.status(500).json("Database error");
+//       }
+
+//       // Step 2: Reset all ordinals in correct order (compact 0, 1, 2, ...)
+//       const resetOrdinalsQuery = `
+//         SET @rownum := -1;
+//         UPDATE tubs
+//         SET ordinal = (@rownum := @rownum + 1)
+//         ORDER BY ordinal;
+//       `;
+
+//       // MySQL doesn't allow multiple statements by default, so split them:
+//       db.query(`SET @rownum := -1`, (err1) => {
+//         if (err1) {
+//           console.error("Error initializing rownum:", err1);
+//           return res.status(500).json("Ordinal reset failed (rownum)");
+//         }
+
+//         db.query(
+//           `UPDATE tubs SET ordinal = (@rownum := @rownum + 1) ORDER BY ordinal`,
+//           (err2, updateResult) => {
+//             if (err2) {
+//               console.error("Error resetting ordinals:", err2);
+//               return res.status(500).json("Ordinal reset failed");
+//             }
+
+//             return res.status(200).json({
+//               success: true,
+//               deleted: deleteResult.affectedRows,
+//               ordinalsReset: updateResult.affectedRows,
+//             });
+//           }
+//         );
+//       });
+//     });
+//   });
+// };
+
 export const deleteProducts = (req, res) => {
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Access token missing");
 
   const { serial_numbers } = req.body;
-
   if (!serial_numbers || serial_numbers.length === 0) {
     return res.status(400).json("Missing serial numbers");
   }
@@ -117,25 +235,75 @@ export const deleteProducts = (req, res) => {
   jwt.verify(token, process.env.JWT_SECRET, (err) => {
     if (err) return res.status(403).json("Token is invalid!");
 
-    const q = `DELETE FROM tubs WHERE serial_number IN (?)`;
-
-    db.query(q, [serial_numbers], (err, result) => {
+    db.getConnection((err, connection) => {
       if (err) {
-        console.error("DB error:", err);
-        return res.status(500).json("Database error");
+        console.error("Connection error:", err);
+        return res.status(500).json("Connection failed");
       }
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json("No products found to delete");
-      }
+      connection.beginTransaction((err) => {
+        if (err) {
+          connection.release();
+          return res.status(500).json("Failed to start transaction");
+        }
 
-      return res
-        .status(200)
-        .json({ success: true, deleted: result.affectedRows });
+        const deleteQuery = `DELETE FROM tubs WHERE serial_number IN (?)`;
+        connection.query(deleteQuery, [serial_numbers], (err) => {
+          if (err) {
+            return connection.rollback(() => {
+              connection.release();
+              res.status(500).json("Delete failed");
+            });
+          }
+
+          connection.query(`SET @rownum := -1`, (err) => {
+            if (err) {
+              return connection.rollback(() => {
+                connection.release();
+                res.status(500).json("Failed to reset rownum");
+              });
+            }
+
+            const reindexQuery = `
+              UPDATE tubs
+              JOIN (
+                SELECT serial_number, (@rownum := @rownum + 1) AS new_ordinal
+                FROM tubs
+                ORDER BY ordinal
+              ) AS ordered ON tubs.serial_number = ordered.serial_number
+              SET tubs.ordinal = ordered.new_ordinal
+            `;
+
+            connection.query(reindexQuery, (err, result2) => {
+              if (err) {
+                return connection.rollback(() => {
+                  connection.release();
+                  res.status(500).json("Reindex failed");
+                });
+              }
+
+              connection.commit((err) => {
+                if (err) {
+                  return connection.rollback(() => {
+                    connection.release();
+                    res.status(500).json("Commit failed");
+                  });
+                }
+
+                connection.release();
+                return res.status(200).json({
+                  success: true,
+                  deleted: serial_numbers.length,
+                  reindexed: result2.affectedRows,
+                });
+              });
+            });
+          });
+        });
+      });
     });
   });
 };
-
 export const syncToGoogleSheets = (req, res) => {
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("No token.");
