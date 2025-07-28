@@ -125,6 +125,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
   };
 
   const handleAddRow = () => {
+    setEditMode(false);
     if (pathname.startsWith("/products")) {
       setAddProductPage(true);
     } else {
@@ -186,7 +187,9 @@ const ProductsHeader = ({ title }: { title: String }) => {
       if (dataFilters.listings === "All") {
         setEditMode((prev) => !prev);
       } else {
-        toast.info("Edit disabled when filtering");
+        toast.info("Edit disabled when filtering", {
+          toastId: "edit-disabled-toast",
+        });
       }
     } else {
       setEditMode((prev) => !prev);

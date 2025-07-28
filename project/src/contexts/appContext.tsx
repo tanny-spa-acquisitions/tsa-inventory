@@ -322,7 +322,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
           date_sold: values.date_sold ?? undefined,
           note: values.note ?? "",
           images: Array.isArray(values.images) ? values.images : [],
-          // ordinal: currentOrdinal ?? values.ordinal ?? 0,
           ordinal: currentOrdinal ?? 0,
         });
       }
@@ -346,7 +345,9 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     if (updatedProducts.length === 0) {
-      toast.info("No changes to save");
+      toast.info("No changes to save", {
+        toastId: "no-changes-toast",
+      });
       setEditMode(false);
       return;
     }

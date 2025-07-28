@@ -34,15 +34,15 @@ const InventoryRow = ({
     );
   };
 
-  // const form = useForm<ProductFormData>({
-  //   defaultValues: product,
-  // });
+  const form = useForm<ProductFormData>({
+    defaultValues: product,
+  });
 
-  // useEffect(() => {
-  //   if (form.getValues("serial_number") !== product.serial_number) {
-  //     form.reset(product);
-  //   }
-  // }, [product.serial_number]);
+  useEffect(() => {
+    if (form.getValues("serial_number") !== product.serial_number) {
+      form.reset(product);
+    }
+  }, [product.serial_number]);
 
   if (!currentUser) return null;
 

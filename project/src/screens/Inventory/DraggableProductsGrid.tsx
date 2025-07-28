@@ -62,14 +62,14 @@ function SortableItem({
       {...attributes}
       className="relative w-full"
     >
-      {editMode ? (
-        <div className="cursor-pointer hover:brightness-75 dim w-full h-full inset-0">
-          <div {...listeners} className="absolute inset-0 z-10 cursor-grab" />
-          <InventoryRow index={index} product={product} />
-        </div>
-      ) : (
+      <div
+        className={`w-full h-full inset-0 ${
+          editMode && "hover:brightness-75 dim cursor-pointer"
+        }`}
+      >
+        {editMode && <div {...listeners} className="absolute inset-0 z-10" />}
         <InventoryRow index={index} product={product} />
-      )}
+      </div>
     </div>
   );
 }
@@ -122,7 +122,7 @@ const DraggableProductsGrid = ({ data }: { data: Product[] }) => {
         strategy={verticalListSortingStrategy}
       >
         <div className="flex flex-col max-h-full pb-[46px] mb-[46px]">
-          {[...filteredProducts(localData)].map((product, index) => (
+          {[...filteredProducts(localDataRef.current)].map((product, index) => (
             <SortableItem
               key={product.serial_number}
               id={product.serial_number}
@@ -132,6 +132,7 @@ const DraggableProductsGrid = ({ data }: { data: Product[] }) => {
             />
           ))}
         </div>
+        <div className="h-[61px] w-[100%]"></div>
       </SortableContext>
     </DndContext>
   );
