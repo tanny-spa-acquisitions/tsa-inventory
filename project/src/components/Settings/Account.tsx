@@ -83,7 +83,7 @@ const Account = () => {
   if (!currentUser) return null;
 
   return (
-    <div className="ml-[5px] md:ml-[8px] w-full h-full flex flex-col pt-[50px] pr-[43px] sm:pr-[80px]">
+    <div className="relative ml-[5px] md:ml-[8px] h-full flex flex-col pt-[50px] w-[calc(100%-43px)] sm:w-[calc(100%-80px)]">
       <div className="ml-[1px] w-[90%] flex flex-col items-center justify-center">
         <p className="font-[600] lg:mb-[21px] mb-[19px] text-[29px] leading-[29px] md:text-[32px] md:leading-[32px] w-[100%] items-start">
           {currentUser.first_name} {currentUser.last_name}
@@ -131,7 +131,7 @@ const Account = () => {
         </div>
       </div>
 
-      <div className="flex flex-col-reverse sm:flex-row gap-[15px] mt-[0] absolute bottom-[32px] pr-[73px] sm:flex sm:mt-[18px] w-[100%]">
+      <div className="flex flex-col-reverse sm:flex-row gap-[15px] absolute bottom-[32px] sm:flex sm:mt-[18px] w-[100%]">
         <div
           onClick={handleSignOut}
           className="dim select-none cursor-pointer w-[100%] sm:w-[50%] hover:brightness-75 h-[40px] flex items-center justify-center font-[600]"
