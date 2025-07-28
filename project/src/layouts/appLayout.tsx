@@ -25,7 +25,11 @@ import appDetails from "@/util/appDetails.json";
 import { usePathname, useRouter } from "next/navigation";
 import LandingNav from "@/screens/Landing/LandingNav/LandingNav";
 import { useLeftBarOpenStore } from "@/store/useLeftBarOpenStore";
-import { QueryProvider } from "@/contexts/queryContext";
+import {
+  Product,
+  QueryProvider,
+  useContextQueries,
+} from "@/contexts/queryContext";
 import CustomToast from "@/components/CustomToast";
 import { usePageLayoutRefStore } from "@/store/usePageLayoutStore";
 import LandingPage from "@/screens/Landing/LandingPage/LandingPage";
@@ -97,19 +101,19 @@ const UnprotectedLayout = () => {
 };
 
 const ProtectedLayout = ({ children }: { children: ReactNode }) => {
-  const {
-    editingLock,
-    setSelectedProducts,
-    setEditMode,
-    setNewRows,
-    setAddProductPage,
-  } = useAppContext();
+  const { editingLock, setSelectedProducts, setEditMode, setAddProductPage } =
+    useAppContext();
+  const { setLocalData, productsData } = useContextQueries();
   const pathName = usePathname();
 
   useEffect(() => {
     setSelectedProducts([]);
     setEditMode(false);
-    setNewRows([]);
+    setLocalData(
+      productsData.sort(
+        (a: Product, b: Product) => (a.ordinal ?? 0) - (b.ordinal ?? 0)
+      )
+    );
     setAddProductPage(false);
   }, [setSelectedProducts, pathName]);
 

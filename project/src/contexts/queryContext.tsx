@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import {
   useQuery,
   useMutation,
@@ -28,9 +28,12 @@ export type Product = {
   width: number;
   note: string;
   images: string[];
+  ordinal: number;
 };
 
 export type QueryContextType = {
+  localData: Product[];
+  setLocalData: React.Dispatch<React.SetStateAction<Product[]>>;
   productsData: Product[];
   isLoadingProductsData: boolean;
   refetchProductsData: () => Promise<QueryObserverResult<Product[], Error>>;
@@ -58,7 +61,10 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     queryKey: ["products"],
     queryFn: async () => {
       const res = await makeRequest.get("/api/products/get", {});
-      return res.data.products || [];
+      const result = res.data.products || [];
+      const sorted = result.sort((a: Product, b: Product) => (a.ordinal ?? 0) - (b.ordinal ?? 0))
+      setLocalData(sorted);
+      return sorted;
     },
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
@@ -148,9 +154,13 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     await deleteProductsMutation.mutateAsync(serial_numbers);
   };
 
+  const [localData, setLocalData] = useState<Product[]>([]);
+
   return (
     <QueryContext.Provider
       value={{
+        localData,
+        setLocalData,
         productsData: productsData ?? [],
         isLoadingProductsData,
         refetchProductsData,

@@ -24,64 +24,82 @@ export const updateProducts = (req, res) => {
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Access token missing");
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, userInfo) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err) => {
     if (err) return res.status(403).json("Token is invalid!");
 
     const { products } = req.body;
+
     if (!Array.isArray(products)) {
       return res.status(400).json("Expected 'products' to be an array");
     }
 
     if (products.length === 0) {
-      return res.status(200).json({ success: true, message: "No products to update" });
+      return res
+        .status(200)
+        .json({ success: true, message: "No products to update" });
     }
 
-    const q = `
-      INSERT INTO tubs (
-        serial_number, name, description, note, make, model, price, type, date_sold,
-        repair_status, sale_status, length, width, images
-      )
-      VALUES ${products.map(() => `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).join(", ")}
-      ON DUPLICATE KEY UPDATE
-        name = VALUES(name),
-        description = VALUES(description),
-        note = VALUES(note),
-        make = VALUES(make),
-        model = VALUES(model),
-        price = VALUES(price),
-        type = VALUES(type),
-        date_sold = VALUES(date_sold),
-        repair_status = VALUES(repair_status),
-        sale_status = VALUES(sale_status),
-        length = VALUES(length),
-        width = VALUES(width),
-        images = VALUES(images)
-    `;
-
-    const values = products.flatMap(p => [
-      p.serial_number,
-      p.name,
-      p.description,
-      p.note ?? "",
-      p.make,
-      p.model,
-      p.price,
-      "TSA",
-      p.date_sold ? formatDateToMySQL(p.date_sold) : null,
-      p.repair_status,
-      p.sale_status,
-      p.length,
-      p.width,
-      JSON.stringify(Array.isArray(p.images) ? p.images : []),
-    ]);
-
-    db.query(q, values, (err, result) => {
+    db.query(`SELECT serial_number, ordinal FROM tubs`, (err, rows) => {
       if (err) {
-        console.error("DB error:", err);
+        console.error("Error fetching existing tubs:", err);
         return res.status(500).json("Database error");
       }
 
-      return res.status(200).json({ success: true, affectedRows: result.affectedRows });
+      const q = `
+        INSERT INTO tubs (
+          serial_number, name, description, note, make, model, price, type, date_sold,
+          repair_status, sale_status, length, width, images, ordinal
+        )
+        VALUES ${products
+          .map(() => `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          .join(", ")}
+        ON DUPLICATE KEY UPDATE
+          name = VALUES(name),
+          description = VALUES(description),
+          note = VALUES(note),
+          make = VALUES(make),
+          model = VALUES(model),
+          price = VALUES(price),
+          type = VALUES(type),
+          date_sold = VALUES(date_sold),
+          repair_status = VALUES(repair_status),
+          sale_status = VALUES(sale_status),
+          length = VALUES(length),
+          width = VALUES(width),
+          images = VALUES(images),
+          ordinal = VALUES(ordinal)
+      `;
+
+      const values = products.flatMap((p) => [
+        p.serial_number,
+        p.name,
+        p.description,
+        p.note ?? "",
+        p.make,
+        p.model,
+        p.price,
+        "TSA", // Hardcoded type
+        p.date_sold ? formatDateToMySQL(p.date_sold) : null,
+        p.repair_status,
+        p.sale_status,
+        p.length,
+        p.width,
+        JSON.stringify(Array.isArray(p.images) ? p.images : []),
+        p.ordinal,
+      ]);
+
+      db.query(q, values, (err, result) => {
+        if (err) {
+          console.error("DB error inserting/updating products:", err);
+          return res.status(500).json("Database error");
+        }
+
+        return res.status(200).json({
+          success: true,
+          affectedRows: result.affectedRows,
+          message: "Products inserted or updated successfully",
+        });
+      });
     });
   });
 };

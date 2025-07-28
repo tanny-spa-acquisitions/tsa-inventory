@@ -16,7 +16,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Image from "next/image";
-import { useAppContext } from "@/contexts/appContext";
 import { appTheme } from "@/util/appTheme";
 import { useContext, useRef, useState } from "react";
 import { AuthContext } from "@/contexts/authContext";

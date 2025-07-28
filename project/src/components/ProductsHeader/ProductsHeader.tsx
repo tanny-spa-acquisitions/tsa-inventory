@@ -6,7 +6,7 @@ import { BsWindow } from "react-icons/bs";
 import { AuthContext } from "@/contexts/authContext";
 import { appTheme } from "@/util/appTheme";
 import { toast } from "react-toastify";
-import { useAppContext } from "@/contexts/appContext";
+import { DataFilters, useAppContext } from "@/contexts/appContext";
 import { makeRequest } from "@/util/axios";
 import { GOOGLE_SHEET_URL } from "@/util/config";
 import { IoTrashSharp } from "react-icons/io5";
@@ -28,10 +28,9 @@ const ProductsHeader = ({ title }: { title: String }) => {
     setDataFilters,
     selectedProducts,
     setSelectedProducts,
-    setNewRows,
     setAddProductPage,
   } = useAppContext();
-  const { deleteProducts } = useContextQueries();
+  const { deleteProducts, updateProducts, localData } = useContextQueries();
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
   const pathname = usePathname();
@@ -153,7 +152,15 @@ const ProductsHeader = ({ title }: { title: String }) => {
     }
   };
 
-  const addRow = (newSerial: string, newMake: string, newModel: string) => {
+  const addRow = async (
+    newSerial: string,
+    newMake: string,
+    newModel: string
+  ) => {
+    const allOrdinals = localData.map((p) => p.ordinal);
+    const nextOrdinal =
+      allOrdinals.length > 0 ? Math.max(...allOrdinals) + 1 : 0;
+
     const newProduct: Product = {
       serial_number: newSerial,
       name: "",
@@ -169,8 +176,29 @@ const ProductsHeader = ({ title }: { title: String }) => {
       description: "",
       note: "",
       images: [],
+      ordinal: nextOrdinal,
     };
-    setNewRows((prev) => [...prev, newProduct]);
+    await updateProducts([newProduct]);
+  };
+
+  const handleEditClick = () => {
+    if (pathname === "/") {
+      if (dataFilters.listings === "All") {
+        setEditMode((prev) => !prev);
+      } else {
+        toast.info("Edit disabled when filtering");
+      }
+    } else {
+      setEditMode((prev) => !prev);
+    }
+  };
+
+  const handleFilterClick = (filter: DataFilters["listings"]) => {
+    setDataFilters({ ...dataFilters, listings: filter });
+    setSelectedProducts([]);
+    if (pathname === "/" && (filter === "Active" || filter === "Sold")) {
+      setEditMode(false);
+    }
   };
 
   if (!currentUser) return null;
@@ -188,10 +216,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
           className="flex w-[202px] pl-[4px] h-[32px] rounded-[18px] flex-row items-center"
         >
           <div
-            onClick={() => {
-              setDataFilters({ ...dataFilters, listings: "All" });
-              setSelectedProducts([]);
-            }}
+            onClick={() => handleFilterClick("All")}
             style={{
               backgroundColor:
                 dataFilters.listings === "All"
@@ -210,10 +235,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
             }}
           />
           <div
-            onClick={() => {
-              setDataFilters({ ...dataFilters, listings: "Active" });
-              setSelectedProducts([]);
-            }}
+            onClick={() => handleFilterClick("Active")}
             style={{
               backgroundColor:
                 dataFilters.listings === "Active"
@@ -232,10 +254,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
             }}
           />
           <div
-            onClick={() => {
-              setDataFilters({ ...dataFilters, listings: "Sold" });
-              setSelectedProducts([]);
-            }}
+            onClick={() => handleFilterClick("Sold")}
             style={{
               backgroundColor:
                 dataFilters.listings === "Sold"
@@ -294,9 +313,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
               : "none",
           }}
           className="mr-[2px] dim hover:brightness-75 rounded-[25px] w-[33px] h-[33px] flex flex-row justify-center items-center gap-[10px] text-[15px] cursor-pointer"
-          onClick={() => {
-            setEditMode((prev) => !prev);
-          }}
+          onClick={handleEditClick}
         >
           <FiEdit
             size={17}

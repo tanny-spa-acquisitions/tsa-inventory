@@ -7,7 +7,7 @@ import React, {
   useRef,
 } from "react";
 import { fetchInventory } from "../util/functions/Inventory";
-import { getCurrentTimestamp } from "@/util/functions/Data";
+import { getCurrentTimestamp, getNextOrdinal } from "@/util/functions/Data";
 import axios from "axios";
 import { BACKEND_URL } from "@/util/config";
 import {
@@ -44,9 +44,7 @@ type AppContextType = {
   setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   selectedProducts: string[];
   setSelectedProducts: React.Dispatch<React.SetStateAction<string[]>>;
-  newRows: Product[];
-  setNewRows: React.Dispatch<React.SetStateAction<Product[]>>;
-  saveProducts: () => Promise<void>;
+  saveProducts: (inventoryData: Product[]) => Promise<void>;
   productFormRef: React.RefObject<UseFormReturn<ProductFormData> | null>;
   formRefs: React.RefObject<Map<string, UseFormReturn<ProductFormData>>>;
   previousPath: string | null;
@@ -72,7 +70,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { productsData } = useContextQueries();
+  const { productsData, localData } = useContextQueries();
   const pathname = usePathname();
   const [previousPath, setPreviousPath] = useState<string | null>(null);
   const lastPathRef = useRef<string | null>(null);
@@ -211,6 +209,12 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     if (dataFilters.listings === "All") {
       return products;
     } else if (dataFilters.listings === "Sold") {
+      const result = products.filter(
+        (product) =>
+          product.sale_status === "Sold Awaiting Delivery" ||
+          product.sale_status === "Delivered"
+      );
+      console.log(result);
       return products.filter(
         (product) =>
           product.sale_status === "Sold Awaiting Delivery" ||
@@ -228,42 +232,65 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [editMode, setEditMode] = useState<boolean>(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
-  const [newRows, setNewRows] = useState<Product[]>([]);
-
   const formRefs = useRef<Map<string, UseFormReturn<ProductFormData>>>(
     new Map()
   );
   type ProductFormRef = React.RefObject<UseFormReturn<ProductFormData> | null>;
   const productFormRef: ProductFormRef = useRef(null);
 
-  const saveProducts = async () => {
-    const updatedProducts: Product[] = [];
-    for (const [serial, form] of formRefs.current.entries()) {
-      const values = form.getValues();
-      if (Object.keys(form.formState.dirtyFields).length === 0) continue;
+  const saveProducts = async (passedLocalData: Product[]) => {
+    let updatedProducts: Product[] = [];
 
-      updatedProducts.push({
-        ...values,
-        date_entered: values.date_entered ?? undefined,
-        date_sold: values.date_sold ?? undefined,
-        note: values.note ?? "",
-        images: Array.isArray(values.images) ? values.images : [],
-      });
+    console.log(passedLocalData);
+    console.log(productsData);
+
+    if (passedLocalData.length > 0) {
+      for (let i = 0; i < passedLocalData.length; i++) {
+        const storedObject = productsData.find(
+          (p) => p.serial_number === passedLocalData[i].serial_number
+        );
+        if (storedObject && storedObject.ordinal === passedLocalData[i].ordinal)
+          continue;
+        updatedProducts.push(passedLocalData[i]);
+      }
     }
 
-    if (updatedProducts.length === 0 && newRows.length === 0) {
+    console.log(updatedProducts);
+
+    for (const [serial, form] of formRefs.current.entries()) {
+      if (updatedProducts.find((item) => item.serial_number === serial))
+        continue;
+      const values = form.getValues();
+      const localObject = passedLocalData.find(
+        (p) => p.serial_number === serial
+      );
+      if (!localObject) continue;
+
+      const isDirty = Object.keys(form.formState.dirtyFields).length > 0;
+      if (isDirty) {
+        updatedProducts.push({
+          ...values,
+          date_entered: values.date_entered ?? undefined,
+          date_sold: values.date_sold ?? undefined,
+          note: values.note ?? "",
+          images: Array.isArray(values.images) ? values.images : [],
+          ordinal: localObject.ordinal,
+        });
+      }
+    }
+
+    console.log(updatedProducts);
+
+    if (updatedProducts.length === 0) {
       toast.info("No changes to save");
       return;
     }
-
     try {
       setEditingLock(true);
-      await updateProducts([...updatedProducts, ...newRows]);
-      setNewRows([]);
-      for (const [serial, form] of formRefs.current.entries()) {
+      await updateProducts(updatedProducts);
+      for (const [, form] of formRefs.current.entries()) {
         form.reset(form.getValues());
       }
-
       toast.success("Products updated");
     } catch (err) {
       toast.error("Failed to update products");
@@ -302,10 +329,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
           dirtyRows += 1;
         }
       }
-      if (newRows.length > 0 || dirtyRows > 0) {
+      if (localData.length > productsData.length || dirtyRows > 0) {
         const onContinue = async () => {
-          await saveProducts();
-          router.push(`/products/`);
+          await saveProducts(localData);
+          router.push(newPage);
         };
         promptSave(() => router.push(newPage), onContinue);
       } else {
@@ -340,26 +367,32 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const onSubmit = async (
     data: ProductFormData,
     overrideNewProduct?: boolean
-  ) => {
+  ): Promise<boolean> => {
     try {
       const isNew = overrideNewProduct ?? addProductPage;
+
       if (data.serial_number.length !== 14) {
         toast.error("Serial # is not 14 characters");
         return false;
       }
-      if (
-        isNew &&
-        productsData.filter((item) => item.serial_number === data.serial_number)
-          .length > 0
-      ) {
+
+      const existing = productsData.find(
+        (item) => item.serial_number === data.serial_number
+      );
+
+      if (isNew && existing) {
         toast.error("Serial # is already used on another product");
         return false;
       }
+
+      const ordinal = existing?.ordinal ?? getNextOrdinal(productsData);
       const normalizedData: Product = {
         ...data,
         note: data.note ?? "",
         images: Array.isArray(data.images) ? data.images : [],
+        ordinal,
       };
+
       await updateProducts([normalizedData]);
       toast.success("Updated products");
       return true;
@@ -400,8 +433,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setEditMode,
         selectedProducts,
         setSelectedProducts,
-        newRows,
-        setNewRows,
         saveProducts,
         formRefs,
         productFormRef,

@@ -1,3 +1,4 @@
+import { Product } from "@/contexts/queryContext";
 import crypto from "crypto";
 
 export const formatDate = (dateString: string) => {
@@ -105,4 +106,9 @@ export const getCurrentTimestamp = () => {
 
 export const random8Digits = () => {
   return Math.floor(10000000 + Math.random() * 90000000);
+};
+
+export const getNextOrdinal = (productsData: Product[]): number => {
+  const ordinals = productsData.map((p) => p.ordinal);
+  return ordinals.length > 0 ? Math.max(...ordinals) + 1 : 0;
 };

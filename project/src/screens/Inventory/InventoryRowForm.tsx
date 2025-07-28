@@ -18,7 +18,6 @@ import Modal2Continue from "@/modals/Modal2Continue";
 type InventoryRowFormProps = {
   product: Product;
   inventoryDataLayout: InventoryDataItem[];
-  saveProducts: () => Promise<void>;
   registerFormRef: (
     serial: string,
     form: UseFormReturn<ProductFormData>
@@ -28,11 +27,10 @@ const InventoryRowForm = ({
   product,
   inventoryDataLayout,
   registerFormRef,
-  saveProducts,
 }: InventoryRowFormProps) => {
   const { currentUser } = useContext(AuthContext);
-  const { newRows, formRefs } = useAppContext();
-  const { productsData } = useContextQueries();
+  const { formRefs, saveProducts } = useAppContext();
+  const { productsData, localData } = useContextQueries();
   const form = useProductForm();
   const router = useRouter();
   const modal2 = useModal2Store((state: any) => state.modal2);
@@ -77,7 +75,7 @@ const InventoryRowForm = ({
       (p) => p.serial_number === product.serial_number
     );
     if (exists) {
-      if (newRows.length > 0 || dirtyRows > 0) {
+      if (localData.length > productsData.length || dirtyRows > 0) {
         if (!currentUser) return null;
         setModal2({
           ...modal2,
@@ -94,7 +92,7 @@ const InventoryRowForm = ({
               onNoSave={() => router.push(`/products/${product.serial_number}`)}
               text={`Save products before continuing?`}
               onContinue={async () => {
-                await saveProducts();
+                await saveProducts(localData);
                 router.push(`/products/${product.serial_number}`);
               }}
             />
@@ -104,7 +102,7 @@ const InventoryRowForm = ({
         router.push(`/products/${product.serial_number}`);
       }
     } else {
-      if (newRows.length > 0 || dirtyRows > 0) {
+      if (localData.length > productsData.length || dirtyRows > 0) {
         if (!currentUser) return null;
         setModal2({
           ...modal2,
@@ -121,7 +119,7 @@ const InventoryRowForm = ({
               text={`Save products before continuing?`}
               onNoSave={() => router.push(`/products/${product.serial_number}`)}
               onContinue={async () => {
-                await saveProducts();
+                await saveProducts(localData);
                 router.push(`/products/${product.serial_number}`);
               }}
             />
