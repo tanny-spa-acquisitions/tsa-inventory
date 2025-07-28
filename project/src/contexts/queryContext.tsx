@@ -99,8 +99,9 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
         return updated ? updated : product;
       });
       queryClient.setQueryData(queryKey, newData);
-      localDataRef.current = newData;
-      setLocalData(newData);
+      // localDataRef.current = newData;
+      // setLocalData(newData);
+      isOptimisticUpdate.current = true;
       return { previousData, queryKey };
     },
     onError: (_err, _newData, context) => {
@@ -109,6 +110,7 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     },
     onSettled: (_data, _err, _variables, context) => {
+      isOptimisticUpdate.current = false;
       if (context?.queryKey) {
         queryClient.invalidateQueries({ queryKey: context.queryKey });
       }
@@ -182,8 +184,10 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
+  const isOptimisticUpdate = useRef(false);
+
   useEffect(() => {
-    if (productsData) {
+    if (!isOptimisticUpdate.current && productsData) {
       setLocalData(productsData);
       localDataRef.current = productsData;
     }

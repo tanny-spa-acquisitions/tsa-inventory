@@ -232,69 +232,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   type ProductFormRef = React.RefObject<UseFormReturn<ProductFormData> | null>;
   const productFormRef: ProductFormRef = useRef(null);
 
-  // const saveProducts = async () => {
-  //   let updatedProducts: Product[] = [];
-
-  //   console.log(localDataRef.current);
-  //   console.log(productsData);
-
-  //   const data = localDataRef.current;
-
-  //   if (data.length > 0) {
-  //     for (let i = 0; i < data.length; i++) {
-  //       const storedObject = productsData.find(
-  //         (p) => p.serial_number === data[i].serial_number
-  //       );
-  //       console.log(storedObject?.ordinal, data[i].ordinal);
-  //       if (storedObject && storedObject.ordinal === data[i].ordinal) continue;
-  //       updatedProducts.push(data[i]);
-  //     }
-  //   }
-
-  //   console.log(updatedProducts);
-
-  //   for (const [serial, form] of formRefs.current.entries()) {
-  //     if (updatedProducts.find((item) => item.serial_number === serial))
-  //       continue;
-  //     const values = form.getValues();
-  //     const localObject = data.find((p) => p.serial_number === serial);
-  //     if (!localObject) continue;
-
-  //     const isDirty = Object.keys(form.formState.dirtyFields).length > 0;
-  //     if (isDirty) {
-  //       updatedProducts.push({
-  //         ...values,
-  //         date_entered: values.date_entered ?? undefined,
-  //         date_sold: values.date_sold ?? undefined,
-  //         note: values.note ?? "",
-  //         images: Array.isArray(values.images) ? values.images : [],
-  //         ordinal: localObject.ordinal,
-  //       });
-  //     }
-  //   }
-
-  //   console.log(updatedProducts);
-
-  //   if (updatedProducts.length === 0) {
-  //     toast.info("No changes to save");
-  //     setEditMode(false);
-  //     return;
-  //   }
-  //   try {
-  //     setEditingLock(true);
-  //     await updateProducts(updatedProducts);
-  //     for (const [, form] of formRefs.current.entries()) {
-  //       form.reset(form.getValues());
-  //     }
-  //     toast.success("Products updated");
-  //   } catch (err) {
-  //     toast.error("Failed to update products");
-  //   } finally {
-  //     setEditingLock(false);
-  //     setEditMode(false);
-  //   }
-  // };
-
   const saveProducts = async () => {
     let updatedProducts: Product[] = [];
 
@@ -356,7 +293,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       setEditingLock(true);
       await updateProducts(updatedProducts);
       for (const [, form] of formRefs.current.entries()) {
-        form.reset(form.getValues()); // resets dirty state
+        form.reset(form.getValues());  
       }
       // toast.success("Products updated");
     } catch (err) {
@@ -463,7 +400,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       };
 
       await updateProducts([normalizedData]);
-      toast.success("Updated products");
+      // toast.success("Updated products");
       return true;
     } catch (error) {
       toast.error("Error updating products");

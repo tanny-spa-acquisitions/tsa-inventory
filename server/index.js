@@ -81,16 +81,6 @@ db.getConnection((err, connection) => {
   console.log("Connected to MySQL Database");
   connection.release();
 });
-// const testDbConnection = async () => {
-//   try {
-//     const connection = await db.getConnection();
-//     console.log("Connected to MySQL Database");
-//     connection.release();
-//   } catch (err) {
-//     console.error("Database connection failed: ", err);
-//   }
-// };
-// testDbConnection();
 
 // INVENTORY
 app.get("/google/inventory", async (req, res) => {
