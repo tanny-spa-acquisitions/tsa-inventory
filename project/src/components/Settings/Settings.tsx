@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useContext, useState } from "react";
 import { appTheme } from "../../util/appTheme";
 import { AuthContext } from "../../contexts/authContext";
@@ -9,17 +9,14 @@ type SettingsProps = {
   initialPage: SettingsPages | null;
 };
 
-type SettingsPages = "Account" | "Subscription" | "Billing" | "Settings";
+type SettingsPages = "Account";
 
 const Settings = ({ initialPage }: SettingsProps) => {
   const { currentUser } = useContext(AuthContext);
   const [selectedPage, setSelectedPage] = useState<SettingsPages>(
     initialPage === null ? "Account" : initialPage
   );
-  const settingsPages: SettingsPages[] = [
-    "Account",
-    "Settings",
-  ];
+  const settingsPages: SettingsPages[] = ["Account"];
 
   if (!currentUser) return null;
 
@@ -64,7 +61,6 @@ const Settings = ({ initialPage }: SettingsProps) => {
       </div>
       <div className="w-[75%] h-full max-w-[calc(100%-200px)]">
         {selectedPage === "Account" && <Account />}
-        {selectedPage === "Settings" && <UserSettings />}
       </div>
     </div>
   );
