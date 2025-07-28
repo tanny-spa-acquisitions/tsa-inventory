@@ -180,9 +180,9 @@ const InventoryGrid = () => {
       </div>
 
       <div
-        onClick={() => saveProducts(localData)}
+        onClick={() => saveProducts()}
         className="absolute z-[800] bottom-[35px] right-[30px] h-[40px] w-[110px] font-[600] rounded-[25px] dim cursor-pointer hover:brightness-75 items-center justify-center flex"
-        style={{ backgroundColor: appTheme[currentUser.theme].app_color_1 }}
+        style={{ backgroundColor: "white" }}
       >
         Save
       </div>

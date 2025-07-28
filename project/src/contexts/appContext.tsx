@@ -44,7 +44,7 @@ type AppContextType = {
   setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   selectedProducts: string[];
   setSelectedProducts: React.Dispatch<React.SetStateAction<string[]>>;
-  saveProducts: (inventoryData: Product[]) => Promise<void>;
+  saveProducts: () => Promise<void>;
   productFormRef: React.RefObject<UseFormReturn<ProductFormData> | null>;
   formRefs: React.RefObject<Map<string, UseFormReturn<ProductFormData>>>;
   previousPath: string | null;
@@ -70,7 +70,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { productsData, localData } = useContextQueries();
+  const { productsData, localDataRef } = useContextQueries();
   const pathname = usePathname();
   const [previousPath, setPreviousPath] = useState<string | null>(null);
   const lastPathRef = useRef<string | null>(null);
@@ -209,12 +209,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     if (dataFilters.listings === "All") {
       return products;
     } else if (dataFilters.listings === "Sold") {
-      const result = products.filter(
-        (product) =>
-          product.sale_status === "Sold Awaiting Delivery" ||
-          product.sale_status === "Delivered"
-      );
-      console.log(result);
       return products.filter(
         (product) =>
           product.sale_status === "Sold Awaiting Delivery" ||
@@ -238,60 +232,132 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   type ProductFormRef = React.RefObject<UseFormReturn<ProductFormData> | null>;
   const productFormRef: ProductFormRef = useRef(null);
 
-  const saveProducts = async (passedLocalData: Product[]) => {
+  // const saveProducts = async () => {
+  //   let updatedProducts: Product[] = [];
+
+  //   console.log(localDataRef.current);
+  //   console.log(productsData);
+
+  //   const data = localDataRef.current;
+
+  //   if (data.length > 0) {
+  //     for (let i = 0; i < data.length; i++) {
+  //       const storedObject = productsData.find(
+  //         (p) => p.serial_number === data[i].serial_number
+  //       );
+  //       console.log(storedObject?.ordinal, data[i].ordinal);
+  //       if (storedObject && storedObject.ordinal === data[i].ordinal) continue;
+  //       updatedProducts.push(data[i]);
+  //     }
+  //   }
+
+  //   console.log(updatedProducts);
+
+  //   for (const [serial, form] of formRefs.current.entries()) {
+  //     if (updatedProducts.find((item) => item.serial_number === serial))
+  //       continue;
+  //     const values = form.getValues();
+  //     const localObject = data.find((p) => p.serial_number === serial);
+  //     if (!localObject) continue;
+
+  //     const isDirty = Object.keys(form.formState.dirtyFields).length > 0;
+  //     if (isDirty) {
+  //       updatedProducts.push({
+  //         ...values,
+  //         date_entered: values.date_entered ?? undefined,
+  //         date_sold: values.date_sold ?? undefined,
+  //         note: values.note ?? "",
+  //         images: Array.isArray(values.images) ? values.images : [],
+  //         ordinal: localObject.ordinal,
+  //       });
+  //     }
+  //   }
+
+  //   console.log(updatedProducts);
+
+  //   if (updatedProducts.length === 0) {
+  //     toast.info("No changes to save");
+  //     setEditMode(false);
+  //     return;
+  //   }
+  //   try {
+  //     setEditingLock(true);
+  //     await updateProducts(updatedProducts);
+  //     for (const [, form] of formRefs.current.entries()) {
+  //       form.reset(form.getValues());
+  //     }
+  //     toast.success("Products updated");
+  //   } catch (err) {
+  //     toast.error("Failed to update products");
+  //   } finally {
+  //     setEditingLock(false);
+  //     setEditMode(false);
+  //   }
+  // };
+
+  const saveProducts = async () => {
     let updatedProducts: Product[] = [];
 
-    console.log(passedLocalData);
-    console.log(productsData);
+    const localData = localDataRef.current;
 
-    if (passedLocalData.length > 0) {
-      for (let i = 0; i < passedLocalData.length; i++) {
-        const storedObject = productsData.find(
-          (p) => p.serial_number === passedLocalData[i].serial_number
-        );
-        if (storedObject && storedObject.ordinal === passedLocalData[i].ordinal)
-          continue;
-        updatedProducts.push(passedLocalData[i]);
-      }
+    // Step 1: Build a map from serial -> ordinal (from localDataRef)
+    const ordinalMap = new Map<string, number>();
+    for (const item of localData) {
+      ordinalMap.set(item.serial_number, item.ordinal);
     }
 
-    console.log(updatedProducts);
-
+    // Step 2: Loop through formRefs and override values with the form ones
     for (const [serial, form] of formRefs.current.entries()) {
-      if (updatedProducts.find((item) => item.serial_number === serial))
-        continue;
       const values = form.getValues();
-      const localObject = passedLocalData.find(
-        (p) => p.serial_number === serial
-      );
-      if (!localObject) continue;
-
       const isDirty = Object.keys(form.formState.dirtyFields).length > 0;
-      if (isDirty) {
+
+      const stored = productsData.find((p) => p.serial_number === serial);
+      const currentOrdinal = ordinalMap.get(serial);
+      const ordinalChanged = stored?.ordinal !== currentOrdinal;
+
+      if (isDirty || ordinalChanged) {
         updatedProducts.push({
           ...values,
           date_entered: values.date_entered ?? undefined,
           date_sold: values.date_sold ?? undefined,
           note: values.note ?? "",
           images: Array.isArray(values.images) ? values.images : [],
-          ordinal: localObject.ordinal,
+          // ordinal: currentOrdinal ?? values.ordinal ?? 0,
+          ordinal: currentOrdinal ?? 0,
         });
       }
     }
 
-    console.log(updatedProducts);
+    // Step 3: Handle any new items in localData that weren’t in formRefs (e.g., new unsaved items)
+    for (const item of localData) {
+      const existsInForm = formRefs.current.has(item.serial_number);
+      const existsInUpdated = updatedProducts.some(
+        (p) => p.serial_number === item.serial_number
+      );
+      const stored = productsData.find(
+        (p) => p.serial_number === item.serial_number
+      );
+
+      const ordinalChanged = stored?.ordinal !== item.ordinal;
+
+      if (!existsInForm && ordinalChanged && !existsInUpdated) {
+        updatedProducts.push(item);
+      }
+    }
 
     if (updatedProducts.length === 0) {
       toast.info("No changes to save");
+      setEditMode(false);
       return;
     }
+
     try {
       setEditingLock(true);
       await updateProducts(updatedProducts);
       for (const [, form] of formRefs.current.entries()) {
-        form.reset(form.getValues());
+        form.reset(form.getValues()); // resets dirty state
       }
-      toast.success("Products updated");
+      // toast.success("Products updated");
     } catch (err) {
       toast.error("Failed to update products");
     } finally {
@@ -329,9 +395,11 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
           dirtyRows += 1;
         }
       }
-      if (localData.length > productsData.length || dirtyRows > 0) {
+      // if (localData.length > productsData.length || dirtyRows > 0) {
+      const localDataCurrent = localDataRef.current;
+      if (localDataCurrent.length > productsData.length || dirtyRows > 0) {
         const onContinue = async () => {
-          await saveProducts(localData);
+          await saveProducts();
           router.push(newPage);
         };
         promptSave(() => router.push(newPage), onContinue);

@@ -78,8 +78,8 @@ const DraggableProductsGrid = ({ data }: { data: Product[] }) => {
   const { currentUser } = useContext(AuthContext);
   const sensors = useSensors(useSensor(PointerSensor));
   const [imageView, setImageView] = useState<string>("");
-  const { localData, setLocalData } = useContextQueries();
-  const { filteredProducts } = useAppContext();
+  const { localData, setLocalData, localDataRef } = useContextQueries();
+  const { filteredProducts, saveProducts } = useAppContext();
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -104,6 +104,8 @@ const DraggableProductsGrid = ({ data }: { data: Product[] }) => {
     );
 
     setLocalData(sorted);
+    localDataRef.current = sorted;
+    await saveProducts();
   };
 
   if (!currentUser) return null;

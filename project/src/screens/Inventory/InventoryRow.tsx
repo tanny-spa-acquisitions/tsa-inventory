@@ -5,8 +5,10 @@ import { RiDraggable } from "react-icons/ri";
 import { useAppContext } from "@/contexts/appContext";
 import { Product, useContextQueries } from "@/contexts/queryContext";
 import { AuthContext } from "@/contexts/authContext";
-import { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { FaCheck } from "react-icons/fa6";
+import { ProductFormData } from "@/util/schemas/productSchema";
+import { useForm } from "react-hook-form";
 
 const InventoryRow = ({
   index,
@@ -23,13 +25,24 @@ const InventoryRow = ({
     selectedProducts,
     setSelectedProducts,
     formRefs,
-    saveProducts,
   } = useAppContext();
   const { productsData, localData, setLocalData } = useContextQueries();
 
   const deleteNewRow = (serial: string) => () => {
-    setLocalData((prev) => prev.filter((item) => item.serial_number !== serial))
+    setLocalData((prev) =>
+      prev.filter((item) => item.serial_number !== serial)
+    );
   };
+
+  // const form = useForm<ProductFormData>({
+  //   defaultValues: product,
+  // });
+
+  // useEffect(() => {
+  //   if (form.getValues("serial_number") !== product.serial_number) {
+  //     form.reset(product);
+  //   }
+  // }, [product.serial_number]);
 
   if (!currentUser) return null;
 
@@ -118,7 +131,6 @@ const InventoryRow = ({
       </div>
 
       <InventoryRowForm
-        key={product.serial_number}
         product={product}
         inventoryDataLayout={inventoryDataLayout}
         registerFormRef={(serial, formInstance) => {

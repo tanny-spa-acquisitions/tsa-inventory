@@ -1,5 +1,12 @@
 "use client";
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   useQuery,
   useMutation,
@@ -33,6 +40,7 @@ export type Product = {
 
 export type QueryContextType = {
   localData: Product[];
+  localDataRef: React.MutableRefObject<Product[]>;
   setLocalData: React.Dispatch<React.SetStateAction<Product[]>>;
   productsData: Product[];
   isLoadingProductsData: boolean;
@@ -62,8 +70,9 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     queryFn: async () => {
       const res = await makeRequest.get("/api/products/get", {});
       const result = res.data.products || [];
-      const sorted = result.sort((a: Product, b: Product) => (a.ordinal ?? 0) - (b.ordinal ?? 0))
-      setLocalData(sorted);
+      const sorted = result.sort(
+        (a: Product, b: Product) => (a.ordinal ?? 0) - (b.ordinal ?? 0)
+      );
       return sorted;
     },
     staleTime: 1000 * 60 * 5,
@@ -154,12 +163,35 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     await deleteProductsMutation.mutateAsync(serial_numbers);
   };
 
-  const [localData, setLocalData] = useState<Product[]>([]);
+  const [localData, setLocalDataState] = useState<Product[]>([]);
+  const localDataRef = useRef<Product[]>([]);
+
+  const setLocalData: React.Dispatch<React.SetStateAction<Product[]>> = (
+    newDataOrFn
+  ) => {
+    setLocalDataState((prevState) => {
+      const newData =
+        typeof newDataOrFn === "function"
+          ? (newDataOrFn as (prev: Product[]) => Product[])(prevState)
+          : newDataOrFn;
+
+      localDataRef.current = newData;
+      return newData;
+    });
+  };
+
+  useEffect(() => {
+    if (productsData) {
+      setLocalData(productsData);
+      localDataRef.current = productsData;
+    }
+  }, [productsData]);
 
   return (
     <QueryContext.Provider
       value={{
         localData,
+        localDataRef,
         setLocalData,
         productsData: productsData ?? [],
         isLoadingProductsData,
