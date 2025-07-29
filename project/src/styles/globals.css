@@ -13,6 +13,10 @@ input:-webkit-autofill:active {
   transition: background-color 9999s ease-in-out 0s;
 }
 
+.custom-select::-ms-expand {
+  display: none;
+}
+
 /* TIP TAP NOTES */
 .tiptap p {
   margin: 0;
