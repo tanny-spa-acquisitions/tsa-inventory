@@ -113,7 +113,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
     setEditingLock(true);
     try {
       await deleteProducts(selectedProducts);
-      resetTimer();
+      resetTimer(true);
       // toast.success("Deleted successfully");
     } catch (e) {
       toast.error(

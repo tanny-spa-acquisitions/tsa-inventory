@@ -25,7 +25,6 @@ const InventoryRow = ({
     selectedProducts,
     setSelectedProducts,
     formRefs,
-    resetTimer,
   } = useAppContext();
   const { productsData, localData, setLocalData } = useContextQueries();
 
@@ -43,12 +42,6 @@ const InventoryRow = ({
     form.reset(product);
   }, [product]);
 
-  useEffect(() => {
-    const subscription = form.watch(() => {
-      resetTimer();
-    });
-    return () => subscription.unsubscribe();
-  }, []);
 
   if (!currentUser) return null;
 

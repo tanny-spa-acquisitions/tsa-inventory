@@ -233,7 +233,7 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
           }}
           className="dim hover:brightness-75 cursor-pointer w-[170px] h-[35px] mb-[13px] gap-[6px] rounded-[6px] text-[15px] flex items-center justify-center font-[500]"
           style={{
-            border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
+            border: `0.5px solid ${currentUser.theme === "light" ? appTheme[currentUser.theme].text_1 : appTheme[currentUser.theme].text_4}`,
           }}
         >
           <IoIosAddCircleOutline

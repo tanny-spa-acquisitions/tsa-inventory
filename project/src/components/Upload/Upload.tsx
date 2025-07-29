@@ -37,7 +37,10 @@ const UploadModal: React.FC<UploadModalProps> = ({ setValue, getValues }) => {
               style={{
                 userSelect: "none",
                 borderRadius: "30px",
-                border: `0.5px solid ${appTheme[currentUser.theme].text_2}`,
+                border:
+                  currentUser.theme === "light"
+                    ? `0.5px solid ${appTheme[currentUser.theme].text_2}`
+                    : `1px solid ${appTheme[currentUser.theme].background_2}`,
               }}
             >
               <Upload

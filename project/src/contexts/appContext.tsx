@@ -54,7 +54,7 @@ type AppContextType = {
     overrideNewProduct?: boolean
   ) => Promise<boolean>;
   submitProductForm: () => Promise<boolean>;
-  resetTimer: () => void;
+  resetTimer: (fast: boolean) => void;
   checkForUnsavedChanges: () => boolean;
 };
 
@@ -305,25 +305,26 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const promptSave = (onNoSave: () => void, onContinue: () => void) => {
-    setModal2({
-      ...modal2,
-      open: !modal2.open,
-      showClose: false,
-      offClickClose: true,
-      width: "w-[300px]",
-      maxWidth: "max-w-[400px]",
-      aspectRatio: "aspect-[5/2]",
-      borderRadius: "rounded-[12px] md:rounded-[15px]",
-      content: (
-        <Modal2Continue
-          text={`Save products before continuing?`}
-          onContinue={onContinue}
-          threeOptions={true}
-          onNoSave={onNoSave}
-        />
-      ),
-    });
+  const promptSave = async (onNoSave: () => void, onContinue: () => void) => {
+    // setModal2({
+    //   ...modal2,
+    //   open: !modal2.open,
+    //   showClose: false,
+    //   offClickClose: true,
+    //   width: "w-[300px]",
+    //   maxWidth: "max-w-[400px]",
+    //   aspectRatio: "aspect-[5/2]",
+    //   borderRadius: "rounded-[12px] md:rounded-[15px]",
+    //   content: (
+    //     <Modal2Continue
+    //       text={`Save products before continuing?`}
+    //       onContinue={onContinue}
+    //       threeOptions={true}
+    //       onNoSave={onNoSave}
+    //     />
+    //   ),
+    // });
+    await onContinue();
   };
 
   const pageClick = (newPage: string) => {
@@ -422,20 +423,23 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimer = () => {
+  const startTimer = (fast: boolean) => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
-    timerRef.current = setTimeout(async () => {
-      await saveProducts();
-    }, 3000);
+    timerRef.current = setTimeout(
+      async () => {
+        await saveProducts();
+      },
+      fast ? 200 : 2000
+    );
   };
 
-  const resetTimer = () => {
+  const resetTimer = (fast: boolean) => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
-    startTimer();
+    startTimer(fast);
   };
 
   const cancelTimer = () => {

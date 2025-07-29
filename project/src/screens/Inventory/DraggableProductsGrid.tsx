@@ -67,7 +67,7 @@ function SortableItem({
   const handleDeleteProduct = async (item: Product) => {
     try {
       await deleteProducts([item.serial_number]);
-      resetTimer();
+      resetTimer(true);
       // toast.success("Deleted product");
     } catch (error) {
       toast.error("Failed to delete product");
@@ -162,7 +162,7 @@ const DraggableProductsGrid = ({
     );
 
     setLocalData(sorted);
-    resetTimer();
+    resetTimer(true);
   };
 
   if (!currentUser) return null;

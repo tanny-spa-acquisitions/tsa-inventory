@@ -187,7 +187,7 @@ const LeftBar = () => {
           >
             <div
               onClick={() => pageClick("/")}
-              className="flex flex-row mt-[20px] gap-[5px] mb-[18px] items-center cursor-pointer dim hover:brightness-75 pr-[6px]"
+              className="flex lg:hidden flex-row mt-[20px] gap-[5px] mb-[18px] items-center cursor-pointer dim hover:brightness-75 pr-[6px]"
             >
               <img
                 src={

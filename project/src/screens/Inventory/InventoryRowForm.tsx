@@ -30,11 +30,9 @@ const InventoryRowForm = ({
 }: InventoryRowFormProps) => {
   const { currentUser } = useContext(AuthContext);
   const { formRefs, saveProducts, resetTimer } = useAppContext();
-  const { productsData, localData } = useContextQueries();
+  const { productsData, localData, setLocalData } = useContextQueries();
   const form = useProductForm();
   const router = useRouter();
-  const modal2 = useModal2Store((state: any) => state.modal2);
-  const setModal2 = useModal2Store((state: any) => state.setModal2);
   registerFormRef(product.serial_number, form);
 
   let newProduct = false;
@@ -58,7 +56,7 @@ const InventoryRowForm = ({
     }
   }, [newProduct, product.serial_number, form.reset]);
 
-  const handleImageClick = () => {
+  const handleImageClick = async () => {
     let dirtyRows = 0;
     for (const [serial, form] of formRefs.current.entries()) {
       if (Object.keys(form.formState.dirtyFields).length !== 0) {
@@ -71,55 +69,16 @@ const InventoryRowForm = ({
     );
     if (exists) {
       if (localData.length > productsData.length || dirtyRows > 0) {
-        if (!currentUser) return null;
-        setModal2({
-          ...modal2,
-          open: !modal2.open,
-          showClose: false,
-          offClickClose: true,
-          width: "w-[300px]",
-          maxWidth: "max-w-[400px]",
-          aspectRatio: "aspect-[5/2]",
-          borderRadius: "rounded-[12px] md:rounded-[15px]",
-          content: (
-            <Modal2Continue
-              threeOptions={true}
-              onNoSave={() => router.push(`/products/${product.serial_number}`)}
-              text={`Save products before continuing?`}
-              onContinue={async () => {
-                await saveProducts();
-                router.push(`/products/${product.serial_number}`);
-              }}
-            />
-          ),
-        });
+        await saveProducts();
+        router.push(`/products/${product.serial_number}`);
       } else {
         router.push(`/products/${product.serial_number}`);
       }
     } else {
       if (localData.length > productsData.length || dirtyRows > 0) {
         if (!currentUser) return null;
-        setModal2({
-          ...modal2,
-          open: !modal2.open,
-          showClose: false,
-          offClickClose: true,
-          width: "w-[300px]",
-          maxWidth: "max-w-[400px]",
-          aspectRatio: "aspect-[5/2]",
-          borderRadius: "rounded-[12px] md:rounded-[15px]",
-          content: (
-            <Modal2Continue
-              threeOptions={true}
-              text={`Save products before continuing?`}
-              onNoSave={() => router.push(`/products/${product.serial_number}`)}
-              onContinue={async () => {
-                await saveProducts();
-                router.push(`/products/${product.serial_number}`);
-              }}
-            />
-          ),
-        });
+        await saveProducts();
+        router.push(`/products/${product.serial_number}`);
       } else {
         return;
       }
@@ -131,11 +90,37 @@ const InventoryRowForm = ({
       // if (name) {
       //   console.log(product, name, value[name as keyof typeof value]);
       // }
-      resetTimer();
+      resetTimer(false);
     });
 
     return () => subscription.unsubscribe();
   }, [form, product.serial_number]);
+
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      resetTimer(false);
+      setLocalData((prev) => {
+        const updated = [...prev];
+        const index = updated.findIndex(
+          (p) => p.serial_number === product.serial_number
+        );
+        if (index !== -1) {
+          updated[index] = {
+            ...updated[index],
+            ...value,
+          } as Product;
+        } else {
+          updated.push({
+            ...value,
+            serial_number: product.serial_number,
+          } as Product);
+        }
+        return updated;
+      });
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, product.serial_number, setLocalData, resetTimer]);
 
   if (!currentUser) return null;
 

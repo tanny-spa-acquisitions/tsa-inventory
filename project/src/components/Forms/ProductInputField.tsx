@@ -67,18 +67,26 @@ const ProductInputField = <T extends FieldValues>({
           pattern={pattern}
           onInput={onInput}
           disabled={disabled}
-          className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
+          className="input rounded-[7px] w-[100%] mt-[6px] px-[10px] py-[4px]"
           style={{
-            border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
+            border: `0.5px solid ${
+              currentUser.theme === "light"
+                ? appTheme[currentUser.theme].text_3
+                : appTheme[currentUser.theme].text_4
+            }`,
           }}
         />
       ) : inputType === "textarea" ? (
         <textarea
           {...register(name)}
-          className="resize-none input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
+          className="resize-none input rounded-[7px] w-[100%] mt-[6px] px-[10px] py-[4px]"
           disabled={disabled}
           style={{
-            border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
+            border: `0.5px solid ${
+              currentUser.theme === "light"
+                ? appTheme[currentUser.theme].text_3
+                : appTheme[currentUser.theme].text_4
+            }`,
           }}
           rows={rows}
         />
@@ -87,7 +95,11 @@ const ProductInputField = <T extends FieldValues>({
           {...register(name)}
           className="input rounded-[7px] w-[100%] mt-[6px] px-[6px] py-[4px]"
           style={{
-            border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
+            border: `0.5px solid ${
+              currentUser.theme === "light"
+                ? appTheme[currentUser.theme].text_3
+                : appTheme[currentUser.theme].text_4
+            }`,
           }}
         >
           {options &&
@@ -102,7 +114,11 @@ const ProductInputField = <T extends FieldValues>({
           <div
             className="rounded-[8px] w-fit"
             style={{
-              border: `0.5px solid ${appTheme[currentUser.theme].text_1}`,
+              border: `0.5px solid ${
+                currentUser.theme === "light"
+                  ? appTheme[currentUser.theme].text_3
+                  : appTheme[currentUser.theme].text_4
+              }`,
             }}
           >
             <DatePicker
