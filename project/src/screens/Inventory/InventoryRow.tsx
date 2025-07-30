@@ -26,13 +26,7 @@ const InventoryRow = ({
     setSelectedProducts,
     formRefs,
   } = useAppContext();
-  const { productsData, localData, setLocalData } = useContextQueries();
-
-  const deleteNewRow = (serial: string) => () => {
-    setLocalData((prev) =>
-      prev.filter((item) => item.serial_number !== serial)
-    );
-  };
+  const { productsData, localData } = useContextQueries();
 
   const form = useForm<ProductFormData>({
     defaultValues: product,
@@ -41,7 +35,6 @@ const InventoryRow = ({
   useEffect(() => {
     form.reset(product);
   }, [product]);
-
 
   if (!currentUser) return null;
 
@@ -74,7 +67,7 @@ const InventoryRow = ({
           <>
             {productsData?.some(
               (p) => p.serial_number === product.serial_number
-            ) ? (
+            ) && (
               <div
                 onClick={() => {
                   if (selectedProducts.includes(product.serial_number)) {
@@ -103,26 +96,8 @@ const InventoryRow = ({
                 className="cursor-pointer dim w-[17px] h-[17px] rounded-[4px] flex items-center justify-center"
               >
                 {selectedProducts.includes(product.serial_number) && (
-                  <FaCheck
-                    color={appTheme[currentUser.theme].text_1}
-                    size={11}
-                  />
+                  <FaCheck color={"white"} size={11} />
                 )}
-              </div>
-            ) : (
-              <div
-                onClick={deleteNewRow(product.serial_number)}
-                style={{
-                  backgroundColor: appTheme[currentUser.theme].background_2,
-                }}
-                className="cursor-pointer dim w-[17px] h-[17px] rounded-full flex items-center justify-center"
-              >
-                <div
-                  style={{
-                    backgroundColor: appTheme[currentUser.theme].text_1,
-                  }}
-                  className="w-[8px] h-[1px] rounded-[3px]"
-                ></div>
               </div>
             )}
           </>

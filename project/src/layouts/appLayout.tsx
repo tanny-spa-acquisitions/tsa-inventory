@@ -117,15 +117,15 @@ const ProtectedLayout = ({ children }: { children: ReactNode }) => {
   }, [setSelectedProducts, pathName]);
 
   return (
-    <>
+    <div className="w-[100vw] display-height">
       {editingLock && (
-        <div className="z-[999] absolute left-0 top-0 w-[100vw] h-[100vh]" />
+        <div className="z-[999] absolute left-0 top-0 w-[100vw] display-height" />
       )}
       <Modals landing={false} />
       <Navbar />
       <LeftBar />
       <PageLayout>{children}</PageLayout>
-    </>
+    </div>
   );
 };
 
@@ -159,7 +159,7 @@ const PageLayout = ({ children }: { children: ReactNode }) => {
         leftBarOpen && "lg:left-[calc(var(--left-bar-width))]"
       } top-[var(--nav-height)] w-[100vw] ${
         leftBarOpen && "lg:w-[calc(100vw-(var(--left-bar-width)))]"
-      } flex h-[calc(100vh-var(--nav-height))] overflow-scroll`}
+      } flex h-[calc(100%-var(--nav-height))]`}
     >
       <div className="relative w-[100%] h-[100%]">{children}</div>
     </div>

@@ -43,7 +43,7 @@ type AppContextType = {
   setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   selectedProducts: string[];
   setSelectedProducts: React.Dispatch<React.SetStateAction<string[]>>;
-  saveProducts: () => Promise<void>;
+  saveProducts: (newProduct?: Product) => Promise<void>;
   productFormRef: React.RefObject<UseFormReturn<ProductFormData> | null>;
   formRefs: React.RefObject<Map<string, UseFormReturn<ProductFormData>>>;
   previousPath: string | null;
@@ -121,15 +121,11 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       formData.append("files", fileImage.file, fileImage.name);
     });
     try {
-      const response = await axios.post(
-        "/api/images/compress",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post("/api/images/compress", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       if (response.status === 200) {
         const isValidUrl = (url: string) =>
           typeof url === "string" && url.startsWith("https://");
@@ -261,22 +257,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         });
       }
     }
-
-    for (const item of localData) {
-      const existsInForm = formRefs.current.has(item.serial_number);
-      const existsInUpdated = updatedProducts.some(
-        (p) => p.serial_number === item.serial_number
-      );
-      const stored = productsData.find(
-        (p) => p.serial_number === item.serial_number
-      );
-      const ordinalChanged = stored?.ordinal !== item.ordinal;
-
-      if (!existsInForm && ordinalChanged && !existsInUpdated) {
-        updatedProducts.push(item);
-      }
-    }
-
     return updatedProducts;
   };
 
@@ -284,8 +264,12 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     return getUnsavedProducts().length > 0;
   };
 
-  const saveProducts = async () => {
+  const saveProducts = async (newProduct?: Product) => {
     const updatedProducts = getUnsavedProducts();
+
+    if (newProduct) {
+      updatedProducts.push(newProduct);
+    }
 
     if (updatedProducts.length === 0) return;
 

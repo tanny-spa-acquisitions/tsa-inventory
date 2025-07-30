@@ -17,7 +17,7 @@ export const useModal1Store = create((set) => ({
     open: false,
     showClose: true,
     offClickClose: true,
-    width: "w-[100vw] sm:w-[90vw] h-[100vh] sm:h-[auto]",
+    width: "w-[100vw] sm:w-[90vw] display-height sm:h-[auto]",
     maxWidth: "max-w-[1000px] min-h-[655px] sm:min-h-[500px]",
     aspectRatio: "sm:aspect-[3/3.4] md:aspect-[5/4.5] lg:aspect-[5/3.9]",
     borderRadius: "rounded-0 sm:rounded-[15px] md:rounded-[20px]",

@@ -155,7 +155,7 @@ const LeftBar = () => {
   if (!currentUser) return null;
 
   return (
-    <>
+    <div className="display-height">
       <div
         style={
           {
@@ -164,7 +164,7 @@ const LeftBar = () => {
             top: `${offsetHeight}px`,
           } as React.CSSProperties
         }
-        className="z-[921] pointer-events-none w-[calc(var(--left-bar-width))] h-[calc(100vh-var(--offset-height))] left-0 fixed"
+        className="z-[921] pointer-events-none w-[calc(var(--left-bar-width))] h-[calc(100%-var(--offset-height))] left-0 fixed"
       >
         <div
           ref={leftBarRef}
@@ -187,7 +187,7 @@ const LeftBar = () => {
           >
             <div
               onClick={() => pageClick("/")}
-              className="flex lg:hidden flex-row mt-[20px] gap-[5px] mb-[18px] items-center cursor-pointer dim hover:brightness-75 pr-[6px]"
+              className="flex lg:hidden flex-row mt-[22px] gap-[5px] mb-[18px] items-center cursor-pointer dim hover:brightness-75 pr-[6px]"
             >
               <img
                 src={
@@ -200,7 +200,7 @@ const LeftBar = () => {
               />
 
               <p
-                className="hidden [@media(min-width:450px)]:block select-none text-[23px] font-[700] ml-[10px]"
+                className="select-none text-[23px] font-[700] ml-[8px] mt-[1px]"
                 style={{
                   color: appTheme[currentUser.theme].text_1,
                 }}
@@ -282,7 +282,7 @@ const LeftBar = () => {
           <div
             ref={showLeftBarRef}
             onClick={closeLeftBar}
-            className="absolute top-0 left-0 w-[100vw] h-[100vh] flex items-center justify-center"
+            className="absolute top-0 left-0 w-[100vw] display-height flex items-center justify-center"
             style={{
               opacity: 0,
               transition:
@@ -291,7 +291,7 @@ const LeftBar = () => {
           ></div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

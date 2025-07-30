@@ -100,7 +100,7 @@ const LandingLeftBar = () => {
   const offsetHeight =
     appDetails.left_bar_full || windowWidth < 1024 ? 0 : appDetails.nav_height;
   return (
-    <>
+    <div>
       <div
         style={
           {
@@ -152,7 +152,7 @@ const LandingLeftBar = () => {
           ></div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

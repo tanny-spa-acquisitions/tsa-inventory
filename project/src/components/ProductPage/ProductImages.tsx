@@ -7,6 +7,7 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  TouchSensor,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -51,7 +52,7 @@ function SortableImage({
     transition,
     cursor: "grab",
     zIndex: isDragging ? 999 : 1,
-    position: "relative", 
+    position: "relative",
   };
 
   const startPos = useRef<{ x: number; y: number } | null>(null);
@@ -127,7 +128,16 @@ export default function DraggableImageGrid({
   getValues: UseFormGetValues<ProductFormData>;
 }) {
   const { currentUser } = useContext(AuthContext);
-  const sensors = useSensors(useSensor(PointerSensor));
+  // const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 5,
+      },
+    })
+  );
   const [imageView, setImageView] = useState<string>("");
 
   const items = images.map((url, index) => ({
@@ -152,7 +162,7 @@ export default function DraggableImageGrid({
     <>
       {imageView !== "" && (
         <div
-          className="fixed z-[990] top-0 left-0 w-[100vw] h-[100vh] flex items-center justify-center"
+          className="fixed z-[990] top-0 left-0 w-[100vw] display-height flex items-center justify-center"
           style={{
             backgroundColor: appTheme[currentUser.theme].background_1,
           }}
@@ -174,7 +184,7 @@ export default function DraggableImageGrid({
           strategy={rectSortingStrategy}
         >
           {images.length > 0 && (
-            <div className="grid grid-cols-6 gap-[10px] p-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-[10px] p-1 sm:p-2 md:p-4 touch-none">
               {items.map((item) => (
                 <SortableImage
                   key={item.id}

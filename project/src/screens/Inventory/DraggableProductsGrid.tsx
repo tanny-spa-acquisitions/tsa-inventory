@@ -16,7 +16,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { AuthContext } from "@/contexts/authContext";
 import { Product, useContextQueries } from "@/contexts/queryContext";
 import { verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -33,19 +33,17 @@ import { IoCloseOutline } from "react-icons/io5";
 
 function SortableItem({
   id,
-  setImageView,
   product,
   index,
   sheet,
 }: {
   id: string;
-  setImageView: React.Dispatch<React.SetStateAction<string>>;
   product: Product;
   index: number;
   sheet: boolean;
 }) {
   const { currentUser } = useContext(AuthContext);
-  const { editMode, resetTimer } = useAppContext();
+  const { editMode, saveProducts } = useAppContext();
   const { deleteProducts } = useContextQueries();
 
   const {
@@ -66,8 +64,8 @@ function SortableItem({
 
   const handleDeleteProduct = async (item: Product) => {
     try {
+      await saveProducts();
       await deleteProducts([item.serial_number]);
-      resetTimer(true);
       // toast.success("Deleted product");
     } catch (error) {
       toast.error("Failed to delete product");
@@ -133,10 +131,9 @@ const DraggableProductsGrid = ({
     useSensor(TouchSensor),
     useSensor(PointerSensor)
   );
-  const [imageView, setImageView] = useState<string>("");
-  const { localData, setLocalData, localDataRef, productsData } =
+  const { localData, setLocalData, localDataRef } =
     useContextQueries();
-  const { filteredProducts, resetTimer } = useAppContext();
+  const { filteredProducts, saveProducts } = useAppContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -162,7 +159,7 @@ const DraggableProductsGrid = ({
     );
 
     setLocalData(sorted);
-    resetTimer(true);
+    await saveProducts()
   };
 
   if (!currentUser) return null;
@@ -187,7 +184,6 @@ const DraggableProductsGrid = ({
               <SortableItem
                 key={product.serial_number}
                 id={product.serial_number}
-                setImageView={setImageView}
                 product={product}
                 index={index}
                 sheet={sheet}
@@ -215,7 +211,6 @@ const DraggableProductsGrid = ({
             <SortableItem
               key={product.serial_number}
               id={product.serial_number}
-              setImageView={setImageView}
               product={product}
               index={index}
               sheet={sheet}

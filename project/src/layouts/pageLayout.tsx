@@ -2,6 +2,7 @@ import appDetails from "@/util/appDetails.json";
 import { ReactNode } from "react";
 
 const PageLayout = ({ children }: { children: ReactNode }) => {
+  return <></>
   return (
     <div
       style={

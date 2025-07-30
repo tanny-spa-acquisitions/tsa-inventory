@@ -97,7 +97,7 @@ const Modals = ({ landing }: { landing: boolean }) => {
               setModal1({ ...modal1, open: false });
             }
           }}
-          className="z-[940] fixed top-0 left-0 w-[100vw] h-[100vh] flex items-center justify-center"
+          className="z-[940] fixed top-0 left-0 w-[100vw] display-height flex items-center justify-center"
           style={{
             opacity: 0,
             transition:
@@ -139,7 +139,7 @@ const Modals = ({ landing }: { landing: boolean }) => {
               setModal2({ ...modal2, open: false });
             }
           }}
-          className="z-[940] fixed top-0 left-0 w-[100vw] h-[100vh] flex items-center justify-center"
+          className="z-[940] fixed top-0 left-0 w-[100vw] display-height flex items-center justify-center"
           style={{
             opacity: 0,
             transition:

@@ -87,18 +87,9 @@ const InventoryRowForm = ({
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
-      // if (name) {
-      //   console.log(product, name, value[name as keyof typeof value]);
-      // }
-      resetTimer(false);
-    });
+      // console.log(product, name, value[name as keyof typeof value]);
+      // resetTimer(false);
 
-    return () => subscription.unsubscribe();
-  }, [form, product.serial_number]);
-
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      resetTimer(false);
       setLocalData((prev) => {
         const updated = [...prev];
         const index = updated.findIndex(
@@ -109,18 +100,13 @@ const InventoryRowForm = ({
             ...updated[index],
             ...value,
           } as Product;
-        } else {
-          updated.push({
-            ...value,
-            serial_number: product.serial_number,
-          } as Product);
-        }
+        } 
         return updated;
       });
     });
 
     return () => subscription.unsubscribe();
-  }, [form, product.serial_number, setLocalData, resetTimer]);
+  }, [form, product.serial_number]);
 
   if (!currentUser) return null;
 

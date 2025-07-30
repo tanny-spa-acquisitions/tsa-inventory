@@ -171,15 +171,12 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
   const setLocalData: React.Dispatch<React.SetStateAction<Product[]>> = (
     newDataOrFn
   ) => {
-    setLocalDataState((prevState) => {
-      const newData =
-        typeof newDataOrFn === "function"
-          ? (newDataOrFn as (prev: Product[]) => Product[])(prevState)
-          : newDataOrFn;
-
-      localDataRef.current = newData;
-      return newData;
-    });
+    const newData =
+      typeof newDataOrFn === "function"
+        ? (newDataOrFn as (prev: Product[]) => Product[])(localDataRef.current)
+        : newDataOrFn;
+    localDataRef.current = newData;
+    setLocalDataState(newData);
   };
 
   const isOptimisticUpdate = useRef(false);

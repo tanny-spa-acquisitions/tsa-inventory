@@ -18,9 +18,9 @@ import DraggableProductsGrid from "@/screens/Inventory/DraggableProductsGrid";
 
 const ProductsPage = () => {
   const { currentUser } = useContext(AuthContext);
-  const { productsData, deleteProducts, isLoadingProductsData } =
+  const { productsData, isLoadingProductsData } =
     useContextQueries();
-  const { addProductPage, setAddProductPage, editMode, dataFilters } =
+  const { addProductPage, dataFilters } =
     useAppContext();
 
   const filteredProducts = (products: Product[]) => {

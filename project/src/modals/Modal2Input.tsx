@@ -44,7 +44,7 @@ const Modal2Input: React.FC<Modal2InputProps> = ({ text, onContinue }) => {
       } else if (
         productsData.some((item: Product) => item.serial_number === trimmed)
       ) {
-        toast.error("Product # already in use");
+        toast.error("Product ID already in use");
         return;
       }
     }

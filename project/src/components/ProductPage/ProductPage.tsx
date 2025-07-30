@@ -79,7 +79,7 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
     form.reset();
   };
 
-  if (!currentUser) return null
+  if (!currentUser) return null;
 
   if (!newProduct && serialNumber && productsData?.length) {
     const productExists = productsData.some(
@@ -179,12 +179,12 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
   if (!currentUser) return null;
 
   return (
-    <div>
+    <div className="w-[100%] h-[100%] overflow-scroll">
       <UploadModal setValue={form.setValue} getValues={form.getValues} />
       <div
         className={`max-w-4xl mx-auto px-10 ${
           newProduct ? "pt-[60px]" : "pt-[22px]"
-        } pb-[60px] rounded-2xl overflow-scroll`}
+        } pb-[60px] rounded-2xl`}
       >
         <div className="flex flex-row gap-[13px] mb-[10px]">
           <div
@@ -233,7 +233,11 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
           }}
           className="dim hover:brightness-75 cursor-pointer w-[170px] h-[35px] mb-[13px] gap-[6px] rounded-[6px] text-[15px] flex items-center justify-center font-[500]"
           style={{
-            border: `0.5px solid ${currentUser.theme === "light" ? appTheme[currentUser.theme].text_1 : appTheme[currentUser.theme].text_4}`,
+            border: `0.5px solid ${
+              currentUser.theme === "light"
+                ? appTheme[currentUser.theme].text_1
+                : appTheme[currentUser.theme].text_4
+            }`,
           }}
         >
           <IoIosAddCircleOutline

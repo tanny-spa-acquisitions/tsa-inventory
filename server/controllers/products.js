@@ -109,6 +109,7 @@ export const deleteProducts = (req, res) => {
   if (!token) return res.status(401).json("Access token missing");
 
   const { serial_numbers } = req.body;
+
   if (!serial_numbers || serial_numbers.length === 0) {
     return res.status(400).json("Missing serial numbers");
   }
@@ -128,12 +129,20 @@ export const deleteProducts = (req, res) => {
           return res.status(500).json("Failed to start transaction");
         }
 
-        const deleteQuery = `DELETE FROM tubs WHERE serial_number IN (?)`;
-        connection.query(deleteQuery, [serial_numbers], (err) => {
+        const deleteQuery = `DELETE FROM tubs WHERE serial_number IN (${serial_numbers
+          .map(() => "?")
+          .join(",")})`;
+        connection.query(deleteQuery, serial_numbers, (err, result) => {
           if (err) {
             return connection.rollback(() => {
               connection.release();
               res.status(500).json("Delete failed");
+            });
+          }
+          if (result.affectedRows === 0) {
+            return connection.rollback(() => {
+              connection.release();
+              res.status(200).json("No products were deleted");
             });
           }
 
@@ -372,9 +381,9 @@ export const syncToWix = async (req, res) => {
     const q = "SELECT * FROM tubs";
     db.query(q, async (err, data) => {
       if (err) return res.status(500).json(err);
-      const sortedData = data.sort(
-        (a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0)
-      ).reverse();
+      const sortedData = data
+        .sort((a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0))
+        .reverse();
       const corrected_data = sortedData.map((item) => ({
         serialNumber: item.serial_number,
         sold: !!item.date_sold,

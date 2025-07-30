@@ -27,10 +27,10 @@ const UploadModal: React.FC<UploadModalProps> = ({ setValue, getValues }) => {
       {uploadPopup && (
         <div className="z-[999] fixed top-0 left-0">
           <div
-            className="absolute top-0 w-[100vw] h-[100vh]"
+            className="absolute top-0 w-[100vw] display-height"
             style={{ backgroundColor: "black", opacity: 0.4 }}
           ></div>
-          <div className="absolute top-0 w-[100vw] h-[100vh] flex items-center justify-center">
+          <div className="absolute top-0 w-[100vw] display-height flex items-center justify-center">
             <div
               ref={uploadPopupRef}
               className="shadow-lg w-[85%] sm:w-[70%] aspect-[1/1.2] sm:aspect-[1.5/1] relative"

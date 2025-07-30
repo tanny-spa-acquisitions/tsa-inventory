@@ -21,6 +21,11 @@ select.custom-select {
   box-shadow: none;
 }
 
+.display-height {
+  height: 100vh;   /* fallback for older browsers */
+  height: 100dvh;  /* preferred for modern browsers */
+}
+
 /* TIP TAP NOTES */
 .tiptap p {
   margin: 0;
