@@ -13,8 +13,12 @@ input:-webkit-autofill:active {
   transition: background-color 9999s ease-in-out 0s;
 }
 
-.custom-select::-ms-expand {
-  display: none;
+select.custom-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  box-shadow: none;
 }
 
 /* TIP TAP NOTES */
@@ -86,8 +90,6 @@ input[type="range"]::-moz-range-thumb {
   border: none;
   cursor: pointer;
 }
-
-
 
 /* DIM */
 .dim {
@@ -444,4 +446,3 @@ input[type="range"]::-moz-range-thumb {
     @apply bg-background text-foreground;
   }
 }
-

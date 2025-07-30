@@ -100,7 +100,7 @@ const ProductInputCell = <T extends FieldValues>({
               appTheme[currentUser.theme].background_3
             }`,
           }}
-          className="input w-[100%] h-[100%] px-[6px] py-[4px] text-[12px]"
+          className="custom-select input w-[100%] h-[100%] px-[6px] py-[4px] text-[12px]"
           onInput={onInput}
         >
           {options &&

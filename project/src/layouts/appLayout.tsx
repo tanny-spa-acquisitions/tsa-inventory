@@ -18,7 +18,6 @@ import Navbar from "@/components/Navbar/Navbar";
 import LeftBar from "@/components/LeftBar/LeftBar";
 import { appTheme } from "@/util/appTheme";
 import { io, Socket } from "socket.io-client";
-import { BACKEND_URL } from "@/util/config";
 import { handleUpdateUser } from "@/util/functions/User";
 import Modals from "@/modals/Modals";
 import appDetails from "@/util/appDetails.json";

@@ -1,6 +1,5 @@
 import axios from "axios";
 import { auth, provider, signInWithPopup } from "./firebase";
-import { BACKEND_URL } from "./config";
 import { showToast } from "@/components/CustomToast";
 import { toast } from "react-toastify";
 
@@ -20,7 +19,7 @@ export type RegisterInputs = {
 
 export const login = async (inputs: LoginInputs) => {
   try {
-    const res = await axios.post(BACKEND_URL + "/api/auth/login", inputs, {
+    const res = await axios.post("/api/auth/login", inputs, {
       withCredentials: true,
     });
     return res.status === 200;
@@ -33,7 +32,7 @@ export const login = async (inputs: LoginInputs) => {
 export const logout = async () => {
   try {
     const res = await axios.post(
-      BACKEND_URL + "/api/auth/logout",
+      "/api/auth/logout",
       {},
       { withCredentials: true }
     );
@@ -46,7 +45,7 @@ export const logout = async () => {
 
 export const register = async (inputs: RegisterInputs) => {
   try {
-    const res = await axios.post(BACKEND_URL + "/api/auth/register", inputs, {
+    const res = await axios.post("/api/auth/register", inputs, {
       withCredentials: true,
     });
     return res.status === 200;
@@ -72,7 +71,7 @@ export const googleSignIn = async () => {
       profile_img_src: user.photoURL,
     };
 
-    const res = await axios.post(BACKEND_URL + "/api/auth/google", inputs, {
+    const res = await axios.post("/api/auth/google", inputs, {
       withCredentials: true,
     });
     return res.status === 200;

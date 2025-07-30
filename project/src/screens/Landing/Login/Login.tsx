@@ -8,7 +8,6 @@ import { FaFacebook } from "react-icons/fa";
 import { BsQuestion } from "react-icons/bs";
 import { IoEyeOff } from "react-icons/io5";
 import { IoEye } from "react-icons/io5";
-import { BACKEND_URL } from "../../../util/config";
 import appDetails from "../../../util/appDetails.json";
 import { appTheme, ThemeType } from "../../../util/appTheme";
 import animationData from "../../../util/animations/loading-animation-black.json";
@@ -181,7 +180,7 @@ const Login = () => {
           return;
         }
         try {
-          const response = await fetch(BACKEND_URL + "/api/auth/send-code", {
+          const response = await fetch("/api/auth/send-code", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -216,7 +215,7 @@ const Login = () => {
 
       const executeCodeEntered = async () => {
         try {
-          const response = await fetch(BACKEND_URL + "/api/auth/check-code", {
+          const response = await fetch("/api/auth/check-code", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -254,7 +253,7 @@ const Login = () => {
       const confirmNewPassword = async () => {
         try {
           const response = await fetch(
-            BACKEND_URL + "/api/auth/password-reset",
+            "/api/auth/password-reset",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },

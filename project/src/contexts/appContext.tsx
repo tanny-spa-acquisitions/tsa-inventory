@@ -9,7 +9,6 @@ import React, {
 import { fetchInventory } from "../util/functions/Inventory";
 import { getCurrentTimestamp, getNextOrdinal } from "@/util/functions/Data";
 import axios from "axios";
-import { BACKEND_URL } from "@/util/config";
 import {
   UseFormGetValues,
   UseFormReturn,
@@ -123,7 +122,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     });
     try {
       const response = await axios.post(
-        BACKEND_URL + "/api/images/compress",
+        "/api/images/compress",
         formData,
         {
           headers: {
