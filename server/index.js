@@ -55,18 +55,20 @@ app.use((req, res, next) => {
   next();
 });
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : ["http://localhost:3000"];
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    // origin: process.env.ALLOWED_ORIGINS
-    //   ? process.env.ALLOWED_ORIGINS.split(",")
-    //   : "*",
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
       }
-      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
