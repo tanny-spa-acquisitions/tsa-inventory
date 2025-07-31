@@ -245,6 +245,16 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const normalizeProduct = (item: Product) => {
+    return {
+      ...item,
+      date_entered: item.date_entered ?? undefined,
+      date_sold: item.date_sold ?? undefined,
+      note: item.note ?? "",
+      images: Array.isArray(item.images) ? item.images : [],
+    };
+  };
+
   const [editMode, setEditMode] = useState<boolean>(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
@@ -256,32 +266,29 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getUnsavedProducts = (): Product[] => {
     const updatedProducts: Product[] = [];
+    for (const item of localDataRef.current) {
+      const stored = productsData.find(
+        (p) => p.serial_number === item.serial_number
+      );
+      if (stored && stored?.ordinal !== item.ordinal) {
+        updatedProducts.push(normalizeProduct(item));
+        continue;
+      }
 
-    const localData = localDataRef.current;
-    const ordinalMap = new Map<string, number>();
-    for (const item of localData) {
-      ordinalMap.set(item.serial_number, item.ordinal);
-    }
-
-    for (const [serial, form] of formRefs.current.entries()) {
-      const values = form.getValues();
-      const isDirty = Object.keys(form.formState.dirtyFields).length > 0;
-
-      const stored = productsData.find((p) => p.serial_number === serial);
-      const currentOrdinal = ordinalMap.get(serial);
-      const ordinalChanged = stored?.ordinal !== currentOrdinal;
-
-      if (isDirty || ordinalChanged) {
-        updatedProducts.push({
-          ...values,
-          date_entered: values.date_entered ?? undefined,
-          date_sold: values.date_sold ?? undefined,
-          note: values.note ?? "",
-          images: Array.isArray(values.images) ? values.images : [],
-          ordinal: currentOrdinal ?? 0,
-        });
+      if (formRefs.current) {
+        const formArray = formRefs.current
+          .entries()
+          .find((form) => form[0] === item.serial_number);
+        if (formArray) {
+          const isDirty =
+            Object.keys(formArray[1].formState.dirtyFields).length > 0;
+          if (isDirty) {
+            updatedProducts.push(normalizeProduct(item));
+          }
+        }
       }
     }
+
     return updatedProducts;
   };
 

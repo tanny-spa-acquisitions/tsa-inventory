@@ -89,7 +89,7 @@ const InventoryRowForm = ({
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       // console.log(product, name, value[name as keyof typeof value]);
-      // resetTimer(false);
+      resetTimer(false);
 
       setLocalData((prev) => {
         const updated = [...prev];
