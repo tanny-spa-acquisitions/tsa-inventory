@@ -89,6 +89,19 @@ function SortableItem({
           />
         )}
 
+        {editMode && (
+          <div
+            style={{
+              border: `1px solid ${appTheme[currentUser.theme].text_4}`,
+              backgroundColor: appTheme[currentUser.theme].background_1,
+            }}
+            className="absolute top-[-8px] right-[-9px] z-[950] w-[26px] h-[26px] flex items-center justify-center dim hover:brightness-75 cursor-pointer rounded-[20px]"
+            onClick={() => handleDeleteProduct(product)}
+          >
+            <IoCloseOutline color={appTheme[currentUser.theme].text_2} />
+          </div>
+        )}
+
         <div className="transition-[filter] duration-300 ease-in-out group-hover/grabber:brightness-75">
           {sheet ? (
             <InventoryRow index={index} product={product} />
@@ -98,18 +111,6 @@ function SortableItem({
               className="relative w-[100%] h-[100%]"
             >
               <CustomInventoryFrame item={product} index={index} />
-              {editMode && (
-                <div
-                  style={{
-                    border: `1px solid ${appTheme[currentUser.theme].text_4}`,
-                    backgroundColor: appTheme[currentUser.theme].background_1,
-                  }}
-                  className="ignore-click w-[26px] h-[26px] flex items-center justify-center dim hover:brightness-75 cursor-pointer rounded-[20px] absolute top-[-8px] right-[-9px]"
-                  onClick={() => handleDeleteProduct(product)}
-                >
-                  <IoCloseOutline color={appTheme[currentUser.theme].text_2} />
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -118,11 +119,7 @@ function SortableItem({
   );
 }
 
-const DraggableProductsGrid = ({
-  sheet,
-}: {
-  sheet: boolean;
-}) => {
+const DraggableProductsGrid = ({ sheet }: { sheet: boolean }) => {
   const { currentUser } = useContext(AuthContext);
   const sensors = useSensors(
     useSensor(MouseSensor),
