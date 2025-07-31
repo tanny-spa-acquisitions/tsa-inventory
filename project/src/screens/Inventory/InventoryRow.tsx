@@ -25,8 +25,9 @@ const InventoryRow = ({
     selectedProducts,
     setSelectedProducts,
     formRefs,
+    localData
   } = useAppContext();
-  const { productsData, localData } = useContextQueries();
+  const { productsData } = useContextQueries();
 
   const form = useForm<ProductFormData>({
     defaultValues: product,

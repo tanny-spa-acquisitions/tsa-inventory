@@ -128,7 +128,6 @@ export default function DraggableImageGrid({
   getValues: UseFormGetValues<ProductFormData>;
 }) {
   const { currentUser } = useContext(AuthContext);
-  // const sensors = useSensors(useSensor(PointerSensor));
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(TouchSensor, {

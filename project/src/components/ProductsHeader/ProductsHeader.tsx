@@ -30,8 +30,9 @@ const ProductsHeader = ({ title }: { title: String }) => {
     setSelectedProducts,
     setAddProductPage,
     saveProducts,
+    localData
   } = useAppContext();
-  const { deleteProducts, localData } = useContextQueries();
+  const { deleteProducts } = useContextQueries();
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
   const pathname = usePathname();
@@ -111,7 +112,7 @@ const ProductsHeader = ({ title }: { title: String }) => {
     }
     setEditingLock(true);
     try {
-      await saveProducts()
+      await saveProducts();
       await deleteProducts(selectedProducts);
       // toast.success("Deleted successfully");
     } catch (e) {
@@ -179,14 +180,19 @@ const ProductsHeader = ({ title }: { title: String }) => {
       images: [],
       ordinal: nextOrdinal,
     };
-    await saveProducts(newProduct)
+    await saveProducts(newProduct);
   };
 
   const handleEditClick = () => {
     if (dataFilters.listings === "All") {
       setEditMode((prev) => !prev);
     } else {
-      setDataFilters({ ...dataFilters, listings: "All" });
+      if (editMode) {
+        setEditMode((prev) => !prev);
+      } else {
+        setDataFilters({ ...dataFilters, listings: "All" });
+        setEditMode((prev) => !prev);
+      }
     }
   };
 

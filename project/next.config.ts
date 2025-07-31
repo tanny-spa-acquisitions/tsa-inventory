@@ -36,7 +36,8 @@
 const isPlayer = process.env.PLAYER === "true";
 
 const nextConfig = {
-  reactStrictMode: true,
+  // reactStrictMode: true,
+  reactStrictMode: false,
   basePath: isPlayer ? "" : "",
   eslint: {
     ignoreDuringBuilds: true,

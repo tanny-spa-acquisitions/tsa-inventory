@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
   useRef,
+  RefObject,
 } from "react";
 import { fetchInventory } from "../util/functions/Inventory";
 import { getCurrentTimestamp, getNextOrdinal } from "@/util/functions/Data";
@@ -18,10 +19,13 @@ import { ProductFormData } from "@/components/ProductPage/ProductPage";
 import { Product, useContextQueries } from "./queryContext";
 import { toast } from "react-toastify";
 import { usePathname, useRouter } from "next/navigation";
-import { useModal2Store } from "@/store/useModalStore";
 import Modal2Continue from "@/modals/Modal2Continue";
+import { useModal2Store } from "@/store/useModalStore";
 
 type AppContextType = {
+  localData: Product[];
+  localDataRef: RefObject<Product[]>;
+  setLocalData: React.Dispatch<React.SetStateAction<Product[]>>;
   editingLock: boolean;
   setEditingLock: React.Dispatch<React.SetStateAction<boolean>>;
   inventory: any[];
@@ -71,13 +75,34 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { productsData, localDataRef } = useContextQueries();
+  const { productsData, isOptimisticUpdate } = useContextQueries();
   const pathname = usePathname();
   const [previousPath, setPreviousPath] = useState<string | null>(null);
   const lastPathRef = useRef<string | null>(null);
   const router = useRouter();
+
   const modal2 = useModal2Store((state: any) => state.modal2);
   const setModal2 = useModal2Store((state: any) => state.setModal2);
+
+  const [localData, setLocalDataState] = useState<Product[]>([]);
+  const localDataRef = useRef<Product[]>([]);
+
+  const setLocalData: React.Dispatch<React.SetStateAction<Product[]>> = (
+    newDataOrFn
+  ) => {
+    const newData =
+      typeof newDataOrFn === "function"
+        ? (newDataOrFn as (prev: Product[]) => Product[])(localDataRef.current)
+        : newDataOrFn;
+    localDataRef.current = newData;
+    setLocalDataState(newData);
+  };
+
+  useEffect(() => {
+    if (!isOptimisticUpdate.current && productsData) {
+      setLocalData(productsData);
+    }
+  }, [productsData]);
 
   useEffect(() => {
     if (lastPathRef.current !== pathname) {
@@ -289,47 +314,33 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const promptSave = async (onNoSave: () => void, onContinue: () => void) => {
-    // setModal2({
-    //   ...modal2,
-    //   open: !modal2.open,
-    //   showClose: false,
-    //   offClickClose: true,
-    //   width: "w-[300px]",
-    //   maxWidth: "max-w-[400px]",
-    //   aspectRatio: "aspect-[5/2]",
-    //   borderRadius: "rounded-[12px] md:rounded-[15px]",
-    //   content: (
-    //     <Modal2Continue
-    //       text={`Save products before continuing?`}
-    //       onContinue={onContinue}
-    //       threeOptions={true}
-    //       onNoSave={onNoSave}
-    //     />
-    //   ),
-    // });
-    await onContinue();
+    setModal2({
+      ...modal2,
+      open: !modal2.open,
+      showClose: false,
+      offClickClose: true,
+      width: "w-[300px]",
+      maxWidth: "max-w-[400px]",
+      aspectRatio: "aspect-[5/2]",
+      borderRadius: "rounded-[12px] md:rounded-[15px]",
+      content: (
+        <Modal2Continue
+          text={`Save products before continuing?`}
+          onContinue={onContinue}
+          threeOptions={true}
+          onNoSave={onNoSave}
+        />
+      ),
+    });
   };
 
-  const pageClick = (newPage: string) => {
+  const pageClick = async (newPage: string) => {
+    if (newPage === pathname) return;
     if (pathname === "/") {
-      if (newPage === "/") return;
-      let dirtyRows = 0;
-      for (const [serial, form] of formRefs.current.entries()) {
-        if (Object.keys(form.formState.dirtyFields).length !== 0) {
-          dirtyRows += 1;
-        }
+      if (checkForUnsavedChanges()) {
+        await saveProducts();
       }
-      // if (localData.length > productsData.length || dirtyRows > 0) {
-      const localDataCurrent = localDataRef.current;
-      if (localDataCurrent.length > productsData.length || dirtyRows > 0) {
-        const onContinue = async () => {
-          await saveProducts();
-          router.push(newPage);
-        };
-        promptSave(() => router.push(newPage), onContinue);
-      } else {
-        router.push(newPage);
-      }
+      router.push(newPage);
     } else if (pathname.startsWith("/products")) {
       const onContinue = async () => {
         const result = await submitProductForm();
@@ -373,7 +384,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       );
 
       if (isNew && existing) {
-        toast.error("Serial # is already used on another product");
+        toast.error("ID is already used on another product");
         return false;
       }
 
@@ -386,7 +397,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       };
 
       await updateProducts([normalizedData]);
-      // toast.success("Updated products");
+      if (productFormRef.current) {
+        productFormRef.current.reset(productFormRef.current.watch());
+      }
+
       return true;
     } catch (error) {
       toast.error("Error updating products");
@@ -435,6 +449,9 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <AppContext.Provider
       value={{
+        localData,
+        localDataRef,
+        setLocalData,
         editingLock,
         setEditingLock,
         inventory,

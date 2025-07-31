@@ -29,8 +29,9 @@ const InventoryRowForm = ({
   registerFormRef,
 }: InventoryRowFormProps) => {
   const { currentUser } = useContext(AuthContext);
-  const { formRefs, saveProducts, resetTimer } = useAppContext();
-  const { productsData, localData, setLocalData } = useContextQueries();
+  const { formRefs, saveProducts, resetTimer, localData, setLocalData } =
+    useAppContext();
+  const { productsData } = useContextQueries();
   const form = useProductForm();
   const router = useRouter();
   registerFormRef(product.serial_number, form);
@@ -42,19 +43,25 @@ const InventoryRowForm = ({
 
   useEffect(() => {
     if (!newProduct && product.serial_number) {
+      const matchingProduct = productsData.find(
+        (item) => item.serial_number === product.serial_number
+      );
+      if (!matchingProduct) return;
       const formDefaults: Partial<ProductFormData> = {
-        ...product,
-        date_sold: product.date_sold ? new Date(product.date_sold) : undefined,
-        date_entered: product.date_entered
-          ? new Date(product.date_entered)
+        ...matchingProduct,
+        date_sold: matchingProduct.date_sold
+          ? new Date(matchingProduct.date_sold)
           : undefined,
-        price: product.price ? Number(product.price) : 0,
-        length: product.length ? Number(product.length) : 0,
-        width: product.width ? Number(product.width) : 0,
+        date_entered: matchingProduct.date_entered
+          ? new Date(matchingProduct.date_entered)
+          : undefined,
+        price: matchingProduct.price ? Number(matchingProduct.price) : 0,
+        length: matchingProduct.length ? Number(matchingProduct.length) : 0,
+        width: matchingProduct.width ? Number(matchingProduct.width) : 0,
       };
       form.reset(formDefaults);
     }
-  }, [newProduct, product.serial_number, form.reset]);
+  }, [newProduct, product.serial_number, form.reset, productsData]);
 
   const handleImageClick = async () => {
     let dirtyRows = 0;
@@ -75,13 +82,7 @@ const InventoryRowForm = ({
         router.push(`/products/${product.serial_number}`);
       }
     } else {
-      if (localData.length > productsData.length || dirtyRows > 0) {
-        if (!currentUser) return null;
-        await saveProducts();
-        router.push(`/products/${product.serial_number}`);
-      } else {
-        return;
-      }
+      return;
     }
   };
 
@@ -100,7 +101,7 @@ const InventoryRowForm = ({
             ...updated[index],
             ...value,
           } as Product;
-        } 
+        }
         return updated;
       });
     });

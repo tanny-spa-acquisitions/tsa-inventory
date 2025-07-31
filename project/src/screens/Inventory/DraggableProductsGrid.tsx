@@ -119,10 +119,8 @@ function SortableItem({
 }
 
 const DraggableProductsGrid = ({
-  data,
   sheet,
 }: {
-  data: Product[];
   sheet: boolean;
 }) => {
   const { currentUser } = useContext(AuthContext);
@@ -131,9 +129,13 @@ const DraggableProductsGrid = ({
     useSensor(TouchSensor),
     useSensor(PointerSensor)
   );
-  const { localData, setLocalData, localDataRef } =
-    useContextQueries();
-  const { filteredProducts, saveProducts } = useAppContext();
+  const {
+    filteredProducts,
+    saveProducts,
+    localData,
+    setLocalData,
+    localDataRef,
+  } = useAppContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -159,7 +161,7 @@ const DraggableProductsGrid = ({
     );
 
     setLocalData(sorted);
-    await saveProducts()
+    await saveProducts();
   };
 
   if (!currentUser) return null;
@@ -203,7 +205,7 @@ const DraggableProductsGrid = ({
       modifiers={[restrictToVerticalAxis, restrictToParentElement]}
     >
       <SortableContext
-        items={localData.map((p) => p.serial_number)}
+        items={localDataRef.current.map((p) => p.serial_number)}
         strategy={verticalListSortingStrategy}
       >
         <div className="flex flex-col max-h-full pb-[46px] mb-[46px]">

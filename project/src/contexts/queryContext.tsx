@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-  useState,
+  RefObject,
 } from "react";
 import {
   useQuery,
@@ -39,9 +39,7 @@ export type Product = {
 };
 
 export type QueryContextType = {
-  localData: Product[];
-  localDataRef: React.MutableRefObject<Product[]>;
-  setLocalData: React.Dispatch<React.SetStateAction<Product[]>>;
+  isOptimisticUpdate: RefObject<boolean>;
   productsData: Product[];
   isLoadingProductsData: boolean;
   refetchProductsData: () => Promise<QueryObserverResult<Product[], Error>>;
@@ -165,35 +163,12 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
     await deleteProductsMutation.mutateAsync(serial_numbers);
   };
 
-  const [localData, setLocalDataState] = useState<Product[]>([]);
-  const localDataRef = useRef<Product[]>([]);
-
-  const setLocalData: React.Dispatch<React.SetStateAction<Product[]>> = (
-    newDataOrFn
-  ) => {
-    const newData =
-      typeof newDataOrFn === "function"
-        ? (newDataOrFn as (prev: Product[]) => Product[])(localDataRef.current)
-        : newDataOrFn;
-    localDataRef.current = newData;
-    setLocalDataState(newData);
-  };
-
   const isOptimisticUpdate = useRef(false);
-
-  useEffect(() => {
-    if (!isOptimisticUpdate.current && productsData) {
-      setLocalData(productsData);
-      localDataRef.current = productsData;
-    }
-  }, [productsData]);
 
   return (
     <QueryContext.Provider
       value={{
-        localData,
-        localDataRef,
-        setLocalData,
+        isOptimisticUpdate,
         productsData: productsData ?? [],
         isLoadingProductsData,
         refetchProductsData,

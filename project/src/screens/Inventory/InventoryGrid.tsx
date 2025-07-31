@@ -95,12 +95,9 @@ export const inventoryDataLayout: InventoryDataItem[] = [
 
 const InventoryGrid = () => {
   const { currentUser } = useContext(AuthContext);
-  const { productsData, localData } = useContextQueries();
-  const {
-    filteredProducts,
-    selectedProducts,
-    setSelectedProducts,
-  } = useAppContext();
+  const { productsData } = useContextQueries();
+  const { filteredProducts, selectedProducts, setSelectedProducts, localData } =
+    useAppContext();
 
   const selectAllProducts = () => {
     if (productsData && filteredProducts(productsData).length > 0) {
@@ -170,10 +167,7 @@ const InventoryGrid = () => {
           <div className="absolute top-0 left-0 w-[100%] h-[calc(100%-40px)] mt-[40px]">
             <div className="w-[100%] h-[100%] overflow-y-scroll">
               {localData && filteredProducts(localData).length > 0 && (
-                <DraggableProductsGrid
-                  data={filteredProducts(localData)}
-                  sheet={true}
-                />
+                <DraggableProductsGrid sheet={true} />
               )}
               <div className="h-[60px] w-[100%]" />
             </div>
