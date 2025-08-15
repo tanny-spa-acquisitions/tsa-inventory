@@ -28,7 +28,7 @@ const isProduction = process.env.NODE_ENV === "production";
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-const useHTTPS = false;
+const useHTTPS = true;
 const server =
   useHTTPS && !isProduction
     ? (() => {
