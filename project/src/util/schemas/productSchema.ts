@@ -1,8 +1,8 @@
 import { z } from "zod";
- 
+
 export const ProductSchema = z.object({
   name: z.string(),
-  description: z.string(),
+  description: z.string().optional().nullable(),
   serial_number: z
     .string()
     .min(14, "14 Characters Required")
@@ -10,8 +10,8 @@ export const ProductSchema = z.object({
     .refine((val) => /^[A-Z0-9]+$/.test(val), {
       message: "Only uppercase letters and numbers allowed",
     }),
-  make: z.string().min(1, "Required"),
-  model: z.string().min(1, "Required"),
+  make: z.string().nullable(),
+  model: z.string().nullable(),
   price: z
     .number()
     .min(0, "Must be a positive number")
@@ -39,7 +39,7 @@ export const ProductSchema = z.object({
     .refine((val) => /^\d+(\.\d{1,2})?$/.test(String(val)), {
       message: "Max 2 decimal places",
     }),
-  note: z.string().optional(),
+  note: z.string().optional().nullable(),
   images: z.array(z.string().url()).optional(),
 });
 

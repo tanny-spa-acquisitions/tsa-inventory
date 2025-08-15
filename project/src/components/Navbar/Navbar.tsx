@@ -113,18 +113,19 @@ const Navbar = () => {
               }  select-none ml-[3px] mt-[-4px] w-[29px] h-[29px] object-cover`}
             />
 
-            <p
+            <div
               className="hidden [@media(min-width:450px)]:block select-none text-[23px] font-[700] ml-[10px]"
               style={{
                 color: appTheme[currentUser.theme].text_1,
               }}
             >
-              {appDetails.project_name}
-            </p>
+              <p className="hidden sm:block">TSA Inventory</p>
+              <p className="block sm:hidden">TSA</p>
+            </div>
           </div>
         </div>
 
-        <div className="h-[100%] mr-[10px] pr-[2px] flex flex-row items-center gap-[18px]">
+        <div className="h-[100%] mr-[12px] flex flex-row items-center gap-[18px]">
           {editingLock && (
             <div
               style={{
@@ -138,7 +139,7 @@ const Navbar = () => {
                     ? `2px solid #bbbbbb`
                     : "2px solid #dddddd",
               }}
-              className="absolute top-4 right-[218px] w-[28px] h-[28px] mt-[3px] simple-spinner"
+              className="w-[28px] h-[28px] mt-[3px] simple-spinner"
             ></div>
           )}
           <div

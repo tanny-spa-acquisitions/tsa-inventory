@@ -37,7 +37,7 @@ const Modal2Input: React.FC<Modal2InputProps> = ({ text, onContinue }) => {
   const handleContinue = () => {
     const trimmed = input.trim();
     if (step === "serial") {
-      if (trimmed.length !== 14) {
+      if (trimmed.length < 14) {
         setError(true);
         inputRef.current?.focus();
         return;
@@ -85,7 +85,7 @@ const Modal2Input: React.FC<Modal2InputProps> = ({ text, onContinue }) => {
       return value
         .toUpperCase()
         .replace(/[^A-Z0-9]/g, "")
-        .slice(0, 14);
+        .slice(0, 20);
     }
     return value;
   };

@@ -1,4 +1,4 @@
-import crypto from "crypto"
+import crypto from "crypto";
 import { DateTime } from "luxon";
 
 export const generateId = (length) => {
@@ -8,18 +8,18 @@ export const generateId = (length) => {
 export function formatTimeStamp(input) {
   const totalSeconds = Math.floor(input); // ignore decimal part
 
-  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  const paddedMinutes = String(minutes).padStart(2, '0');
-  const paddedSeconds = String(seconds).padStart(2, '0');
+  const paddedMinutes = String(minutes).padStart(2, "0");
+  const paddedSeconds = String(seconds).padStart(2, "0");
 
-  return `${hours}:${paddedMinutes}:${paddedSeconds}`
+  return `${hours}:${paddedMinutes}:${paddedSeconds}`;
 }
 
 export const formatSQLDate = (value) => {
-  if (!value) return ""
+  if (!value) return "";
   const date = typeof value === "string" ? new Date(value) : value;
   if (isNaN(date.getTime())) return "";
   const month = date.getMonth() + 1;
@@ -29,10 +29,13 @@ export const formatSQLDate = (value) => {
 };
 
 export function formatDateToMySQL(dateInput) {
-  const date = DateTime.fromJSDate(new Date(dateInput), {
-    zone: "America/New_York",
-  });
-  return date.toFormat("yyyy-LL-dd HH:mm:ss");  
+  const date =
+    typeof dateInput === "string"
+      ? DateTime.fromISO(dateInput, { zone: "America/Los_Angeles" }).toUTC()
+      : DateTime.fromJSDate(new Date(dateInput), {
+          zone: "America/New_York",
+        });
+  return date.toFormat("yyyy-LL-dd HH:mm:ss");
 }
 
 export const extractJsonArray = (input) => {
@@ -56,9 +59,46 @@ export const extractJsonArray = (input) => {
 
 export function ensureValidJsonString(input) {
   try {
-    const parsed = typeof input === 'string' ? JSON.parse(input) : input;
+    const parsed = typeof input === "string" ? JSON.parse(input) : input;
     return JSON.stringify(parsed);
   } catch (err) {
-    throw new Error('Invalid JSON input');
+    throw new Error("Invalid JSON input");
   }
 }
+
+export const generateSerial = (length, width, make, total) => {
+  const brandMap = {
+    hotsprings: "HS",
+    hotspot: "HP",
+    jacuzzi: "JC",
+    americanwhirlpool: "LW",
+    vikingspas: "VK",
+    sunrise: "SR",
+    caldera: "CD",
+    saratogaspas: "SS",
+    beachcomber: "BC",
+    vitaspa: "VS",
+    elitespa: "ES",
+    coastalspas: "CS",
+    maaxspa: "MS",
+    dreammaker: "DM",
+    tranquilityspas: "TS",
+    catalina: "CL",
+    calspa: "CA",
+    mira: "MI",
+  };
+
+  const normalizedMake = (make || "").toLowerCase().replace(/\s+/g, "");
+  const brand = brandMap[normalizedMake] || "HT";
+
+  if (length === 0 || length === null) {
+    length = 80;
+  }
+  if (width === 0 || width === null) {
+    width = 80;
+  }
+  const variable = "N1";
+  return `TSA${length}${width}${variable}${brand}${total
+    .toString()
+    .padStart(3, "0")}`;
+};

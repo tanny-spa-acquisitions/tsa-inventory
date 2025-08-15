@@ -19,9 +19,10 @@ import { AuthContext } from "./authContext";
 export type Product = {
   serial_number: string;
   name: string;
-  description: string;
-  make: string;
-  model: string;
+  highlight: string | null;
+  description: string | null;
+  make: string | null;
+  model: string | null;
   price: number;
   date_sold?: Date;
   date_entered?: Date;
@@ -33,7 +34,7 @@ export type Product = {
     | "Delivered";
   length: number;
   width: number;
-  note: string;
+  note: string | null;
   images: string[];
   ordinal: number;
 };
@@ -71,6 +72,7 @@ export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
       const sorted = result.sort(
         (a: Product, b: Product) => (a.ordinal ?? 0) - (b.ordinal ?? 0)
       );
+      // console.log(sorted);
       return sorted;
     },
     staleTime: 1000 * 60 * 5,

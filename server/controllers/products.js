@@ -1,9 +1,13 @@
+import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { db } from "../connection/connect.js";
 import { google } from "googleapis";
 import axios from "axios";
-import dotenv from "dotenv";
-import { formatDateToMySQL, formatSQLDate } from "../functions/data.js";
+import {
+  formatDateToMySQL,
+  formatSQLDate,
+  generateSerial,
+} from "../functions/data.js";
 dotenv.config();
 
 export const getProducts = (req, res) => {
@@ -20,11 +24,11 @@ export const getProducts = (req, res) => {
   });
 };
 
-export const updateProducts = (req, res) => {
+export const updateProducts = async (req, res) => {
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json("Access token missing");
 
-  jwt.verify(token, process.env.JWT_SECRET, (err) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err) => {
     if (err) return res.status(403).json("Token is invalid!");
 
     const { products } = req.body;
@@ -39,22 +43,43 @@ export const updateProducts = (req, res) => {
         .json({ success: true, message: "No products to update" });
     }
 
+    try {
+      await updateProductsDB(products);
+      return res.status(200).json({
+        success: true,
+        message: "Products inserted or updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating products:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error updating products",
+      });
+    }
+  });
+};
+
+export const updateProductsDB = (products) => {
+  return new Promise((resolve, reject) => {
     db.query(`SELECT serial_number, ordinal FROM tubs`, (err, rows) => {
       if (err) {
         console.error("Error fetching existing tubs:", err);
-        return res.status(500).json("Database error");
+        return reject(err);
       }
+      const nextOrdinal =
+        rows.length > 0 ? Math.max(...rows.map((r) => r.ordinal ?? 0)) + 1 : 0;
 
       const q = `
         INSERT INTO tubs (
-          serial_number, name, description, note, make, model, price, type, date_sold,
+          serial_number, name, highlight, description, note, make, model, price, type, date_sold,
           repair_status, sale_status, length, width, images, ordinal
         )
         VALUES ${products
-          .map(() => `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          .map(() => `(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
           .join(", ")}
         ON DUPLICATE KEY UPDATE
           name = VALUES(name),
+          highlight = VALUES(highlight),
           description = VALUES(description),
           note = VALUES(note),
           make = VALUES(make),
@@ -71,34 +96,34 @@ export const updateProducts = (req, res) => {
       `;
 
       const values = products.flatMap((p) => [
-        p.serial_number,
+        p.serial_number === null ||
+        p.serial_number === undefined ||
+        p.serial_number.length < 14
+          ? generateSerial(p.length, p.width, p.make, rows.length)
+          : p.serial_number,
         p.name,
+        p.highlight ?? null,
         p.description,
         p.note ?? "",
         p.make,
         p.model,
         p.price,
-        "TSA", // Hardcoded type
+        p.type ?? "TSA",
         p.date_sold ? formatDateToMySQL(p.date_sold) : null,
         p.repair_status,
         p.sale_status,
         p.length,
         p.width,
         JSON.stringify(Array.isArray(p.images) ? p.images : []),
-        p.ordinal,
+        typeof p.ordinal === "number" ? p.ordinal : nextOrdinal,
       ]);
 
       db.query(q, values, (err, result) => {
         if (err) {
           console.error("DB error inserting/updating products:", err);
-          return res.status(500).json("Database error");
+          return reject(err);
         }
-
-        return res.status(200).json({
-          success: true,
-          affectedRows: result.affectedRows,
-          message: "Products inserted or updated successfully",
-        });
+        resolve(result);
       });
     });
   });
@@ -394,7 +419,9 @@ export const syncToWix = async (req, res) => {
         price: parseFloat(item.price) || 0,
         length: parseFloat(item.length) || 0,
         width: parseFloat(item.width) || 0,
-        images: item.images?.join(" ") || "",
+        images:
+          item.images?.filter((url) => !/\.(mp4|mov)$/i.test(url)).join(" ") ||
+          "",
       }));
 
       try {

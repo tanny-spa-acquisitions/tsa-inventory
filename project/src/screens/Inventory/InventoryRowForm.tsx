@@ -130,13 +130,25 @@ const InventoryRowForm = ({
         >
           <div className="relative w-[42px] h-[42px]">
             {product.images.length > 0 ? (
-              <Image
-                src={product.images[0]}
-                alt="product image 2"
-                fill
-                sizes="42px"
-                className="object-cover rounded-[5px]"
-              />
+              <>
+                {/\.(mp4|mov)$/i.test(product.images[0]) ? (
+                  <video
+                    src={product.images[0]}
+                    className="object-cover w-[42px] h-[42px] rounded-[5px]"
+                    playsInline
+                    muted
+                    loop
+                  />
+                ) : (
+                  <Image
+                    src={product.images[0]}
+                    alt="image"
+                    width={42}
+                    height={42}
+                    className="object-cover w-[42px] h-[42px] rounded-[5px]"
+                  />
+                )}
+              </>
             ) : (
               <div
                 style={{
@@ -160,7 +172,7 @@ const InventoryRowForm = ({
           }`,
         }}
       >
-        <div>{product.serial_number}</div>
+        <div className="w-[100%] overflow-hidden">{product.serial_number}</div>
       </div>
 
       <ProductInputCell

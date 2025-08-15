@@ -291,7 +291,7 @@ const ProductPage = ({ serialNumber }: { serialNumber?: string }) => {
                 e.currentTarget.value = e.currentTarget.value
                   .toUpperCase()
                   .replace(/[^A-Z0-9]/g, "")
-                  .slice(0, 14);
+                  .slice(0, 20);
               }}
             />
 

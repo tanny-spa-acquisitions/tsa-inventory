@@ -7,7 +7,6 @@ import React, {
   useRef,
   RefObject,
 } from "react";
-import { fetchInventory } from "../util/functions/Inventory";
 import { getCurrentTimestamp, getNextOrdinal } from "@/util/functions/Data";
 import axios from "axios";
 import {
@@ -28,8 +27,6 @@ type AppContextType = {
   setLocalData: React.Dispatch<React.SetStateAction<Product[]>>;
   editingLock: boolean;
   setEditingLock: React.Dispatch<React.SetStateAction<boolean>>;
-  inventory: any[];
-  setInventory: React.Dispatch<React.SetStateAction<any[]>>;
   uploadPopup: boolean;
   setUploadPopup: React.Dispatch<React.SetStateAction<boolean>>;
   handleFiles: (
@@ -114,13 +111,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const { updateProducts } = useContextQueries();
   const [editingLock, setEditingLock] = useState<boolean>(false);
 
-  const [inventory, setInventory] = useState<any[]>([]);
-  useEffect(() => {
-    fetchInventory().then((data) => {
-      setInventory(data);
-    });
-  }, []);
-
   const [uploadPopup, setUploadPopup] = useState(false);
   const uploadPopupRef = useRef<HTMLDivElement>(null);
 
@@ -168,15 +158,15 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const handleFileProcessing = async (files: File[]): Promise<string[]> => {
     setEditingLock(true);
     const uploadedNames: string[] = [];
-    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
+    // const imageFiles = files.filter((file) => file.type.startsWith("image/"));
 
-    if (imageFiles.length === 0) {
+    if (files.length === 0) {
       alert("Only image files are allowed!");
       setEditingLock(false);
       return [];
     }
 
-    const readerPromises = imageFiles.map((file) => {
+    const readerPromises = files.map((file) => {
       return new Promise<FileImage>((resolve) => {
         const extension = file.type.split("/").pop();
         if (!extension) return;
@@ -186,10 +176,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
         const newFileName = file.name.slice(0, lastDotIndex);
         let sanitizedFileName = newFileName.replace(/[^a-zA-Z0-9]/g, "_");
-        const newExtension = "webp";
+        const extention = file.type.startsWith("image/") ? "webp" : file.name.split(".").pop();
         const timeStamp = getCurrentTimestamp();
 
-        sanitizedFileName = `${timeStamp}--${sanitizedFileName}.${newExtension}`;
+        sanitizedFileName = `${timeStamp}--${sanitizedFileName}.${extention}`;
         uploadedNames.push(sanitizedFileName);
         resolve({ name: sanitizedFileName, file });
       });
@@ -381,8 +371,8 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const isNew = overrideNewProduct ?? addProductPage;
 
-      if (data.serial_number.length !== 14) {
-        toast.error("Serial # is not 14 characters");
+      if (data.serial_number.length < 14) {
+        toast.error("Serial # is not at least 14 characters");
         return false;
       }
 
@@ -398,7 +388,9 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
       const ordinal = existing?.ordinal ?? getNextOrdinal(productsData);
       const normalizedData: Product = {
         ...data,
-        note: data.note ?? "",
+        highlight: existing?.highlight ?? null,
+        description: data.description ?? null,
+        note: data.note ?? null,
         images: Array.isArray(data.images) ? data.images : [],
         ordinal,
       };
@@ -461,8 +453,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setLocalData,
         editingLock,
         setEditingLock,
-        inventory,
-        setInventory,
         uploadPopup,
         setUploadPopup,
         handleFiles,

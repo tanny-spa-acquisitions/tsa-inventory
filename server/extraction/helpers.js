@@ -58,6 +58,5 @@ export const clearDownloadsFolder = () => {
         if (err) console.error("Failed to delete:", filePath, err);
       });
     });
-    console.log("Downloads folder cleared!");
   });
 };

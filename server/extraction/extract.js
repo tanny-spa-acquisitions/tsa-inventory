@@ -8,17 +8,29 @@ import {
 } from "./helpers.js";
 import ExcelJS from "exceljs";
 import { downloadCommand } from "./google/downloadFolder.js";
-import dotenv from "dotenv";
+import { updateProductsDB } from "../controllers/products.js";
 import path from "path";
-
-dotenv.config({
-  path: path.resolve(process.cwd(), "..", ".env"),
-});
+import fs from "fs/promises";
+import { compressAndUploadFiles } from "../controllers/images.js";
+import "../env.js";
+import { db } from "../connection/connect.js";
 
 const extractRow = async (sheet, row, index) => {
+  const photosURL = row[15];
+  const folderId = getDriveFolderId(photosURL);
+  await downloadCommand(folderId);
+  let images = [];
+  try {
+    const downloadsDir = path.join(process.cwd(), "downloads");
+    const files = await fs.readdir(downloadsDir);
+    const allFiles = files.map((file) => path.join(downloadsDir, file));
+    images = await compressAndUploadFiles(allFiles);
+  } catch (err) {
+    console.error("Error uploading images:", err);
+  }
   const tub = {
-    color: getRowColor(sheet, index),
-    title: row[1],
+    name: row[1],
+    highlight: getRowColor(sheet, index),
     date_entered: row[2] ? excelDateToJSDate(row[2]) : row[2],
     make: row[4],
     model: row[5],
@@ -30,12 +42,20 @@ const extractRow = async (sheet, row, index) => {
     date_sold: row[11] ? excelDateToJSDate(row[11]) : row[11],
     length: row[13],
     width: row[14],
-    photos: row[15],
+    images,
+    description: null,
+    note: null,
+    ordinal: null,
   };
-  console.log(tub);
-  const folderId = getDriveFolderId(tub.photos);
-  await downloadCommand(folderId);
-  // clearDownloadsFolder();
+  await updateProductsDB([tub])
+    .then(() => {})
+    .catch((err) => {
+      console.error("Update failed:", err);
+    })
+    .finally(() => {
+      clearDownloadsFolder();
+      db.end();
+    });
 };
 
 const extractMaster = async () => {

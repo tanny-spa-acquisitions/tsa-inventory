@@ -41,13 +41,28 @@ const CustomInventoryFrame = ({
     >
       <div className="dim w-[100%] h-[100%] select-none">
         <div className="relative w-[100%] aspect-[16/9] overflow-hidden">
-          <img
-            draggable={false}
-            className="w-[100%] h-[100%] object-cover"
-            src={
-              item.images.length > 0 ? item.images[0] : app_details.default_img
-            }
-          />
+          {item.images.length === 0 ? (
+            <img
+              draggable={false}
+              className="w-[100%] h-[100%] object-cover"
+              src={app_details.default_img}
+            />
+          ) : /\.(mp4|mov)$/i.test(item.images[0]) ? (
+            <video
+              src={item.images[0]}
+              className="object-cover w-full h-full"
+              playsInline
+              muted
+              loop
+            />
+          ) : (
+            <img
+              draggable={false}
+              className="w-[100%] h-[100%] object-cover"
+              src={item.images[0]}
+            />
+          )}
+
           <div
             style={{
               backgroundColor: appTheme[currentUser.theme].background_2,

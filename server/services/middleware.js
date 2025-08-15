@@ -1,6 +1,5 @@
 import multer from "multer";
 import os from "os";
-import path from "path";
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -9,6 +8,9 @@ const upload = multer({
       cb(null, `${Date.now()}-${file.originalname}`);
     },
   }),
+  limits: {
+    fileSize: 500 * 1024 * 1024, // 500 MB limit
+  },
 });
 
 export default upload;

@@ -22,6 +22,7 @@ import { useContext, useRef, useState } from "react";
 import { AuthContext } from "@/contexts/authContext";
 import { UseFormSetValue, UseFormGetValues } from "react-hook-form";
 import { ProductFormData } from "./ProductPage";
+import { IoPlayCircleOutline } from "react-icons/io5";
 
 function SortableImage({
   id,
@@ -94,13 +95,28 @@ function SortableImage({
     >
       <div className=" cursor-pointer hover:brightness-75 dim w-[100%] h-[100%] inset-0">
         <div {...listeners} className="absolute inset-0 z-10 cursor-grab" />
-        <Image
-          src={url}
-          alt="image"
-          width={200}
-          height={200}
-          className="object-cover w-full h-full rounded-[10px]"
-        />
+        {/\.(mp4|mov)$/i.test(url) ? (
+          <>
+            <video
+              src={url}
+              className="object-cover w-full h-full rounded-[10px]"
+              playsInline
+              muted
+              loop
+            />
+            <div className="absolute top-0 left-0 w-[100%] h-[100%] flex items-center justify-center pb-[4px]">
+              <IoPlayCircleOutline size={35} color={"white"} />
+            </div>
+          </>
+        ) : (
+          <Image
+            src={url}
+            alt="image"
+            width={200}
+            height={200}
+            className="object-cover w-full h-full rounded-[10px]"
+          />
+        )}
         <div
           style={{
             border: `1px solid ${appTheme[currentUser.theme].text_4}`,
@@ -155,6 +171,9 @@ export default function DraggableImageGrid({
     setValue("images", reordered, { shouldDirty: true });
   };
 
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoTime, setVideoTime] = useState({ current: 0, duration: 0 });
+
   if (!currentUser) return null;
 
   return (
@@ -167,10 +186,92 @@ export default function DraggableImageGrid({
           }}
           onClick={() => setImageView("")}
         >
-          <img
-            src={imageView}
-            className="object-cover max-w-[100%] max-h-[100%]"
-          />
+          {/\.(mp4|mov)$/i.test(imageView) ? (
+            <div className="relative max-w-[100%] max-h-[100%]">
+              <video
+                ref={videoRef}
+                src={imageView}
+                className="object-contain max-w-[100%] max-h-[90vh]"
+                playsInline
+                loop
+                autoPlay
+                onClick={() => setImageView("")}
+                onTimeUpdate={(e) => {
+                  const v = e.currentTarget;
+                  setVideoTime({
+                    current: v.currentTime,
+                    duration: v.duration,
+                  });
+                }}
+              />
+              <div
+                className="absolute left-0 right-0 bottom-4 px-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <input
+                  type="range"
+                  min={0}
+                  max={videoTime.duration || 0}
+                  step={0.01}
+                  value={videoTime.current || 0}
+                  onChange={(e) => {
+                    const newTime = parseFloat(e.target.value);
+                    if (videoRef.current)
+                      videoRef.current.currentTime = newTime;
+                    setVideoTime((prev) => ({ ...prev, current: newTime }));
+                  }}
+                  className="w-full appearance-none bg-transparent cursor-pointer"
+                  style={{
+                    WebkitAppearance: "none",
+                    appearance: "none",
+                  }}
+                />
+                <style jsx>{`
+                  input[type="range"] {
+                    height: 4px;
+                  }
+                  input[type="range"]::-webkit-slider-runnable-track {
+                    height: 4px;
+                    background: #ccc;
+                    border-radius: 2px;
+                  }
+                  input[type="range"]::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    height: 14px;
+                    width: 14px;
+                    border-radius: 50%;
+                    background: #d1d5db;
+                    margin-top: -5px; /* centers thumb vertically */
+                    transition: background 0.2s ease;
+                  }
+                  input[type="range"]::-webkit-slider-thumb:hover {
+                    background: #d1d5db;
+                  }
+                  input[type="range"]::-moz-range-track {
+                    height: 4px;
+                    background: #ccc;
+                    border-radius: 2px;
+                  }
+                  input[type="range"]::-moz-range-thumb {
+                    height: 14px;
+                    width: 14px;
+                    border-radius: 50%;
+                    background: #d1d5db;
+                    border: none;
+                    transition: background 0.2s ease;
+                  }
+                  input[type="range"]::-moz-range-thumb:hover {
+                    background: #d1d5db;
+                  }
+                `}</style>
+              </div>
+            </div>
+          ) : (
+            <img
+              src={imageView}
+              className="object-cover max-w-[100%] max-h-[100%]"
+            />
+          )}
         </div>
       )}
       <DndContext
