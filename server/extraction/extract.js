@@ -16,17 +16,20 @@ import "../env.js";
 import { db } from "../connection/connect.js";
 
 const extractRow = async (sheet, row, index) => {
+  console.log("EXTRACTING ROW " + index, row[7]);
   const photosURL = row[15];
-  const folderId = getDriveFolderId(photosURL);
-  await downloadCommand(folderId);
   let images = [];
-  try {
-    const downloadsDir = path.join(process.cwd(), "downloads");
-    const files = await fs.readdir(downloadsDir);
-    const allFiles = files.map((file) => path.join(downloadsDir, file));
-    images = await compressAndUploadFiles(allFiles);
-  } catch (err) {
-    console.error("Error uploading images:", err);
+  if (photosURL && photosURL.length > 0 && photosURL.startsWith("https://")) {
+    const folderId = getDriveFolderId(photosURL);
+    await downloadCommand(folderId);
+    try {
+      const downloadsDir = path.join(process.cwd(), "downloads");
+      const files = await fs.readdir(downloadsDir);
+      const allFiles = files.map((file) => path.join(downloadsDir, file));
+      images = await compressAndUploadFiles(allFiles);
+    } catch (err) {
+      console.error("Error uploading images:", err);
+    }
   }
   const tub = {
     name: row[1],
@@ -36,9 +39,9 @@ const extractRow = async (sheet, row, index) => {
     model: row[5],
     price: row[6],
     serial_number: row[7],
-    type: row[8],
-    repair_status: row[9],
-    sale_status: row[10],
+    type: row[8] || "TSA",
+    repair_status: row[9] || "In Progress",
+    sale_status: row[10] || "Not Yet Posted",
     date_sold: row[11] ? excelDateToJSDate(row[11]) : row[11],
     length: row[13],
     width: row[14],
@@ -54,7 +57,6 @@ const extractRow = async (sheet, row, index) => {
     })
     .finally(() => {
       clearDownloadsFolder();
-      db.end();
     });
 };
 
@@ -73,15 +75,17 @@ const extractMaster = async () => {
     while (readingData) {
       const rowValues = getRowValues(sheet, i);
       if (rowValues[0] !== null) {
-        extractRow(sheet_data, rowValues, i);
+        clearDownloadsFolder();
+        await extractRow(sheet_data, rowValues, i);
         i += 1;
-        readingData = false;
       } else {
         readingData = false;
       }
     }
   } catch (err) {
     console.error("Error reading Excel file:", err);
+  } finally {
+    db.end();
   }
 };
 extractMaster();

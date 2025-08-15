@@ -86,18 +86,30 @@ async function unzipFileFlatten(zipPath, extractTo) {
   });
 }
 
-function isMediaFile(fileName) {
-  const ext = fileName.toLowerCase();
-  const mediaExtensions = [
-    ".png",
-    ".jpg",
-    ".jpeg",
-    ".heic",
-    ".mp4",
-    ".mov",
-    ".webp",
+function isMediaFile(mimeType) {
+  const mediaMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/heic",
+    "image/heif",
+    "image/webp",
+    "video/mp4",
+    "video/quicktime", // MOV
   ];
-  return mediaExtensions.some((e) => ext.endsWith(e));
+  return mediaMimeTypes.includes(mimeType);
+}
+
+function extensionFromMime(mimeType) {
+  const map = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/heic": ".heic",
+    "image/heif": ".heif",
+    "image/webp": ".webp",
+    "video/mp4": ".mp4",
+    "video/quicktime": ".mov",
+  };
+  return map[mimeType] || "";
 }
 
 async function convertHeicToJpeg(inputPath) {
@@ -115,7 +127,7 @@ async function convertHeicToJpeg(inputPath) {
 
   fs.writeFileSync(outputPath, outputBuffer);
   fs.unlinkSync(inputPath);
-  console.log(`🔄 Converted HEIC → JPEG: ${outputPath}`);
+  console.log(`🔄 Converted file → JPEG: ${outputPath}`);
 
   return outputPath;
 }
@@ -124,7 +136,7 @@ async function downloadFolder(auth, folderId) {
   const drive = google.drive({ version: "v3", auth });
   const res = await drive.files.list({
     q: `'${folderId}' in parents`,
-    fields: "files(id, name)",
+    fields: "files(id, name, mimeType)",
   });
 
   if (!fs.existsSync("downloads")) {
@@ -143,12 +155,17 @@ async function downloadFolder(auth, folderId) {
   }
 
   // Media files
-  const mediaFiles = files.filter((f) => isMediaFile(f.name));
+  const mediaFiles = files.filter((f) => isMediaFile(f.mimeType));
   if (mediaFiles.length > 0) {
     console.log(`🎥 Found ${mediaFiles.length} media files. Downloading...`);
     for (const file of mediaFiles) {
-      const downloadedPath = await downloadFile(drive, file.id, file.name);
-      if (file.name.toLowerCase().endsWith(".heic")) {
+      const ext = extensionFromMime(file.mimeType);
+      const fileNameWithExt = file.name.endsWith(ext)
+        ? file.name
+        : file.name + ext;
+      const safeName = `${file.id.slice(0, 6)}_${fileNameWithExt}`;
+      const downloadedPath = await downloadFile(drive, file.id, safeName);
+      if (file.mimeType === "image/heic" || file.mimeType === "image/heif") {
         await convertHeicToJpeg(downloadedPath);
       }
     }

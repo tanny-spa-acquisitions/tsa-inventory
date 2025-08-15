@@ -38,7 +38,7 @@ export const getRowValues = (sheet, rowNumber) => {
 export const getRowColor = (sheet, index) => {
   const cell_data = sheet.getCell(`A${index + 1}`);
   const bg = cell_data.fill.bgColor?.argb;
-  return bg.slice(2) || null;
+  return bg && bg.length > 2 ? bg.slice(2) : null;
 };
 
 export const getDriveFolderId = (url) => {
